@@ -1,0 +1,20 @@
+{
+  "name": "caritat",
+  "packageManager": "yarn@3.1.1",
+  "devDependencies": {
+    "@types/jest": "^27.4.0",
+    "jest": "^27.4.7",
+    "ts-jest": "^27.1.3",
+    "typescript": "^4.5.4"
+  },
+  "scripts": {
+    "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest"
+  },
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/app.d.ts",
+      "import": "./dist/app.js"
+    }
+  }
+}
