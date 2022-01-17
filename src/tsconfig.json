@@ -1,12 +1,10 @@
 {
-    "compilerOptions": {
-        "outDir": "../dist",
-        "module": "ESNext",
-        "moduleResolution": "Node",
-        "declaration": true
-    },
-    "exclude": [
-        "node_modules"
-    ],
-    "include": ["./**/*.ts"],
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "ESNext",
+    "outDir": "../dist",
+    "moduleResolution": "Node",
+    "declaration": true
+  },
+  "include": ["./**/*.ts"]
 }

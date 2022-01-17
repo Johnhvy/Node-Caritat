@@ -1,12 +1,9 @@
-export class Actor {
+export interface Actor {
   id: string;
-  publicKey: number;
+  publicKey: string;
 }
 
-export class VoteOption {
-  id: number;
-  name?: string;
-}
+export type VoteCandidate = { [id: string]: string };
 
 export type VoteMethod =
   | "MajorityJudgment"
@@ -15,46 +12,38 @@ export type VoteMethod =
   | "Scored";
 
 type Rank = number;
-export interface Vote {
+export interface Ballot {
   voter: Actor;
-  preferences: Map<VoteOption, Rank>;
+  preferences: Map<VoteCandidate, Rank>;
   integrity: string;
 }
 
-export interface MajorityVotes {
-  N: number;
-  O: number;
-  votes: Array<Array<{ candidatID: number; tier: number }>>;
-}
-
 export interface VoteResult {
-  winner: VoteOption;
+  winner: VoteCandidate;
 }
-
-//potential name : mibarila (from majority judgement inventors name)
 
 function voteMajorityJudgment(
-  options: VoteOption[],
+  options: VoteCandidate[],
   authorizedVoters: Actor[],
-  votes: Vote[]
+  votes: Ballot[]
 ) {
   return null;
 }
 
 function voteCondorcet(
-  options: VoteOption[],
+  options: VoteCandidate[],
   authorizedVoters: Actor[],
-  votes: Vote[]
+  votes: Ballot[]
 ) {
-  let scores: Map<VoteOption, number> = new Map(
-    options.map((option: VoteOption) => [option, 0])
+  let scores: Map<VoteCandidate, number> = new Map(
+    options.map((option: VoteCandidate) => [option, 0])
   );
-  options.forEach((firstOption: VoteOption, index: number) => {
+  options.forEach((firstOption: VoteCandidate, index: number) => {
     for (let jndex = index + 1; jndex < options.length; jndex++) {
-      let secondOption: VoteOption = options[jndex];
+      let secondOption: VoteCandidate = options[jndex];
       let firstWins = 0;
       let secondWins = 0;
-      votes.forEach((ballot: Vote) => {
+      votes.forEach((ballot: Ballot) => {
         if (authorizedVoters.includes(ballot.voter)) {
           let firstScore = ballot.preferences.get(firstOption);
           let secondScore = ballot.preferences.get(secondOption);
@@ -62,15 +51,15 @@ function voteCondorcet(
           else secondWins++;
         }
       });
-      let duelWinner: VoteOption =
+      let duelWinner: VoteCandidate =
         firstWins > secondWins ? firstOption : secondOption;
 
       scores.set(duelWinner, scores.get(duelWinner) + 1);
     }
   });
   let maxScore = 0;
-  let winner_s: VoteOption[] = [];
-  scores.forEach((value: number, key: VoteOption) => {
+  let winner_s: VoteCandidate[] = [];
+  scores.forEach((value: number, key: VoteCandidate) => {
     if (value == maxScore) {
       winner_s.push(key);
     }
@@ -83,25 +72,25 @@ function voteCondorcet(
 }
 
 function voteInstantRunoff(
-  options: VoteOption[],
+  options: VoteCandidate[],
   authorizedVoters: Actor[],
-  votes: Vote[]
+  votes: Ballot[]
 ) {
   return null;
 }
 
 function voteScored(
-  options: VoteOption[],
+  options: VoteCandidate[],
   authorizedVoters: Actor[],
-  votes: Vote[]
+  votes: Ballot[]
 ) {
   return null;
 }
 
-export default function vote(
-  options: VoteOption[],
+export function vote(
+  options: VoteCandidate[],
   authorizedVoters: Actor[],
-  votes: Vote[],
+  votes: Ballot[],
   method: VoteMethod
 ): VoteResult {
   switch (method) {
@@ -119,4 +108,87 @@ export default function vote(
   return null;
 }
 
-export type voteFType = typeof vote;
+export default class Vote {
+  #candidates: VoteCandidate[];
+  #authorizedVoters: Actor[];
+  #votes: Ballot[];
+  /**
+   * Once the voting method is set, trying to change it would probably be vote manipulation, so it can only be set if already null
+   * Trying to see the result with some voting method while the target is undefined would force it to be said method, for the same reasons
+   */
+  #targetMethod: VoteMethod = null;
+
+  constructor(options?: {
+    candidates?: VoteCandidate[];
+    authorizedVoters?: Actor[];
+    votes?: Ballot[];
+    targetMethod?: VoteMethod;
+  }) {
+    this.#candidates = options?.candidates ?? [];
+    this.#authorizedVoters = options?.authorizedVoters ?? [];
+    this.#votes = options?.votes ?? [];
+    this.#targetMethod = options?.targetMethod;
+  }
+
+  public set targetMethod(method: VoteMethod) {
+    if (this.#targetMethod == null) {
+      this.#targetMethod = method;
+      return;
+    }
+    throw new Error("Cannot change the existing target voting method");
+  }
+
+  public addCandidate(
+    candidate: VoteCandidate,
+    checkUniqueness: boolean = false
+  ): void {
+    if (
+      checkUniqueness &&
+      this.#candidates.some(
+        (existingCandidate: VoteCandidate) =>
+          existingCandidate.id === candidate.id
+      )
+    ) {
+      throw new Error("Cannot have duplicate candidate id");
+    }
+
+    this.#candidates.push(candidate);
+  }
+
+  public addAuthorizedVoter(
+    actor: Actor,
+    checkUniqueness: boolean = false
+  ): void {
+    if (
+      checkUniqueness &&
+      this.#authorizedVoters.some(
+        (voter: Actor) =>
+          voter.id === actor.id || voter.publicKey === actor.publicKey
+      )
+    ) {
+      throw new Error("Cannot have duplicate voter id");
+    }
+    this.#authorizedVoters.push(actor);
+  }
+
+  public addBallot(ballot: Ballot): void {
+    let existingBallotIndex = this.#votes.findIndex(
+      (existingBallot: Ballot) => existingBallot.voter.id === ballot.voter.id
+    );
+    if (existingBallotIndex !== -1) {
+      this.#votes[existingBallotIndex] = ballot;
+      return;
+    }
+    this.#votes.push(ballot);
+  }
+
+  public getResult(method?: VoteMethod): VoteResult {
+    if (this.#targetMethod == null) throw new Error("Set targetMethod before");
+    return vote(
+      this.#candidates,
+      this.#authorizedVoters,
+      this.#votes,
+      method ?? this.#targetMethod
+    );
+  }
+}

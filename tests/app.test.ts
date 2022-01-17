@@ -4,72 +4,68 @@
 import * as caritat from "caritat";
 import type {
   Actor,
-  Vote,
-  VoteOption,
+  Ballot,
+  VoteCandidate,
   VoteResult,
-  voteFType,
   VoteMethod,
 } from "../src/app";
+import * as fs from "fs";
 
-let carDef: voteFType = caritat.default;
+let testData = JSON.parse(
+  fs.readFileSync("./tests/tests_votes.json").toString()
+);
 
-test("should find the obvious winner", () => {
-  let voteOptions: VoteOption[];
-  let authorizedActors: Actor[];
-  let votes: Vote[] = null;
+testData.forEach(
+  (testSuite: {
+    candidates: VoteCandidate[];
+    voters: Actor[];
+    examples: {
+      method: string;
+      winner: string;
+      ballots: { voter: string; preferences: any }[];
+    }[];
+  }) => {
+    let voteOptions: VoteCandidate[] = testSuite.candidates;
+    let authorizedActors: Actor[] = testSuite.voters;
 
-  let expectedResult: VoteResult = null;
-  let actualResult: VoteResult = null;
+    testSuite.examples.forEach(
+      (example: {
+        method: string;
+        winner: string;
+        ballots: { voter: string; preferences: any }[];
+      }) => {
+        let votes = [];
 
-  voteOptions = [
-    { id: 0, name: "Alice" },
-    { id: 1, name: "Bob" },
-    { id: 0, name: "Charlie" },
-  ];
-  authorizedActors = [
-    { id: "Riri", publicKey: 0 },
-    { id: "Fifi", publicKey: 0 },
-    { id: "Loulou", publicKey: 0 },
-  ];
+        let method: VoteMethod = example.method as VoteMethod;
+        let winner: string = example.winner;
+        let jsonBallots: { voter: string; preferences: any }[] =
+          example.ballots;
+        jsonBallots.forEach(
+          (jsonBallot: { voter: string; preferences: any }) => {
+            let currentVoterName: string = jsonBallot.voter;
+            let preference = jsonBallot.preferences;
+            let properPref = [];
+            voteOptions.forEach((candidate) => {
+              properPref.push([candidate.id, preference[candidate.id]]);
+            });
+            let voter: Actor = authorizedActors.find(
+              (actor) => actor[0] === currentVoterName
+            ) ?? { id: currentVoterName, publicKey: "-1" };
+            votes.push({ integrity: "", voter: new Map(properPref) });
+          }
+        );
 
-  let ririPref: Map<VoteOption, number> = new Map([
-    [voteOptions[0], 0],
-    [voteOptions[1], 1],
-    [voteOptions[2], 2],
-  ]);
-  let fifiPref: Map<VoteOption, number> = new Map([
-    [voteOptions[0], 1],
-    [voteOptions[1], 0],
-    [voteOptions[2], 2],
-  ]);
-  let loulouPref: Map<VoteOption, number> = new Map([
-    [voteOptions[0], 0],
-    [voteOptions[1], 1],
-    [voteOptions[2], 2],
-  ]);
-
-  votes = [
-    { integrity: "", voter: authorizedActors[0], preferences: ririPref },
-    { integrity: "", voter: authorizedActors[1], preferences: fifiPref },
-    { integrity: "", voter: authorizedActors[2], preferences: loulouPref },
-  ];
-
-  expectedResult = { winner: voteOptions[2] };
-
-  actualResult = carDef(voteOptions, authorizedActors, votes, "Condorcet");
-  expect(actualResult).toStrictEqual(expectedResult);
-
-//   actualResult = carDef(
-//     voteOptions,
-//     authorizedActors,
-//     votes,
-//     "MajorityJudgment"
-//   );
-//   expect(actualResult).toStrictEqual(expectedResult);
-
-//   actualResult = carDef(voteOptions, authorizedActors, votes, "InstantRunoff");
-//   expect(actualResult).toStrictEqual(expectedResult);
-
-//   actualResult = carDef(voteOptions, authorizedActors, votes, "Scored");
-//   expect(actualResult).toStrictEqual(expectedResult);
-});
+        let expectedResult = { winner: voteOptions[winner] };
+        let actualResult = caritat.vote(
+          voteOptions,
+          authorizedActors,
+          votes,
+          method
+        );
+        test("should find the obvious winner", () => {
+          expect(actualResult).toStrictEqual(expectedResult);
+        });
+      }
+    );
+  }
+);
