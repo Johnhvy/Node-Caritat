@@ -1,9 +1,17 @@
+import { PathOrFileDescriptor } from "fs";
+import {
+  ballotFileFormat,
+  checkBallot,
+  loadYmlFile,
+  voteFileFormat,
+} from "./parser";
+
 export interface Actor {
   id: string;
   publicKey: string;
 }
 
-export type VoteCandidate = { [id: string]: string };
+export type VoteCandidate = string;
 
 export type VoteMethod =
   | "MajorityJudgment"
@@ -11,10 +19,10 @@ export type VoteMethod =
   | "InstantRunoff"
   | "Scored";
 
-type Rank = number;
+export type Rank = number;
 export interface Ballot {
   voter: Actor;
-  preferences: Map<VoteCandidate, Rank>;
+  preferences: { [name: VoteCandidate]: Rank };
   integrity: string;
 }
 
@@ -45,8 +53,8 @@ function voteCondorcet(
       let secondWins = 0;
       votes.forEach((ballot: Ballot) => {
         if (authorizedVoters.includes(ballot.voter)) {
-          let firstScore = ballot.preferences.get(firstOption);
-          let secondScore = ballot.preferences.get(secondOption);
+          let firstScore = ballot.preferences[firstOption];
+          let secondScore = ballot.preferences[secondOption];
           if (firstScore > secondScore) firstWins++;
           else secondWins++;
         }
@@ -118,6 +126,10 @@ export default class Vote {
    */
   #targetMethod: VoteMethod = null;
 
+  #checksum: string;
+
+  #voteFileData = null;
+
   constructor(options?: {
     candidates?: VoteCandidate[];
     authorizedVoters?: Actor[];
@@ -128,6 +140,12 @@ export default class Vote {
     this.#authorizedVoters = options?.authorizedVoters ?? [];
     this.#votes = options?.votes ?? [];
     this.#targetMethod = options?.targetMethod;
+  }
+
+  public loadFromFile(voteFilePath: PathOrFileDescriptor): void {
+    let voteData: voteFileFormat = loadYmlFile<voteFileFormat>(voteFilePath);
+    this.#voteFileData = voteData;
+    this.#checksum = voteData.checksum;
   }
 
   public set targetMethod(method: VoteMethod) {
@@ -145,8 +163,7 @@ export default class Vote {
     if (
       checkUniqueness &&
       this.#candidates.some(
-        (existingCandidate: VoteCandidate) =>
-          existingCandidate.id === candidate.id
+        (existingCandidate: VoteCandidate) => existingCandidate === candidate
       )
     ) {
       throw new Error("Cannot have duplicate candidate id");
@@ -169,6 +186,23 @@ export default class Vote {
       throw new Error("Cannot have duplicate voter id");
     }
     this.#authorizedVoters.push(actor);
+  }
+
+  public addBallotFile(ballotFilePath: PathOrFileDescriptor): void {
+    let ballotData: ballotFileFormat =
+      loadYmlFile<ballotFileFormat>(ballotFilePath);
+    if (checkBallot(ballotData, this.#voteFileData)) {
+      let preferences: { [name: VoteCandidate]: Rank } = {};
+      ballotData.preferences.forEach((element) => {
+        preferences[element.title] = element.score;
+      });
+      let ballot: Ballot = {
+        voter: { id: ballotData.author, publicKey: "todo" },
+        preferences: preferences,
+        integrity: "todo",
+      };
+      this.addBallot(ballot);
+    }
   }
 
   public addBallot(ballot: Ballot): void {

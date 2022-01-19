@@ -1,10 +1,6 @@
 [
   {
-    "candidates": [
-      { "id": "0", "name": "Alice" },
-      { "id": "1", "name": "Bob" },
-      { "id": "2", "name": "Charlie" }
-    ],
+    "candidates": ["Alice", "Bob", "Charlie"],
     "voters": [
       { "id": "Riri", "publicKey": "gvdfjkimuoh" },
       { "id": "Fifi", "publicKey": " jikqsefgh" },
@@ -13,65 +9,65 @@
     "examples": [
       {
         "method": "Condorcet",
-        "winner": "2",
+        "winner": "Charlie",
         "ballots": [
           {
             "voter": "Riri",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           },
           {
             "voter": "Fifi",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           },
           {
             "voter": "LouLou",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           }
         ]
       },
       {
         "method": "Condorcet",
-        "winner": "2",
+        "winner": "Charlie",
         "ballots": [
           {
             "voter": "Riri",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           },
           {
             "voter": "Fifi",
-            "preferences": { "1": 0, "0": 1, "2": 2 }
+            "preferences": { "Bob": 0, "Alice": 1, "Charlie": 2 }
           },
           {
             "voter": "LouLou",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           }
         ]
       },
       {
         "method": "Condorcet",
-        "winner": "2",
+        "winner": "Charlie",
         "ballots": [
           {
             "voter": "Riri",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           },
           {
             "voter": "Fifi",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           }
         ]
       },
       {
         "method": "Condorcet",
-        "winner": "2",
+        "winner": "Charlie",
         "ballots": [
           {
             "voter": "Riri",
-            "preferences": { "0": 0, "1": 1, "2": 2 }
+            "preferences": { "Alice": 0, "Bob": 1, "Charlie": 2 }
           },
           {
             "voter": "Fifi",
-            "preferences": { "0": 1, "1": 2, "2": 0 }
+            "preferences": { "Alice": 1, "Bob": 2, "Charlie": 0 }
           }
         ]
       }

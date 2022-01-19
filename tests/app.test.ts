@@ -10,6 +10,7 @@ import type {
   VoteMethod,
 } from "../src/app";
 import * as fs from "fs";
+import { loadYmlFile, templateBallot, voteFileFormat } from "../src/parser";
 
 let testData = JSON.parse(
   fs.readFileSync("./tests/tests_votes.json").toString()
@@ -36,6 +37,7 @@ testData.forEach(
       }) => {
         let votes = [];
 
+      
         let method: VoteMethod = example.method as VoteMethod;
         let winner: string = example.winner;
         let jsonBallots: { voter: string; preferences: any }[] =
@@ -46,7 +48,7 @@ testData.forEach(
             let preference = jsonBallot.preferences;
             let properPref = [];
             voteOptions.forEach((candidate) => {
-              properPref.push([candidate.id, preference[candidate.id]]);
+              properPref.push([candidate, preference[candidate]]);
             });
             let voter: Actor = authorizedActors.find(
               (actor) => actor[0] === currentVoterName
@@ -68,4 +70,8 @@ testData.forEach(
       }
     );
   }
+);
+
+console.log(
+  templateBallot(loadYmlFile<voteFileFormat>("./tests/fixtures/vote.yml"))
 );

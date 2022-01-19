@@ -1,11 +1,14 @@
 {
-    "files": [],
-    "references": [
-        {
-            "path": "./src/"
-        },
-        {
-            "path": "./tests/"
-        }
-    ]
+  "compilerOptions": {
+    "watch": true
+  },
+  "files": [],
+  "references": [
+    {
+      "path": "./src/"
+    },
+    {
+      "path": "./tests/"
+    }
+  ]
 }
