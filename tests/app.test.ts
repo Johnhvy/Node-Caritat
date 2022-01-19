@@ -10,7 +10,7 @@ import type {
   VoteMethod,
 } from "../src/app";
 import * as fs from "fs";
-import { loadYmlFile, templateBallot, voteFileFormat } from "../src/parser";
+import { loadYmlFile, templateBallot, voteFileFormat } from "../dist/parser";
 
 let testData = JSON.parse(
   fs.readFileSync("./tests/tests_votes.json").toString()
@@ -37,7 +37,6 @@ testData.forEach(
       }) => {
         let votes = [];
 
-      
         let method: VoteMethod = example.method as VoteMethod;
         let winner: string = example.winner;
         let jsonBallots: { voter: string; preferences: any }[] =
@@ -57,14 +56,14 @@ testData.forEach(
           }
         );
 
-        let expectedResult = { winner: voteOptions[winner] };
+        let expectedResult = { winner: winner };
         let actualResult = caritat.vote(
           voteOptions,
           authorizedActors,
           votes,
           method
         );
-        test("should find the obvious winner", () => {
+        it("should find the obvious winner", () => {
           expect(actualResult).toStrictEqual(expectedResult);
         });
       }
@@ -72,6 +71,10 @@ testData.forEach(
   }
 );
 
-console.log(
-  templateBallot(loadYmlFile<voteFileFormat>("./tests/fixtures/vote.yml"))
-);
+let ballot = fs.readFileSync("./tests/fixtures/ballot.yml").toString();
+it("should make correct template", () =>
+  expect(
+    templateBallot(loadYmlFile<voteFileFormat>("./tests/fixtures/vote.yml"))
+      .split(/\s/)
+      .join("")
+  ).toBe(ballot.split(/\s/).join("")));
