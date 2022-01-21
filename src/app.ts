@@ -40,7 +40,7 @@ function decryptMessage(payload: Buffer, secret: Uint8Array): Buffer {
   const encryptedData = payload.slice(16);
   const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
 
-  let decryptedData = decipher.update(encryptedData);
+  const decryptedData = decipher.update(encryptedData);
   return Buffer.concat([decryptedData, decipher.final()]);
 }
 
@@ -54,16 +54,12 @@ function count(dirPath: string, privateKeyPath: string) {
   let ballotFilesPaths: string[] = fs.readdirSync(ballotDir);
   ballotFilesPaths.forEach((fileName) => {
     let filePath = path.join(ballotDir, fileName);
-    let encryptedFile = JSON.parse(fs.readFileSync(filePath).toString());
-
-    console.log(Buffer.from(encryptedFile.key, "base64").toString("hex"));
+    let encryptedFile = JSON.parse(fs.readFileSync(filePath, "utf-8"));
 
     let decryptedSecret = decryptSecret(
       Buffer.from(encryptedFile.key, "base64"),
       privateKey
     );
-
-    console.log("decrypted key: ", decryptedSecret.toString("hex"));
 
     let decryptedBallot = decryptMessage(
       Buffer.from(encryptedFile.data, "base64"),

@@ -1,5 +1,6 @@
 import { checkBallot, loadYmlFile } from "./parser.js";
 import type { BallotFileFormat, VoteFileFormat } from "./parser";
+
 function main(argv: string[]): void {
   let ballotPath = argv[2];
   let votePath = argv[3];

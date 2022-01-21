@@ -770,6 +770,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/node@npm:^17.0.10":
+  version: 17.0.10
+  resolution: "@types/node@npm:17.0.10"
+  checksum: 979e83d642a2b4f18fa1a4233f884822c05abc7acd0836024aa964187f8446432b21f7913e72fe2b3927c4a811c27a0b6cd60ac7c4ac6a6762cfbab70782aa6a
+  languageName: node
+  linkType: hard
+
 "@types/prettier@npm:^2.1.5":
   version: 2.4.3
   resolution: "@types/prettier@npm:2.4.3"
@@ -1188,6 +1195,7 @@ __metadata:
     "@types/jest": ^27.4.0
     "@types/js-yaml": ^4.0.5
     "@types/minimist": ^1.2.2
+    "@types/node": ^17.0.10
     isomorphic-git: ^1.10.4
     jest: ^27.4.7
     js-yaml: ^4.1.0

@@ -78,13 +78,9 @@ export function checkBallot(
 ): boolean {
   return (
     doubleCheckSum(ballotFile, voteFile) &&
-    ballotFile.author !== undefined &&
-    ballotFile.author !== null &&
-    !ballotFile.preferences.some(
-      (preference) =>
-        voteFile.candidates.find(
-          (candidate) => candidate === preference.title
-        ) === undefined
+    ballotFile.author != null &&
+    ballotFile.preferences.every((preference) =>
+      voteFile.candidates.some((candidate) => candidate === preference.title)
     )
   );
 }
