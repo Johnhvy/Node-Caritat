@@ -8,9 +8,11 @@ import type {
   VoteCandidate,
   VoteResult,
   VoteMethod,
-} from "../src/app";
+} from "../src/vote";
 import * as fs from "fs";
-import { loadYmlFile, templateBallot, voteFileFormat } from "../dist/parser";
+import { checkBallot, loadYmlFile, templateBallot } from "../dist/parser";
+import type { BallotFileFormat, VoteFileFormat } from "../src/parser";
+import { vote } from "../dist/vote";
 
 let testData = JSON.parse(
   fs.readFileSync("./tests/tests_votes.json").toString()
@@ -51,18 +53,13 @@ testData.forEach(
             });
             let voter: Actor = authorizedActors.find(
               (actor) => actor[0] === currentVoterName
-            ) ?? { id: currentVoterName, publicKey: "-1" };
+            ) ?? { id: currentVoterName };
             votes.push({ integrity: "", voter: new Map(properPref) });
           }
         );
 
         let expectedResult = { winner: winner };
-        let actualResult = caritat.vote(
-          voteOptions,
-          authorizedActors,
-          votes,
-          method
-        );
+        let actualResult = vote(voteOptions, authorizedActors, votes, method);
         it("should find the obvious winner", () => {
           expect(actualResult).toStrictEqual(expectedResult);
         });
@@ -71,10 +68,32 @@ testData.forEach(
   }
 );
 
-let ballot = fs.readFileSync("./tests/fixtures/ballot.yml").toString();
+let ballotString = fs.readFileSync("./tests/fixtures/ballot.yml").toString();
 it("should make correct template", () =>
   expect(
-    templateBallot(loadYmlFile<voteFileFormat>("./tests/fixtures/vote.yml"))
+    templateBallot(loadYmlFile<VoteFileFormat>("./tests/fixtures/vote.yml"))
       .split(/\s/)
       .join("")
-  ).toBe(ballot.split(/\s/).join("")));
+  ).toBe(ballotString.split(/\s/).join("")));
+
+let vote_ = loadYmlFile<VoteFileFormat>("./tests/fixtures/vote.yml");
+let ballot = loadYmlFile<BallotFileFormat>("./tests/fixtures/ballot.yml");
+let badBallot = loadYmlFile<BallotFileFormat>("./tests/fixtures/badBallot.yml");
+let badBallot1 = loadYmlFile<BallotFileFormat>(
+  "./tests/fixtures/badBallot1.yml"
+);
+let badBallot2 = loadYmlFile<BallotFileFormat>(
+  "./tests/fixtures/badBallot2.yml"
+);
+
+it("should say the ballot is correct", () =>
+  expect(checkBallot(ballot, vote_)).toBe(true));
+
+it("should say the ballot is incorrect", () =>
+  expect(checkBallot(badBallot, vote_)).toBe(false));
+
+it("should say the ballot is incorrect", () =>
+  expect(checkBallot(badBallot1, vote_)).toBe(false));
+
+it("should say the ballot is incorrect", () =>
+  expect(checkBallot(badBallot2, vote_)).toBe(false));

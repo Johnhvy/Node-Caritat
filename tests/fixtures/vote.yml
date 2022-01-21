@@ -13,5 +13,14 @@ voters:
 
 method: "Condorcet"
 
-publicKey: aqztf
+publicKey: |
+  -----BEGIN PUBLIC KEY-----
+  MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvWVBfdEOFvziLTsu+4Oj
+  JgHS0Ybvx0gkbkvRDIkuase4hBd9maauFnSuORwIrPspNwKOE0Yei3mZGpMl53X0
+  +wDvATNq+ivg16XI8FUFFmoYz2pouxYokm7GSaXmKDv4M9lEFYYunNpb/1ppN3LP
+  h4Pu2l+OZgkSTJtvdFS06MUWQ/eElQwh27GZGGO+nBZ+0pksmKZX479sN6/4XjUd
+  syT6JefIYoCiaPaZGT+jfPlWR7ShlzJ6Wi9aZXaFmga+hfDAHrXoXMoHrfpPOqFh
+  tKXyqrkZMskrfuAGsW6Au0pH9APpIo6auADCy2+YuKrk7T4Pb+H3zWO0XMoQEHnu
+  TwIDAQAB
+  -----END PUBLIC KEY-----
 encryptedPrivateKey: riozuh

@@ -1,6 +1,7 @@
 {
   "compilerOptions": {
-    "watch": true
+    "watch": true,
+    "allowSyntheticDefaultImports": true
   },
   "files": [],
   "references": [

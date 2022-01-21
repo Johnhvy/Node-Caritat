@@ -1,228 +1,163 @@
-import { PathOrFileDescriptor } from "fs";
+#!/usr/bin/env node
+
+import * as fs from "fs";
+import * as path from "path";
+import * as http from "isomorphic-git/http/node/index.cjs";
+import * as os from "os";
+import * as crypto from "crypto";
+import * as yaml from "js-yaml";
+
+import type { PathOrFileDescriptor } from "fs";
 import {
-  ballotFileFormat,
+  BallotFileFormat,
   checkBallot,
   loadYmlFile,
-  voteFileFormat,
-} from "./parser";
+  templateBallot,
+  VoteFileFormat,
+} from "./parser.js";
 
-export interface Actor {
-  id: string;
-  publicKey: string;
-}
+import * as minimist from "minimist";
+import git from "isomorphic-git";
+import Vote, { Ballot, VoteResult } from "./vote.js";
 
-export type VoteCandidate = string;
-
-export type VoteMethod =
-  | "MajorityJudgment"
-  | "Condorcet"
-  | "InstantRunoff"
-  | "Scored";
-
-export type Rank = number;
-export interface Ballot {
-  voter: Actor;
-  preferences: { [name: VoteCandidate]: Rank };
-  integrity: string;
-}
-
-export interface VoteResult {
-  winner: VoteCandidate;
-}
-
-function voteMajorityJudgment(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
-
-function voteCondorcet(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  let scores: Map<VoteCandidate, number> = new Map(
-    options.map((option: VoteCandidate) => [option, 0])
+function decryptSecret(encryptedSecret: Buffer, privateKey: crypto.KeyObject) {
+  return crypto.privateDecrypt(
+    {
+      key: privateKey,
+      padding: crypto.constants.RSA_PKCS1_PADDING,
+      oaepHash: "sha256",
+    },
+    encryptedSecret
   );
-  options.forEach((firstOption: VoteCandidate, index: number) => {
-    for (let jndex = index + 1; jndex < options.length; jndex++) {
-      let secondOption: VoteCandidate = options[jndex];
-      let firstWins = 0;
-      let secondWins = 0;
-      votes.forEach((ballot: Ballot) => {
-        if (authorizedVoters.includes(ballot.voter)) {
-          let firstScore = ballot.preferences[firstOption];
-          let secondScore = ballot.preferences[secondOption];
-          if (firstScore > secondScore) firstWins++;
-          else secondWins++;
+}
+
+function decryptMessage(payload: Buffer, secret: Uint8Array): Buffer {
+  const salt = payload.slice(8, 16);
+  const key_iv = crypto.pbkdf2Sync(secret, salt, 10000, 32 + 16, "sha256");
+  const key = key_iv.slice(0, 32);
+  const iv = key_iv.slice(32);
+
+  const encryptedData = payload.slice(16);
+  const decipher = crypto.createDecipheriv("aes-256-cbc", key, iv);
+
+  let decryptedData = decipher.update(encryptedData);
+  return Buffer.concat([decryptedData, decipher.final()]);
+}
+
+function count(dirPath: string, privateKeyPath: string) {
+  let vote: Vote = new Vote();
+  vote.loadFromFile(path.join(dirPath, "vote.yml"));
+
+  let privateKey = crypto.createPrivateKey(fs.readFileSync(privateKeyPath));
+
+  let ballotDir = path.join(dirPath, "ballots");
+  let ballotFilesPaths: string[] = fs.readdirSync(ballotDir);
+  ballotFilesPaths.forEach((fileName) => {
+    let filePath = path.join(ballotDir, fileName);
+    let encryptedFile = JSON.parse(fs.readFileSync(filePath).toString());
+
+    console.log(Buffer.from(encryptedFile.key, "base64").toString("hex"));
+
+    let decryptedSecret = decryptSecret(
+      Buffer.from(encryptedFile.key, "base64"),
+      privateKey
+    );
+
+    console.log("decrypted key: ", decryptedSecret.toString("hex"));
+
+    let decryptedBallot = decryptMessage(
+      Buffer.from(encryptedFile.data, "base64"),
+      decryptedSecret
+    );
+
+    console.log(decryptedBallot.toString("utf-8"));
+
+    let ballotData: BallotFileFormat = yaml.load(
+      decryptedBallot.toString("utf-8")
+    ) as BallotFileFormat;
+    let ballot: Ballot = vote.addBallotFile(ballotData);
+  });
+  let result: VoteResult = vote.getResult();
+  console.log("the winner is " + result.winner);
+}
+
+function fromGit(
+  url: string,
+  branch: string,
+  tmpDir: string,
+  printKey: boolean,
+  verbose: boolean
+) {
+  let vote: Vote = new Vote();
+  if (verbose) {
+    console.log(
+      "fetching" +
+        (branch !== null ? " branch " + branch + " " : "") +
+        " from repo: " +
+        url +
+        "..."
+    );
+  }
+  git
+    .clone({
+      fs,
+      http,
+      dir: tmpDir,
+      url: url,
+      singleBranch: branch !== null,
+      ref: branch,
+    })
+    .then(() => {
+      vote.loadFromFile(path.join(tmpDir, "vote.yml"));
+      let ballot = templateBallot(vote.voteFileData);
+      let publicKey = vote.voteFileData.publicKey;
+      if (verbose) {
+        console.log("Ballot template (yaml): ");
+      }
+      console.log(ballot);
+      if (printKey) {
+        if (verbose) {
+          console.log("Public key for encrypting ballot :");
         }
-      });
-      let duelWinner: VoteCandidate =
-        firstWins > secondWins ? firstOption : secondOption;
-
-      scores.set(duelWinner, scores.get(duelWinner) + 1);
-    }
-  });
-  let maxScore = 0;
-  let winner_s: VoteCandidate[] = [];
-  scores.forEach((value: number, key: VoteCandidate) => {
-    if (value == maxScore) {
-      winner_s.push(key);
-    }
-    if (value > maxScore) {
-      maxScore = value;
-      winner_s = [key];
-    }
-  });
-  return { winner: winner_s[Math.floor(Math.random() * winner_s.length)] };
+        console.log(publicKey);
+      }
+    });
 }
 
-function voteInstantRunoff(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
+function main(argv: string[]): void {
+  let parsedArgs = (minimist as any as { default: typeof minimist }).default(
+    argv
+  );
+  // console.log(parsedArgs);
+  const tmpDir = path.join(os.tmpdir(), "caritat");
+  let verbose: boolean = parsedArgs["v"] ?? false;
+  let vote: Vote = new Vote();
 
-function voteScored(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
-
-export function vote(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[],
-  method: VoteMethod
-): VoteResult {
-  switch (method) {
-    case "MajorityJudgment":
-      return voteMajorityJudgment(options, authorizedVoters, votes);
-    case "Condorcet":
-      return voteCondorcet(options, authorizedVoters, votes);
-    case "InstantRunoff":
-      return voteInstantRunoff(options, authorizedVoters, votes);
-    case "Scored":
-      return voteScored(options, authorizedVoters, votes);
-    default:
-      break;
-  }
-  return null;
-}
-
-export default class Vote {
-  #candidates: VoteCandidate[];
-  #authorizedVoters: Actor[];
-  #votes: Ballot[];
-  /**
-   * Once the voting method is set, trying to change it would probably be vote manipulation, so it can only be set if already null
-   * Trying to see the result with some voting method while the target is undefined would force it to be said method, for the same reasons
-   */
-  #targetMethod: VoteMethod = null;
-
-  #checksum: string;
-
-  #voteFileData = null;
-
-  constructor(options?: {
-    candidates?: VoteCandidate[];
-    authorizedVoters?: Actor[];
-    votes?: Ballot[];
-    targetMethod?: VoteMethod;
-  }) {
-    this.#candidates = options?.candidates ?? [];
-    this.#authorizedVoters = options?.authorizedVoters ?? [];
-    this.#votes = options?.votes ?? [];
-    this.#targetMethod = options?.targetMethod;
-  }
-
-  public loadFromFile(voteFilePath: PathOrFileDescriptor): void {
-    let voteData: voteFileFormat = loadYmlFile<voteFileFormat>(voteFilePath);
-    this.#voteFileData = voteData;
-    this.#checksum = voteData.checksum;
-  }
-
-  public set targetMethod(method: VoteMethod) {
-    if (this.#targetMethod == null) {
-      this.#targetMethod = method;
-      return;
+  if ("count" in parsedArgs) {
+    // starts the count
+    let dirPath: string = parsedArgs["count"] ?? process.cwd();
+    let keyPath: string = parsedArgs["key"];
+    count(dirPath, keyPath);
+  } else if ("from-git" in parsedArgs) {
+    let url: string = parsedArgs["from-git"];
+    let branch: string = parsedArgs["branch"] ?? parsedArgs["b"] ?? null;
+    fromGit(url, branch, tmpDir, parsedArgs["k"], verbose);
+  } else if ("extract-key-from-file" in parsedArgs) {
+    let filePathRaw = parsedArgs["extract-key-from-file"];
+    let filePath: string = null;
+    if (filePathRaw === true) {
+      // if no arguments are given, we check for the last file in the tmp dir
+      filePath = path.join(tmpDir, "vote.yml");
+      if (fs.existsSync(filePath)) {
+        vote.loadFromFile(filePath);
+      }
+    } else {
+      filePath = path.normalize(filePathRaw);
+      if (fs.existsSync(filePath)) {
+        vote.loadFromFile(filePath);
+      }
     }
-    throw new Error("Cannot change the existing target voting method");
-  }
-
-  public addCandidate(
-    candidate: VoteCandidate,
-    checkUniqueness: boolean = false
-  ): void {
-    if (
-      checkUniqueness &&
-      this.#candidates.some(
-        (existingCandidate: VoteCandidate) => existingCandidate === candidate
-      )
-    ) {
-      throw new Error("Cannot have duplicate candidate id");
-    }
-
-    this.#candidates.push(candidate);
-  }
-
-  public addAuthorizedVoter(
-    actor: Actor,
-    checkUniqueness: boolean = false
-  ): void {
-    if (
-      checkUniqueness &&
-      this.#authorizedVoters.some(
-        (voter: Actor) =>
-          voter.id === actor.id || voter.publicKey === actor.publicKey
-      )
-    ) {
-      throw new Error("Cannot have duplicate voter id");
-    }
-    this.#authorizedVoters.push(actor);
-  }
-
-  public addBallotFile(ballotFilePath: PathOrFileDescriptor): void {
-    let ballotData: ballotFileFormat =
-      loadYmlFile<ballotFileFormat>(ballotFilePath);
-    if (checkBallot(ballotData, this.#voteFileData)) {
-      let preferences: { [name: VoteCandidate]: Rank } = {};
-      ballotData.preferences.forEach((element) => {
-        preferences[element.title] = element.score;
-      });
-      let ballot: Ballot = {
-        voter: { id: ballotData.author, publicKey: "todo" },
-        preferences: preferences,
-        integrity: "todo",
-      };
-      this.addBallot(ballot);
-    }
-  }
-
-  public addBallot(ballot: Ballot): void {
-    let existingBallotIndex = this.#votes.findIndex(
-      (existingBallot: Ballot) => existingBallot.voter.id === ballot.voter.id
-    );
-    if (existingBallotIndex !== -1) {
-      this.#votes[existingBallotIndex] = ballot;
-      return;
-    }
-    this.#votes.push(ballot);
-  }
-
-  public getResult(method?: VoteMethod): VoteResult {
-    if (this.#targetMethod == null) throw new Error("Set targetMethod before");
-    return vote(
-      this.#candidates,
-      this.#authorizedVoters,
-      this.#votes,
-      method ?? this.#targetMethod
-    );
+    console.log(vote.voteFileData.publicKey);
   }
 }
+main(process.argv);

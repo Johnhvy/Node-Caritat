@@ -1,11 +1,7 @@
 [
   {
     "candidates": ["Alice", "Bob", "Charlie"],
-    "voters": [
-      { "id": "Riri", "publicKey": "gvdfjkimuoh" },
-      { "id": "Fifi", "publicKey": " jikqsefgh" },
-      { "id": "Loulou", "publicKey": "gùmwosjkd" }
-    ],
+    "voters": [{ "id": "Riri" }, { "id": "Fifi" }, { "id": "Loulou" }],
     "examples": [
       {
         "method": "Condorcet",

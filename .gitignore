@@ -11,3 +11,9 @@ dist/
 
 tests/*.js
 src/*.js
+key.bin
+key.bin.enc
+key.pem
+public.pem
+ballotBob.yml.enc
+ballotBob.yml

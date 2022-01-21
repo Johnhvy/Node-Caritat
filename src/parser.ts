@@ -2,7 +2,7 @@ import * as yaml from "js-yaml";
 import * as fs from "fs";
 import * as crypto from "crypto";
 
-export interface voteFileFormat {
+export interface VoteFileFormat {
   candidates: string[];
   voters: string[];
   method: string;
@@ -10,19 +10,24 @@ export interface voteFileFormat {
   encryptedPrivateKey: string;
   checksum?: string;
 }
-function instanceOfVoteFile(object: any): object is voteFileFormat {
+function instanceOfVoteFile(object: any): object is VoteFileFormat {
   return "candidates" in object;
 }
 
-export interface ballotFileFormat {
+export interface BallotFileFormat {
   preferences: { title: string; score: number }[];
   author: string;
   poolChecksum: string;
 }
 
-export function loadYmlFile<T>(file_path: fs.PathOrFileDescriptor): T {
+export interface userCredentials {
+  username: string;
+  userMail: string;
+}
+
+export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
   try {
-    let documentBuffer: Buffer = fs.readFileSync(file_path);
+    let documentBuffer: Buffer = fs.readFileSync(filePath);
     let document: string = documentBuffer.toString();
     let data: T = yaml.load(document) as T;
     if (instanceOfVoteFile(data)) {
@@ -36,29 +41,50 @@ export function loadYmlFile<T>(file_path: fs.PathOrFileDescriptor): T {
   }
 }
 
-export function templateBallot(vote_data: voteFileFormat): string {
+export function templateBallot(
+  vote_data: VoteFileFormat,
+  user: userCredentials = {
+    username: null,
+    userMail: null,
+  }
+): string {
+  let tooltip: string =
+    "# Please set a score to each candidate according to your preferences\n# Don't forget to put your correct name and email\n";
+
   let candidates: string[] = vote_data.candidates;
 
-  let template: ballotFileFormat = {
+  let template: BallotFileFormat = {
     preferences: [],
-    author: "John Doe <john@doe.com>",
+    author:
+      (user.username ?? "John Doe") + " " + (user.userMail ?? "<john@doe.com>"),
     poolChecksum: vote_data.checksum,
   };
   candidates.forEach((candidate: string) => {
     template.preferences.push({ title: candidate, score: 0 });
   });
-  return yaml.dump(template);
+  return tooltip + yaml.dump(template);
+}
+
+function doubleCheckSum(
+  ballotFile: BallotFileFormat,
+  voteFile: VoteFileFormat
+) {
+  return ballotFile.poolChecksum === voteFile.checksum;
 }
 
 export function checkBallot(
-  ballotFile: ballotFileFormat,
-  voteFile: voteFileFormat
+  ballotFile: BallotFileFormat,
+  voteFile: VoteFileFormat
 ): boolean {
-  if (ballotFile.poolChecksum !== voteFile.checksum) return false;
-  return !ballotFile.preferences.some(
-    (preference) =>
-      voteFile.candidates.find(
-        (candidate) => candidate === preference.title
-      ) === undefined
+  return (
+    doubleCheckSum(ballotFile, voteFile) &&
+    ballotFile.author !== undefined &&
+    ballotFile.author !== null &&
+    !ballotFile.preferences.some(
+      (preference) =>
+        voteFile.candidates.find(
+          (candidate) => candidate === preference.title
+        ) === undefined
+    )
   );
 }

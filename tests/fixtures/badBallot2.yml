@@ -1,6 +1,4 @@
-# Please set a score to each candidate according to your preferences
-# Don't forget to put your correct name and email
-preferences:
+references:
   - title: >
       Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod
       tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim
@@ -12,6 +10,6 @@ preferences:
     score: 0
   - title: Bob
     score: 0
-author: John Doe <john@doe.com>
+author:
 poolChecksum: >-
   HK8potMiwh6wAvq7uYm3nGT4ntJ4O20Cm5MIukdZdl8162dUcddfhQvOLvl5mlnyCLKSMqlF3znDJ6dqsIxOhA==
