@@ -1,13 +1,10 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-import { argv } from "process";
-import * as minimist from "minimist";
+
+import parsedArgs from "../utils/parsedArgs.js";
 import { decryptBallot } from "../crypto/rsa-aes-decrypt.js";
 
-const parsedArgs = (minimist as any as { default: typeof minimist }).default(
-  argv
-);
 const filePath = parsedArgs["data"] ?? parsedArgs["d"];
 const privateKeyPath = parsedArgs["key"] ?? parsedArgs["k"];
 

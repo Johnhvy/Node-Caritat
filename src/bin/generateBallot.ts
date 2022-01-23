@@ -1,12 +1,7 @@
 #!/usr/bin/env node
 
+import parsedArgs from "../utils/parsedArgs.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
-import * as minimist from "minimist";
-import { argv } from "process";
-
-const parsedArgs = (minimist as any as { default: typeof minimist }).default(
-  argv
-);
 
 const voteFile = parsedArgs["file"] ?? parsedArgs["f"];
 const username = parsedArgs["username"] ?? parsedArgs["u"];
