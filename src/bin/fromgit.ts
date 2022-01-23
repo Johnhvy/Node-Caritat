@@ -40,7 +40,7 @@ const runChildProcessAsync = (
       if (code !== 0) {
         return reject(new Error(`${cmd} ${args} failed: ${code}`));
       }
-      return resolve(stdout);
+      return resolve(stdout?.trim());
     });
   }) as Promise<string>;
 
@@ -80,7 +80,8 @@ await fs.writeFile(
 );
 
 console.log("Ballot is ready for edit.");
-await runChildProcessAsync(EDITOR, [
+const editor = EDITOR || (os.platform() === "win32" && "notepad");
+await runChildProcessAsync(editor, [
   path.join(cwd, subPath, `${username}.yml`),
 ]);
 
