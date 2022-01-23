@@ -88,7 +88,7 @@ await runChildProcessAsync(editor, [
 console.log("Encrypting ballot with vote public key...");
 const { encryptedSecret, data } = await encryptBallot(
   await fs.readFile(path.join(cwd, subPath, `${username}.yml`)),
-  Buffer.from(vote.publicKey, "base64")
+  vote.publicKey
 );
 
 await fs.writeFile(

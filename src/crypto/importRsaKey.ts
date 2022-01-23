@@ -5,7 +5,10 @@ const { subtle } = crypto.webcrypto as any as typeof window.crypto;
 
 const textDecoder = new TextDecoder();
 
-export default function importRsaKey(pem: BufferSource, isPrivate?: boolean) {
+export default function importRsaKey(
+  pem: BufferSource | string,
+  isPrivate?: boolean
+) {
   const publicPrivate = isPrivate ? "PRIVATE" : "PUBLIC";
   const pemHeader = `-----BEGIN ${publicPrivate} KEY-----`;
   const pemFooter = `-----END ${publicPrivate} KEY-----`;
@@ -21,14 +24,16 @@ export default function importRsaKey(pem: BufferSource, isPrivate?: boolean) {
 
 function importKey(
   format: KeyFormat,
-  pem: BufferSource,
+  pem: BufferSource | string,
   usage: KeyUsage[],
   pemHeaderLength: number,
   pemFooterLength: number
 ) {
-  const pemContents = textDecoder
-    .decode(pem)
-    .substring(pemHeaderLength, pem.byteLength - pemFooterLength)
+  if (typeof pem !== "string") {
+    pem = textDecoder.decode(pem);
+  }
+  const pemContents = pem
+    .substring(pemHeaderLength, pem.length - pemFooterLength)
     .split("\n")
     .join("");
   // base64 decode the string to get the binary data
@@ -36,7 +41,7 @@ function importKey(
 
   return subtle.importKey(
     format as any,
-    binaryDer.slice(0, pem.byteLength),
+    binaryDer.slice(0, pem.length),
     ASYMMETRIC_ALGO,
     true,
     usage

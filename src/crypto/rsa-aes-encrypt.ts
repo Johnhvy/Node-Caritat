@@ -10,7 +10,7 @@ const MAGIC_NUMBER = new TextEncoder().encode("Salted__");
 
 export default async function encryptBallot(
   rawData: BufferSource,
-  publicKeyASCII: BufferSource
+  publicKeyASCII: BufferSource | string
 ) {
   const secret = await subtle.exportKey(
     "raw",
