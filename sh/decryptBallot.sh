@@ -16,4 +16,4 @@ openssl pkeyutl -decrypt -inkey "$privateKey" \
  -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256)
 
 # decrypt ballot using AES key
-printf "%s\n" "$encryptedBallot" | openssl enc -d -aes-256-cbc -iter 100000 -salt -base64 -A -pass "pass:$secret" -pbkdf2
+printf "%s\n" "$encryptedBallot" | openssl enc -d -aes-256-cbc -iter 100000 -md sha256 -salt -base64 -A -pass "pass:$secret" -pbkdf2 -nopad && printf "\n\n\n==================SUCCESS=============\n\n\n" >&2
