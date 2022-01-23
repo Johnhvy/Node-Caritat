@@ -1,19 +1,26 @@
 #!/usr/bin/env node
 
-import * as path from "path";
 import * as fs from "fs";
 
-import parsedArgs from "../utils/parsedArgs.js";
+import parseArgs from "../utils/parseArgs.js";
 import encryptBallot from "../crypto/rsa-aes-encrypt.js";
 
-const filePath =
-  parsedArgs["file"] ??
-  parsedArgs["f"] ??
-  path.join(process.cwd(), "ballot.yml");
-const publicKeyPath =
-  parsedArgs["key"] ??
-  parsedArgs["k"] ??
-  path.join(process.cwd(), "public.pem");
+const parsedArgs = parseArgs().options({
+  file: {
+    alias: "f",
+    describe: "Path to the file to encrypt",
+    normalize: true,
+    type: "string",
+  },
+  key: {
+    alias: "k",
+    describe: "Path to the public key file",
+    normalize: true,
+    type: "string",
+  },
+}).argv;
+
+const { file: filePath, key: publicKeyPath } = parsedArgs;
 
 const { encryptedSecret, data } = await encryptBallot(
   fs.readFileSync(filePath),

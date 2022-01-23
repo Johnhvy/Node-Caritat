@@ -1,12 +1,30 @@
 #!/usr/bin/env node
 
-import parsedArgs from "../utils/parsedArgs.js";
+import parseArgs from "../utils/parseArgs.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
 
-const voteFile = parsedArgs["file"] ?? parsedArgs["f"];
-const username = parsedArgs["username"] ?? parsedArgs["u"];
-const emailAddress = parsedArgs["email-address"] ?? parsedArgs["m"];
+const parsedArgs = parseArgs().options({
+  file: {
+    alias: "f",
+    describe: "Path to YAML file describing the vote options",
+    demandOption: true,
+    normalize: true,
+    type: "string",
+  },
+  username: {
+    alias: "u",
+    describe: "Name of the voter (optional)",
+    type: "string",
+  },
+  email: {
+    alias: "m",
+    describe: "Email address of the voter (optional)",
+    type: "string",
+  },
+}).argv;
 
-const vote = loadYmlFile<VoteFileFormat>(voteFile);
+const { file, username, email: emailAddress } = parsedArgs;
+
+const vote = loadYmlFile<VoteFileFormat>(file);
 
 console.log(await templateBallot(vote, { username, emailAddress }));

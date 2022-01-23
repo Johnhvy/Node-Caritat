@@ -6,15 +6,56 @@ import os from "os";
 import { spawn } from "child_process";
 import { env } from "process";
 
-import parsedArgs from "../utils/parsedArgs.js";
+import parseArgs from "../utils/parseArgs.js";
+
 import encryptBallot from "../crypto/rsa-aes-encrypt.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
 
-const repoUrl = parsedArgs["repo"] ?? parsedArgs["r"];
-const branch = parsedArgs["branch"] ?? parsedArgs["b"];
-const subPath = parsedArgs["path"] ?? parsedArgs["p"] ?? ".";
+const parsedArgs = parseArgs().options({
+  repo: {
+    alias: "r",
+    describe: "URL of the repository where the vote files are stored",
+    demandOption: true,
+    type: "string",
+  },
+  branch: {
+    alias: "b",
+    describe: "git branch name",
+    default: "main",
+    type: "string",
+  },
+  path: {
+    alias: "p",
+    describe: "Relative subpath in the git repository to the vote files",
+    default: ".",
+    type: "string",
+  },
+  "git-binary": {
+    describe: "Path to the git binary (when not provided, looks in the $PATH)",
+    normalize: true,
+    type: "string",
+  },
+  editor: {
+    describe:
+      "Path to the preferred text editor (when not provided, looks for $EDITOR in the environment)",
+    normalize: true,
+    type: "string",
+  },
+  username: {
+    describe: "Name of the voter (when not provided, look into git config)",
+    alias: "u",
+    type: "string",
+  },
+  email: {
+    describe:
+      "Email address of the voter (when not provided, look into the git config)",
+    type: "string",
+  },
+}).argv;
 
-const GIT_BIN = parsedArgs["git-binary"] ?? env.GIT ?? "git";
+const { repo: repoUrl, branch, path: subPath } = parsedArgs;
+
+const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
 const runChildProcessAsync = (
   cmd: string,
@@ -52,7 +93,6 @@ const [EDITOR, username, emailAddress] = await Promise.all([
       captureStdout: true,
     }),
   parsedArgs["username"] ||
-    parsedArgs["u"] ||
     runChildProcessAsync(GIT_BIN, ["config", "--get", "user.name"], {
       captureStdout: true,
     }),
