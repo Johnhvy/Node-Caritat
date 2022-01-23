@@ -74,6 +74,12 @@ await runChildProcessAsync(
 
 const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
 
+const author = `${username} <${emailAddress}>`;
+if (!vote.voters.includes(author)) {
+  console.warn("It looks like you are not on the list of allowed voters.");
+  console.warn({ author, allowedVoters: vote.voters });
+}
+
 await fs.writeFile(
   path.join(cwd, subPath, `${username}.yml`),
   templateBallot(vote, { username, emailAddress })
@@ -94,7 +100,7 @@ const { encryptedSecret, data } = await encryptBallot(
 await fs.writeFile(
   path.join(cwd, subPath, `${username}.json`),
   JSON.stringify({
-    username,
+    author,
     encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
     data: Buffer.from(data).toString("base64"),
   })
