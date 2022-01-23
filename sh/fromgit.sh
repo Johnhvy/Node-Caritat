@@ -7,22 +7,35 @@ repoUrl=$2
 branch=$3
 path=$4
 
+__dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+
+[ -z "$path" ] && path="."
+
 tmpDir=$(mktemp -d 2>/dev/null || mktemp -d -t /tmp/caritat.XXXXXX)
-echo "$tmpDir"
 
+# Cloning the repo in the temp directory.
+(cd "$tmpDir" && git clone --branch "$branch" --no-tags --depth=1 "$repoUrl" .)
 
-git clone "$repoUrl" --branch "$branch" --single-branch --depth=1 "$tmpdir"
-
-
+# Edit the ballot for the user to vote.
 $EDITOR "$tmpDir/$path/ballot.yml"
 
-./encryptBallot.sh  "$tmpDir/$path/ballot.yml" "$tmpDir/$path/public.pem" > "$username.json"
+# Encrypt the ballot with the public key
+"$__dirname/encryptBallot.sh" "$tmpDir/$path/ballot.yml" "$tmpDir/$path/public.pem" > "$tmpDir/$path/$username.json"
 
-cd "$tmpDir/$path" || exit 1
-git add "$username.json"
-git commit -m "vote from $username"
+# Commit the encrypted JSON vote data.
+(cd "$tmpDir" && \
+  git add "$tmpDir/$path/$username.json" && \
+  git commit -m "vote from $username")
 
-git push "$repoUrl" "HEAD:$branch"
+# Pushing to the remote repository.
+(cd "$tmpDir" && \
+  git push "$repoUrl" "HEAD:$branch") || \
+  (cd "$tmpDir" && \
+  # if the push failed, fetch latest commits could resolve the situation.
+  git fetch "$repoUrl" "$branch" && \
+  git rebase FETCH_HEAD && \
+  git push "$repoUrl" "HEAD:$branch")
 
-# rm -rf "$tmpDir"
+# Remove the temp directory.
+rm -rf "$tmpDir"
 
