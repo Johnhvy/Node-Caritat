@@ -34,8 +34,7 @@ function importKey(
   }
   const pemContents = pem
     .substring(pemHeaderLength, pem.length - pemFooterLength)
-    .split("\n")
-    .join("");
+    .replace(/^\s+|\s+$/g, "");
   // base64 decode the string to get the binary data
   const binaryDer = Buffer.from(pemContents, "base64"); // TODO: do not use Node.js specific API here
 
