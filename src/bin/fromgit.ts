@@ -17,8 +17,8 @@ const subPath = parsedArgs["path"] ?? parsedArgs["p"] ?? ".";
 const GIT_BIN = parsedArgs["git-binary"] ?? env.GIT ?? "git";
 
 const runChildProcessAsync = (
-  cmd,
-  args,
+  cmd: string,
+  args: any[] | readonly string[],
   { captureStdout = false, spawnArgs = {} } = {}
 ) =>
   new Promise((resolve, reject) => {
