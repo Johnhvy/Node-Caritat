@@ -20,9 +20,9 @@ export interface BallotFileFormat {
   poolChecksum: string;
 }
 
-export interface userCredentials {
+export interface UserCredentials {
   username: string;
-  userMail: string;
+  emailAddress: string;
 }
 
 export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
@@ -43,9 +43,9 @@ export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
 
 export function templateBallot(
   vote_data: VoteFileFormat,
-  user: userCredentials = {
+  user: UserCredentials = {
     username: null,
-    userMail: null,
+    emailAddress: null,
   }
 ): string {
   let tooltip: string =
@@ -55,8 +55,7 @@ export function templateBallot(
 
   let template: BallotFileFormat = {
     preferences: [],
-    author:
-      (user.username ?? "John Doe") + " " + (user.userMail ?? "<john@doe.com>"),
+    author: `${user.username} <${user.emailAddress}>`,
     poolChecksum: vote_data.checksum,
   };
   candidates.forEach((candidate: string) => {
