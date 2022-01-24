@@ -17,3 +17,6 @@ key.pem
 public.pem
 ballotBob.yml.enc
 ballotBob.yml
+
+!/tests/fixtures/key.pem
+!/tests/fixtures/public.pem
