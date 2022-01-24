@@ -48,7 +48,19 @@ helping with that in the future.
 - As a voter or the instigator, you need to trust the git commits are genuine.
   Enforcing GPG signing commits can help with that.
 
-### Do the ballots need to be public?
+### Can a participant tamper with the votes?
+
+When using git, a participant could force push the branch and remove or modify
+ballots from other participants. Adding protection on vote where the vote is
+happening can help prevent this.
+
+### When voting using this tool, are my choices public?
+
+Ballots are encrypted using a public key generated for the vote, only someone in
+possession for the private key (the vote instigator) is theoretically able to
+decipher the ballot. Unless the vote needs to stay private, a recommended
+practice is to publish the vote private key, effectively making everyone's
+choices public.
 
 Making the non-encrypted ballot available publicly is a great way to ensure the
 election was not rigged. Everyone can check that the ballot counted as their has
@@ -71,3 +83,8 @@ trusted).
 Voters can sign their commit using GPG. When doing the counting, the system uses
 the git commit metadata to attribute a ballot to a voter. If a voter casts
 several ballots, the system only counts the most recent one.
+
+### What happens if the vote instigator lose access to the decrypting key?
+
+The vote ballots cannot be deciphered, the process needs to start again (unless
+you have a quantum computer at home).
