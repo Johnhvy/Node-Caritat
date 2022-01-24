@@ -9,7 +9,7 @@ export async function decryptBallot(
   encryptedKey: string,
   saltedDataBase64: string,
   privateKeyASCII: BufferSource
-) {
+): Promise<ArrayBuffer> {
   const privateKey = await importRsaKey(privateKeyASCII, true);
 
   const saltedData = Buffer.from(saltedDataBase64, "base64");

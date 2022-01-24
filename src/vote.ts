@@ -207,6 +207,10 @@ export default class Vote {
     return null;
   }
 
+  public addBallotFromBufferSource(data: BufferSource): void {
+    // TODO
+  }
+
   public addBallot(ballot: Ballot): void {
     let existingBallotIndex = this.#votes.findIndex(
       (existingBallot: Ballot) => existingBallot.voter.id === ballot.voter.id
