@@ -9,7 +9,7 @@ import parseArgs from "../utils/parseArgs";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
-import { decryptBallot } from "../crypto/rsa-aes-decrypt.js";
+import decryptBallot from "../crypto/rsa-aes-decrypt.js";
 import Vote from "../vote.js";
 
 const parsedArgs = parseArgs().options({

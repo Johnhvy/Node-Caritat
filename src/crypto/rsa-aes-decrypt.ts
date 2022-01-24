@@ -5,7 +5,7 @@ import importRsaKey from "./importRsaKey.js";
 
 const { subtle } = crypto.webcrypto as any as typeof window.crypto;
 
-export async function decryptBallot(
+export default async function decryptBallot(
   encryptedKey: string,
   saltedDataBase64: string,
   privateKeyASCII: BufferSource

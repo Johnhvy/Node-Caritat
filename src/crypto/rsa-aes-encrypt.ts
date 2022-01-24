@@ -21,11 +21,11 @@ export default async function encryptBallot(
   const publicKey = await importRsaKey(publicKeyASCII);
 
   // encrypt as secret using rsa key
-  const encryptedSecret = await subtle.encrypt(
+  const encryptedSecret = (await subtle.encrypt(
     { name: ASYMMETRIC_ALGO.name },
     publicKey,
     secret
-  );
+  )) as ArrayBuffer;
 
   const { iv, key } = await deriveKeyIv(secret, salt, "encrypt");
   const data = await subtle.encrypt({ ...SYMMETRIC_ALGO, iv }, key, rawData);

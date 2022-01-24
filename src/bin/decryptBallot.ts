@@ -3,7 +3,7 @@
 import fs from "fs";
 
 import parseArgs from "../utils/parseArgs.js";
-import { decryptBallot } from "../crypto/rsa-aes-decrypt.js";
+import decryptBallot from "../crypto/rsa-aes-decrypt.js";
 
 const parsedArgs = parseArgs().options({
   data: {
