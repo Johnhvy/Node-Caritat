@@ -5,23 +5,23 @@ import importRsaKey from "./importRsaKey.js";
 
 const { subtle } = crypto.webcrypto as any as typeof window.crypto;
 
-export default async function decryptBallot(
-  encryptedKey: string,
-  saltedDataBase64: string,
+export default async function decryptData(
+  encryptedKey: BufferSource,
+  saltedData: BufferSource,
   privateKeyASCII: BufferSource
 ): Promise<ArrayBuffer> {
   const privateKey = await importRsaKey(privateKeyASCII, true);
 
-  const saltedData = Buffer.from(saltedDataBase64, "base64");
-
   // TODO: check for MAGIC_NUMBER
-  const encryptedData = saltedData.subarray(16);
-  const salt = saltedData.subarray(8, 16);
+
+  if (ArrayBuffer.isView(saltedData)) saltedData = saltedData.buffer;
+  const salt = saltedData.slice(8, 16);
+  const encryptedData = saltedData.slice(16);
 
   const secret = await subtle.decrypt(
     ASYMMETRIC_ALGO,
     privateKey,
-    Buffer.from(encryptedKey, "base64")
+    encryptedKey
   );
 
   const { iv, key } = await deriveKeyIv(secret, salt, "decrypt");

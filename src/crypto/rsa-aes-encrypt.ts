@@ -8,7 +8,7 @@ const { subtle, getRandomValues } =
 
 const MAGIC_NUMBER = new TextEncoder().encode("Salted__");
 
-export default async function encryptBallot(
+export default async function encryptData(
   rawData: BufferSource,
   publicKeyASCII: BufferSource | string
 ) {

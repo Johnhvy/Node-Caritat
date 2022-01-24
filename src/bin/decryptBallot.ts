@@ -3,7 +3,7 @@
 import fs from "fs";
 
 import parseArgs from "../utils/parseArgs.js";
-import decryptBallot from "../crypto/rsa-aes-decrypt.js";
+import decryptData from "../crypto/rsa-aes-decrypt.js";
 
 const parsedArgs = parseArgs().options({
   data: {
@@ -31,9 +31,9 @@ const { encryptedSecret, data } = JSON.parse(
 console.log(
   Buffer.from(
     new Uint8Array(
-      await decryptBallot(
-        encryptedSecret,
-        data,
+      await decryptData(
+        Buffer.from(encryptedSecret, "base64"),
+        Buffer.from(data, "base64"),
         fs.readFileSync(privateKeyPath)
       )
     )

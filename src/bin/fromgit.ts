@@ -9,7 +9,7 @@ import parseArgs from "../utils/parseArgs";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
-import encryptBallot from "../crypto/rsa-aes-encrypt.js";
+import encryptData from "../crypto/rsa-aes-encrypt.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
 
 const parsedArgs = parseArgs().options({
@@ -83,7 +83,7 @@ await runChildProcessAsync(editor, [
 ]);
 
 console.log("Encrypting ballot with vote public key...");
-const { encryptedSecret, data } = await encryptBallot(
+const { encryptedSecret, data } = await encryptData(
   await fs.readFile(path.join(cwd, subPath, `${username}.yml`)),
   vote.publicKey
 );

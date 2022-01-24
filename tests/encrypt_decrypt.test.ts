@@ -28,14 +28,9 @@ it("should encrypt input", async () => {
 it("should be able to correctly decrypt what it has encrypted", async () => {
   const encryptedData = await encryptBallot(rawData, publicKey);
 
-  const base64Secret = Buffer.from(encryptedData.encryptedSecret).toString(
-    "base64"
-  );
-  const base64Data = Buffer.from(encryptedData.data).toString("base64");
-
   const decryptedData = await decryptBallot(
-    base64Secret,
-    base64Data,
+    encryptedData.encryptedSecret,
+    encryptedData.data,
     privateKey
   );
 

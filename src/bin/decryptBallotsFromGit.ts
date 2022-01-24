@@ -9,7 +9,7 @@ import parseArgs from "../utils/parseArgs";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
-import decryptBallot from "../crypto/rsa-aes-decrypt.js";
+import decryptData from "../crypto/rsa-aes-decrypt.js";
 import Vote from "../vote.js";
 
 const parsedArgs = parseArgs().options({
@@ -57,9 +57,11 @@ for await (const dirent of await fs.opendir(path.join(cwd, subPath))) {
   );
 
   decryptPromises.push(
-    decryptBallot(encryptedSecret, data, privateKey).then((data) =>
-      vote.addBallotFromBufferSource(data)
-    )
+    decryptData(
+      Buffer.from(encryptedSecret, "base64"),
+      Buffer.from(data, "base64"),
+      privateKey
+    ).then((data) => vote.addBallotFromBufferSource(data))
   );
 }
 
