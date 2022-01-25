@@ -6,7 +6,7 @@
 # generate aes secret
 secret=$("$OPENSSL_BIN" rand 32)
 
-private="$("$OPENSSL_BIN" genrsa)"
+private="$("$OPENSSL_BIN" genpkey -algorithm RSA -outform PEM)"
 
 public="$(printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout)"
 
