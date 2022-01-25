@@ -14,12 +14,6 @@ public="$(printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout)"
 echo "publicKey: |"
 echo "$public" | awk '{ print "  " $0 }'
 
-echo "encrencryptedPrivateKey: >-"
+echo "encryptedPrivateKey: |"
 # encrypt private key using secret
-printf "%s" "$private" | "$OPENSSL_BIN" enc -aes-256-cbc -salt -iter 100000 -pass "pass:$secret" -pbkdf2 -base64 | awk '{ print "  " $0 }'
-
-echo
-
-echo "encryptedSecret: >-"
-# encrypt secret using GPG key
-printf "%s" "$secret" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'
+printf "%s" "$private" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'
