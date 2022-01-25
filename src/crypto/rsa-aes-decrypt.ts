@@ -17,24 +17,29 @@ export async function symmetricDecrypt(
   secret: BufferSource,
   saltedData: BufferSource
 ) {
-  if (ArrayBuffer.isView(saltedData)) saltedData = saltedData.buffer;
+  let offset = 0;
+  const { byteLength } = saltedData;
+  if (ArrayBuffer.isView(saltedData)) {
+    offset = saltedData.byteOffset;
+    saltedData = saltedData.buffer;
+  }
 
   const magicNumber = new DataView(saltedData);
   if (
-    magicNumber.getInt8(0) !== 83 && // 'S'
-    magicNumber.getInt8(1) !== 97 && // 'a'
-    magicNumber.getInt8(2) !== 108 && // 'l'
-    magicNumber.getInt8(3) !== 116 && // 't'
-    magicNumber.getInt8(4) !== 101 && // 'e'
-    magicNumber.getInt8(5) !== 100 && // 'd'
-    magicNumber.getInt8(6) !== 95 && // '_'
-    magicNumber.getInt8(7) !== 95 // '_'
+    magicNumber.getInt8(offset + 0) !== 83 && // 'S'
+    magicNumber.getInt8(offset + 1) !== 97 && // 'a'
+    magicNumber.getInt8(offset + 2) !== 108 && // 'l'
+    magicNumber.getInt8(offset + 3) !== 116 && // 't'
+    magicNumber.getInt8(offset + 4) !== 101 && // 'e'
+    magicNumber.getInt8(offset + 5) !== 100 && // 'd'
+    magicNumber.getInt8(offset + 6) !== 95 && // '_'
+    magicNumber.getInt8(offset + 7) !== 95 // '_'
   ) {
     throw new Error("Invalid magic number");
   }
 
-  const salt = saltedData.slice(8, 16);
-  const encryptedData = saltedData.slice(16);
+  const salt = saltedData.slice(offset + 8, offset + 16);
+  const encryptedData = saltedData.slice(offset + 16, offset + byteLength);
 
   const { iv, key } = await deriveKeyIv(secret, salt, "decrypt");
 
