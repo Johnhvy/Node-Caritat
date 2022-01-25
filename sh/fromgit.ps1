@@ -27,4 +27,4 @@ git push "$repoUrl" "HEAD:$branch" | Out-Null
 
 Set-Location $env
 
-Remove-Item -r "$tmpDir"
+Remove-Item -r "$tmpDir" -Force
