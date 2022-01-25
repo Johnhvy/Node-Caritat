@@ -13,8 +13,8 @@ git clone "$repoUrl" --branch "$branch" --single-branch --depth=1 "$tmpDir"
 
 notepad "$tmpDir/$path/ballot.yml" | Out-Null
 
+.\sh\encryptBallot.ps1 "$($tmpDir)\$($path)\ballot.yml" "$($tmpDir)\$($path)\public.pem" *>&1 | Out-File -FilePath "$tmpDir/$path/$username.json" -Encoding  ascii -NoNewline
 
-& sh/encryptBallot.sh "$tmpDir/$path/ballot.yml" "$tmpDir/$path/public.pem" > "$tmpDir/$path/$username.json"
 
 Set-Location "$tmpDir/$path"
 
