@@ -2,6 +2,9 @@
 # requires openssl
 # Outputs a YAML-formated string.
 
+# Example using jq:
+# jq --arg space ' ' --arg script 'sh/decryptBallot.ps1' -r '$script + $space + .encryptedSecret + $space + .data + $space + $key' --arg key 'sh/key.pem'| powershell
+
 $encryptedKey = $args[0]
 $encryptedBallot = $args[1]
 $privateKeyFile = $args[2]
@@ -23,3 +26,4 @@ Write-Host $(
   openssl enc -d -aes-256-cbc -iter 100000 -md sha256 -salt -base64 -A -pass "file:$tmpFile2" -pbkdf2 -nopad
 )
 Remove-Item $tmpFile2
+

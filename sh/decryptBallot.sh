@@ -4,6 +4,10 @@
 # requires openssl
 # Outputs a YAML-formated string.
 
+# Example using jq:
+# jq --arg space ' ' --arg script 'sh/decryptBallot.sh' -r '$script + $space + .encryptedSecret + $space + .data + $space + $key' --arg key 'sh/key.pem'| sh
+
+
 encryptedKey=$1
 encryptedBallot=$2
 privateKey=$3
