@@ -10,10 +10,12 @@ export default class BallotPoolGit extends BallotPool {
   private ballots: { [author: string]: { url: URL; index: number } } =
     Object.create(null);
   private commits: CommitNode[];
+  private authorizedVoters: string[];
 
-  constructor(commitTree: CommitNode[]) {
+  constructor(commitTree: CommitNode[], voterWhiteList?: string[]) {
     super();
     this.commits = commitTree;
+    this.authorizedVoters = voterWhiteList;
   }
 
   public addBallot({
@@ -27,6 +29,8 @@ export default class BallotPoolGit extends BallotPool {
     if (index === -1) return false;
     const { author, isValid } = this.commits[index];
     if (
+      (this.authorizedVoters !== undefined &&
+        this.authorizedVoters.indexOf(author) < 0) ||
       !isValid ||
       (author in this.ballots && index > this.ballots[author].index)
     ) {

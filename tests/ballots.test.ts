@@ -41,3 +41,10 @@ it("should refuse invalid commits", () => {
   const pool = new BallotPoolGit(commitTree);
   expect(pool.addBallot({ url: fixturesURL, commitSha: "4" })).toBe(false);
 });
+
+it("should accept only the authorizedVoters", () => {
+  const pool = new BallotPoolGit(commitTree, ["riri", "fifi"]);
+  expect(pool.addBallot({ url: fixturesURL, commitSha: "0" })).toBe(true);
+  expect(pool.addBallot({ url: fixturesURL, commitSha: "1" })).toBe(true);
+  expect(pool.addBallot({ url: fixturesURL, commitSha: "2" })).toBe(false);
+});
