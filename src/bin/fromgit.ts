@@ -5,7 +5,7 @@ import path from "path";
 import os from "os";
 import { env } from "process";
 
-import parseArgs from "../utils/parseArgs";
+import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
@@ -42,7 +42,7 @@ const [EDITOR, username, emailAddress] = await Promise.all([
     env.EDITOR ||
     runChildProcessAsync(GIT_BIN, ["config", "--get", "core.editor"], {
       captureStdout: true,
-    }),
+    }).catch(() => ""),
   parsedArgs["username"] ||
     runChildProcessAsync(GIT_BIN, ["config", "--get", "user.name"], {
       captureStdout: true,
@@ -66,7 +66,7 @@ await runChildProcessAsync(
 const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
 
 const author = `${username} <${emailAddress}>`;
-if (!vote.voters.includes(author)) {
+if (!vote.voters?.includes(author)) {
   console.warn("It looks like you are not on the list of allowed voters.");
   console.warn({ author, allowedVoters: vote.voters });
 }
@@ -117,6 +117,9 @@ try {
     "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
   );
   await runChildProcessAsync(GIT_BIN, ["fetch", repoUrl, branch], {
+    spawnArgs,
+  });
+  await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
     spawnArgs,
   });
   await runChildProcessAsync(GIT_BIN, ["rebase", "FETCH_HEAD"], { spawnArgs });
