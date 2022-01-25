@@ -1,10 +1,7 @@
 #!/bin/sh
 
-publicKeyFile=$1
-
 [ -z "$OPENSSL_BIN" ] && OPENSSL_BIN=openssl
-
-# tmpFile=$(mktemp -t /tmp/caritat.XXXXXX)
+[ -z "$GPG_BIN" ] && GPG_BIN=gpg
 
 # generate aes secret
 secret=$("$OPENSSL_BIN" rand 32)
@@ -18,18 +15,11 @@ echo "publicKey: |"
 echo "$public" | awk '{ print "  " $0 }'
 
 echo "encrencryptedPrivateKey: >-"
-printf '  '
-printf "%s" "$private" | "$OPENSSL_BIN" enc -aes-256-cbc -salt -iter 100000 -pass "pass:$secret" -pbkdf2 -base64 -A
+# encrypt private key using secret
+printf "%s" "$private" | "$OPENSSL_BIN" enc -aes-256-cbc -salt -iter 100000 -pass "pass:$secret" -pbkdf2 -base64 | awk '{ print "  " $0 }'
 
 echo
 
 echo "encryptedSecret: >-"
-printf '  '
-# encrypt as secret using rsa key
-printf "%s" "$secret" |\
-  "$OPENSSL_BIN" pkeyutl -encrypt -inkey "$publicKeyFile" -pubin \
-   -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 |\
-# Encoding in base64 for JSON compat
-  "$OPENSSL_BIN" enc -base64 -A
-
-  echo
+# encrypt secret using GPG key
+printf "%s" "$secret" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'
