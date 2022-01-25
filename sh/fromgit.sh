@@ -33,6 +33,7 @@ $EDITOR "$tmpDir/$path/ballot.yml"
   (cd "$tmpDir" && \
   # if the push failed, fetch latest commits could resolve the situation.
   git fetch "$repoUrl" "$branch" && \
+  git reset --hard && \
   git rebase FETCH_HEAD && \
   git push "$repoUrl" "HEAD:$branch")
 
