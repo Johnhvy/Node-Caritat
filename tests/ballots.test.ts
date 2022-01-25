@@ -1,5 +1,3 @@
-import * as fs from "fs";
-
 import BallotPoolGit from "../dist/ballotpool.js";
 
 import type { CommitNode } from "../src/ballotpool.js";
@@ -42,7 +40,7 @@ it("should refuse invalid commits", () => {
   expect(pool.addBallot({ url: fixturesURL, commitSha: "4" })).toBe(false);
 });
 
-it("should accept only the authorizedVoters", () => {
+it("should accept only the authorized voters", () => {
   const pool = new BallotPoolGit(commitTree, ["riri", "fifi"]);
   expect(pool.addBallot({ url: fixturesURL, commitSha: "0" })).toBe(true);
   expect(pool.addBallot({ url: fixturesURL, commitSha: "1" })).toBe(true);

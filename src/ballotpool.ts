@@ -1,4 +1,30 @@
-class BallotPool {}
+import { URL } from "url";
+
+export class BallotPool {
+  public ballots: { [author: string]: { url: URL; index: number } } =
+    Object.create(null);
+  private authorizedVoters: string[];
+
+  constructor(authorizedVoters?: string[]) {
+    this.authorizedVoters = authorizedVoters;
+  }
+
+  public addBallot({
+    url,
+    author,
+  }: { url: URL; author?: string } | any): boolean {
+    if (
+      author != null &&
+      (author in this.ballots ||
+        (this.authorizedVoters != null &&
+          !this.authorizedVoters.includes(author)))
+    )
+      return false;
+    const index: number = 0;
+    this.ballots[author] = { url, index };
+    return true;
+  }
+}
 
 export interface CommitNode {
   sha: string;
@@ -7,15 +33,16 @@ export interface CommitNode {
 }
 
 export default class BallotPoolGit extends BallotPool {
-  private ballots: { [author: string]: { url: URL; index: number } } =
-    Object.create(null);
   private commits: CommitNode[];
-  private authorizedVoters: string[];
 
-  constructor(commitTree: CommitNode[], voterWhiteList?: string[]) {
+  constructor(commitTree: CommitNode[], authorizedVoters?: string[]) {
     super();
     this.commits = commitTree;
-    this.authorizedVoters = voterWhiteList;
+    if (authorizedVoters != null) {
+      for (const commit of this.commits) {
+        commit.isValid &&= authorizedVoters.includes(commit.author);
+      }
+    }
   }
 
   public addBallot({
@@ -29,8 +56,6 @@ export default class BallotPoolGit extends BallotPool {
     if (index === -1) return false;
     const { author, isValid } = this.commits[index];
     if (
-      (this.authorizedVoters !== undefined &&
-        this.authorizedVoters.indexOf(author) < 0) ||
       !isValid ||
       (author in this.ballots && index > this.ballots[author].index)
     ) {
