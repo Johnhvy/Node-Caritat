@@ -18,7 +18,7 @@ const parsedArgs = parseArgs().options({
   key: {
     alias: "k",
     describe: "Path to the private key file",
-    demandOption: true,
+    demandOption: false,
     normalize: true,
     type: "string",
   },
