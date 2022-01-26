@@ -11,6 +11,7 @@ import cliArgsForGit from "../utils/cliArgsForGit.js";
 
 import encryptData from "../crypto/rsa-aes-encrypt.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
+import { boolean } from "yargs";
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
@@ -33,6 +34,10 @@ const parsedArgs = parseArgs().options({
     describe:
       "Email address of the voter (when not provided, look into the git config)",
     type: "string",
+  },
+  abstain: {
+    describe: "Use this flag to create a blank ballot and skip the voting",
+    type: "boolean",
   },
   ["gpg-sign"]: {
     alias: "S",
@@ -89,22 +94,30 @@ if (!vote.allowedVoters?.includes(author)) {
   console.warn({ author, allowedVoters: vote.allowedVoters });
 }
 
-await fs.writeFile(
-  path.join(cwd, subPath, `${handle || username}.yml`),
-  templateBallot(vote, { username, emailAddress })
-);
+const plainTextBallot = templateBallot(vote, { username, emailAddress });
+let rawBallot: BufferSource;
 
-console.log("Ballot is ready for edit.");
-const editor = EDITOR || (os.platform() === "win32" && "notepad");
-await runChildProcessAsync(editor, [
-  path.join(cwd, subPath, `${handle || username}.yml`),
-]);
+if (parsedArgs.abstain) {
+  console.log("skipping vote...");
+  rawBallot = Buffer.from(plainTextBallot);
+} else {
+  await fs.writeFile(
+    path.join(cwd, subPath, `${handle || username}.yml`),
+    plainTextBallot
+  );
+
+  console.log("Ballot is ready for edit.");
+  const editor = EDITOR || (os.platform() === "win32" && "notepad");
+  await runChildProcessAsync(editor, [
+    path.join(cwd, subPath, `${handle || username}.yml`),
+  ]);
+  rawBallot = await fs.readFile(
+    path.join(cwd, subPath, `${handle || username}.yml`)
+  );
+}
 
 console.log("Encrypting ballot with vote public key...");
-const { encryptedSecret, data } = await encryptData(
-  await fs.readFile(path.join(cwd, subPath, `${handle || username}.yml`)),
-  vote.publicKey
-);
+const { encryptedSecret, data } = await encryptData(rawBallot, vote.publicKey);
 
 await fs.writeFile(
   path.join(cwd, subPath, `${handle || username}.json`),
