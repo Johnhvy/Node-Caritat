@@ -8,6 +8,8 @@ export interface VoteFileFormat {
   method: string;
   publicKey: string;
   encryptedPrivateKey: string;
+  headerInstructions?: string;
+  footerInstructions?: string;
   checksum?: string;
 }
 function instanceOfVoteFile(object: any): object is VoteFileFormat {
@@ -48,12 +50,18 @@ export function templateBallot(
     emailAddress: null,
   }
 ): string {
-  let tooltip: string =
+  const tooltip: string =
     "# Please set a score to each candidate according to your preferences\n# Don't forget to put your correct name and email\n";
 
-  let candidates: string[] = vote_data.candidates;
+  const header = vote_data.headerInstructions
+    ? "\n# " + vote_data.headerInstructions.replace("\n", "\n# ")
+    : "";
+  const footer = vote_data.footerInstructions
+    ? "\n# " + vote_data.footerInstructions.replace("\n", "\n# ")
+    : "";
+  const candidates: string[] = vote_data.candidates;
 
-  let template: BallotFileFormat = {
+  const template: BallotFileFormat = {
     preferences: [],
     author: `${user.username} <${user.emailAddress}>`,
     poolChecksum: vote_data.checksum,
@@ -61,7 +69,7 @@ export function templateBallot(
   candidates.forEach((candidate: string) => {
     template.preferences.push({ title: candidate, score: 0 });
   });
-  return tooltip + yaml.dump(template);
+  return tooltip + header + "\n" + yaml.dump(template) + "\n" + footer;
 }
 
 function doubleCheckSum(
