@@ -5,12 +5,13 @@ import path from "path";
 import os from "os";
 import { env } from "process";
 
-import parseArgs from "../utils/parseArgs";
+import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
 import decryptData from "../crypto/rsa-aes-decrypt.js";
 import Vote from "../vote.js";
+import readStdIn from "../utils/readStdin.js";
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
@@ -39,13 +40,16 @@ await runChildProcessAsync(
 
 const vote = new Vote();
 vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
-const privateKey = new Uint8Array(); // TODO: get the key from the YAML file
+
+const privateKey = parsedArgs.key
+  ? await fs.readFile(parsedArgs.key)
+  : await readStdIn(false);
 
 // TODO: check commits signatures?
 
 const decryptPromises = [];
 for await (const dirent of await fs.opendir(path.join(cwd, subPath))) {
-  if (dirent.isDirectory() || dirent.name === "vote.yml") continue;
+  if (dirent.isDirectory() || !dirent.name.endsWith(".json")) continue;
 
   // TODO: check git history for tempering
 
