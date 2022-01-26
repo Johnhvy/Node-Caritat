@@ -4,7 +4,7 @@ import * as crypto from "crypto";
 
 export interface VoteFileFormat {
   candidates: string[];
-  voters: string[];
+  allowedVoters: string[];
   method: string;
   publicKey: string;
   encryptedPrivateKey: string;
@@ -26,6 +26,14 @@ export interface BallotFileFormat {
 export interface UserCredentials {
   username: string;
   emailAddress: string;
+}
+
+export function parseYml<T>(document: string): T {
+  try {
+    return yaml.load(document) as T;
+  } catch (e) {
+    console.log(e);
+  }
 }
 
 export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {

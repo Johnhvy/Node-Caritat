@@ -84,9 +84,9 @@ await runChildProcessAsync(
 const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
 
 const author = `${username} <${emailAddress}>`;
-if (!vote.voters?.includes(author)) {
+if (!vote.allowedVoters?.includes(author)) {
   console.warn("It looks like you are not on the list of allowed voters.");
-  console.warn({ author, allowedVoters: vote.voters });
+  console.warn({ author, allowedVoters: vote.allowedVoters });
 }
 
 await fs.writeFile(

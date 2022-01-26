@@ -2,6 +2,7 @@ import {
   BallotFileFormat,
   checkBallot,
   loadYmlFile,
+  parseYml,
   templateBallot,
   VoteFileFormat,
 } from "./parser.js";
@@ -128,6 +129,8 @@ export default class Vote {
 
   #checksum: string;
 
+  private textDecoder = new TextDecoder();
+
   public voteFileData: VoteFileFormat = null;
 
   constructor(options?: {
@@ -148,7 +151,7 @@ export default class Vote {
     this.#checksum = voteData.checksum;
     this.#candidates = voteData.candidates;
     this.#targetMethod = voteData.method as VoteMethod;
-    // this.#authorizedVoters = voteData.voters;
+    this.#authorizedVoters = voteData.allowedVoters as any[] as Actor[];
   }
 
   public set targetMethod(method: VoteMethod) {
@@ -208,7 +211,9 @@ export default class Vote {
   }
 
   public addBallotFromBufferSource(data: BufferSource): void {
-    // TODO
+    this.addBallotFile(
+      parseYml<BallotFileFormat>(this.textDecoder.decode(data))
+    );
   }
 
   public addBallot(ballot: Ballot): void {
