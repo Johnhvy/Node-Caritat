@@ -61,7 +61,10 @@ const [EDITOR, username, emailAddress, handle] = await Promise.all([
     }),
   parsedArgs["handle"] ||
     runChildProcessAsync("gh", ["auth", "status"], {
-      captureStdout: true,
+      captureStderr: true,
+      spawnArgs: {
+        env: { ...process.env, NO_COLOR: true },
+      },
     }).then(
       (stdout) => /Logged in to github\.com as (\S+)/.exec(stdout)?.[1] ?? "",
       () => ""
