@@ -23,7 +23,7 @@ __metadata:
     decryptBallot: dist/bin/decryptBallot.js
     encryptBallot: dist/bin/encryptBallot.js
     extractEncryptedPrivateKey: dist/bin/extractEncryptedPrivateKey.js
-    voteFromGit: dist/bin/voteFromGit.js
+    voteUsingGit: dist/bin/voteUsingGit.js
   languageName: unknown
   linkType: soft
 

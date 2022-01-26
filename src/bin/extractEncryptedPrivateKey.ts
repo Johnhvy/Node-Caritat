@@ -9,7 +9,14 @@ import readStdIn from "../utils/readStdin.js";
 const [, , yamlFile] = argv;
 
 let data: string;
-if (yamlFile == null) {
+if (yamlFile === "--help" || yamlFile === "-h") {
+  console.log("Usage: extractEncryptedPrivateKey <path-to-YAML-file>");
+  console.log("or");
+  console.log(
+    "Usage: echo 'encryptedPrivateKey: …' | extractEncryptedPrivateKey"
+  );
+  process.exit();
+} else if (yamlFile == null) {
   data = await readStdIn(true);
 } else {
   data = await fs.readFile(yamlFile, "utf8");

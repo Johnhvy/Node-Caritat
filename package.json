@@ -1,6 +1,6 @@
 {
   "name": "@aduh95/caritat",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "packageManager": "yarn@3.1.1",
   "dependencies": {
     "js-yaml": "^4.1.0",
@@ -27,7 +27,7 @@
     "decryptBallot": "dist/bin/decryptBallot.js",
     "encryptBallot": "dist/bin/encryptBallot.js",
     "extractEncryptedPrivateKey": "dist/bin/extractEncryptedPrivateKey.js",
-    "voteFromGit": "dist/bin/voteFromGit.js"
+    "voteUsingGit": "dist/bin/voteUsingGit.js"
   },
   "files": [
     "dist/"
