@@ -8,6 +8,7 @@ export interface VoteFileFormat {
   method: string;
   publicKey: string;
   encryptedPrivateKey: string;
+  subject?: string;
   headerInstructions?: string;
   footerInstructions?: string;
   checksum?: string;
@@ -29,9 +30,9 @@ export interface UserCredentials {
 
 export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
   try {
-    let documentBuffer: Buffer = fs.readFileSync(filePath);
-    let document: string = documentBuffer.toString();
-    let data: T = yaml.load(document) as T;
+    const documentBuffer: Buffer = fs.readFileSync(filePath);
+    const document: string = documentBuffer.toString();
+    const data: T = yaml.load(document) as T;
     if (instanceOfVoteFile(data)) {
       const hash = crypto.createHash("sha512");
       hash.update(documentBuffer);
@@ -50,11 +51,12 @@ export function templateBallot(
     emailAddress: null,
   }
 ): string {
-  const tooltip: string =
-    "# Please set a score to each candidate according to your preferences\n# Don't forget to put your correct name and email\n";
+  const subject: string = vote_data.subject
+    ? yaml.dump({ subject: vote_data.subject }) + "\n"
+    : "";
 
   const header = vote_data.headerInstructions
-    ? "\n# " + vote_data.headerInstructions.replace("\n", "\n# ")
+    ? "# " + vote_data.headerInstructions.replace("\n", "\n# ")
     : "";
   const footer = vote_data.footerInstructions
     ? "\n# " + vote_data.footerInstructions.replace("\n", "\n# ")
@@ -69,14 +71,7 @@ export function templateBallot(
   candidates.forEach((candidate: string) => {
     template.preferences.push({ title: candidate, score: 0 });
   });
-  return tooltip + header + "\n" + yaml.dump(template) + "\n" + footer;
-}
-
-function doubleCheckSum(
-  ballotFile: BallotFileFormat,
-  voteFile: VoteFileFormat
-) {
-  return ballotFile.poolChecksum === voteFile.checksum;
+  return subject + header + "\n" + yaml.dump(template) + footer;
 }
 
 export function checkBallot(
@@ -84,7 +79,7 @@ export function checkBallot(
   voteFile: VoteFileFormat
 ): boolean {
   return (
-    doubleCheckSum(ballotFile, voteFile) &&
+    ballotFile.poolChecksum === voteFile.checksum &&
     ballotFile.author != null &&
     ballotFile.preferences.every((preference) =>
       voteFile.candidates.some((candidate) => candidate === preference.title)
