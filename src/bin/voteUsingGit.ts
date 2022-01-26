@@ -112,7 +112,7 @@ await fs.writeFile(
     author,
     encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
     data: Buffer.from(data).toString("base64"),
-  })
+  }) + "\n"
 );
 
 console.log("Commit encrypted ballot.");
