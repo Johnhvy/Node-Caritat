@@ -163,6 +163,13 @@ try {
     spawnArgs,
   });
   await runChildProcessAsync(GIT_BIN, ["rebase", "FETCH_HEAD"], { spawnArgs });
+  if (parsedArgs["gpg-sign"] === true) {
+    await runChildProcessAsync(
+      GIT_BIN,
+      ["commit", "--amend", "--no-edit", "-S"],
+      { spawnArgs }
+    );
+  }
 
   console.log("Pushing to the remote repository...");
   await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
