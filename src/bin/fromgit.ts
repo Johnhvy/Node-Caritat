@@ -20,6 +20,10 @@ const parsedArgs = parseArgs().options({
     normalize: true,
     type: "string",
   },
+  handle: {
+    describe: "GitHub handle (when not provided, look into gh auth status)",
+    type: "string",
+  },
   username: {
     describe: "Name of the voter (when not provided, look into git config)",
     alias: "u",
@@ -30,13 +34,17 @@ const parsedArgs = parseArgs().options({
       "Email address of the voter (when not provided, look into the git config)",
     type: "string",
   },
+  ["gpg-sign"]: {
+    alias: "S",
+    describe: "GPG-sign commits.",
+  },
 }).argv;
 
 const { repo: repoUrl, branch, path: subPath } = parsedArgs;
 
 const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
-const [EDITOR, username, emailAddress] = await Promise.all([
+const [EDITOR, username, emailAddress, handle] = await Promise.all([
   parsedArgs["editor"] ||
     env.VISUAL ||
     env.EDITOR ||
@@ -51,6 +59,13 @@ const [EDITOR, username, emailAddress] = await Promise.all([
     runChildProcessAsync(GIT_BIN, ["config", "--get", "user.email"], {
       captureStdout: true,
     }),
+  parsedArgs["handle"] ||
+    runChildProcessAsync("gh", ["auth", "status"], {
+      captureStdout: true,
+    }).then(
+      (stdout) => /Logged in to github\.com as (\S+)/.exec(stdout)?.[1] ?? "",
+      () => ""
+    ),
 ]);
 
 const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
@@ -72,24 +87,24 @@ if (!vote.voters?.includes(author)) {
 }
 
 await fs.writeFile(
-  path.join(cwd, subPath, `${username}.yml`),
+  path.join(cwd, subPath, `${handle || username}.yml`),
   templateBallot(vote, { username, emailAddress })
 );
 
 console.log("Ballot is ready for edit.");
 const editor = EDITOR || (os.platform() === "win32" && "notepad");
 await runChildProcessAsync(editor, [
-  path.join(cwd, subPath, `${username}.yml`),
+  path.join(cwd, subPath, `${handle || username}.yml`),
 ]);
 
 console.log("Encrypting ballot with vote public key...");
 const { encryptedSecret, data } = await encryptData(
-  await fs.readFile(path.join(cwd, subPath, `${username}.yml`)),
+  await fs.readFile(path.join(cwd, subPath, `${handle || username}.yml`)),
   vote.publicKey
 );
 
 await fs.writeFile(
-  path.join(cwd, subPath, `${username}.json`),
+  path.join(cwd, subPath, `${handle || username}.json`),
   JSON.stringify({
     author,
     encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
@@ -100,12 +115,21 @@ await fs.writeFile(
 console.log("Commit encrypted ballot.");
 await runChildProcessAsync(
   GIT_BIN,
-  ["add", path.join(cwd, subPath, `${username}.json`)],
+  ["add", path.join(cwd, subPath, `${handle || username}.json`)],
   { spawnArgs }
 );
-await runChildProcessAsync(GIT_BIN, ["commit", "-m", `vote from ${username}`], {
-  spawnArgs,
-});
+await runChildProcessAsync(
+  GIT_BIN,
+  [
+    "commit",
+    ...(parsedArgs["gpg-sign"] === true ? ["-S"] : []),
+    "-m",
+    `vote from ${handle || username}`,
+  ],
+  {
+    spawnArgs,
+  }
+);
 
 console.log("Pushing to the remote repository...");
 try {
