@@ -11,7 +11,6 @@ import cliArgsForGit from "../utils/cliArgsForGit.js";
 
 import encryptData from "../crypto/rsa-aes-encrypt.js";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
-import { boolean } from "yargs";
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
