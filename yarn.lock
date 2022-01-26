@@ -5,6 +5,28 @@ __metadata:
   version: 5
   cacheKey: 8
 
+"@aduh95/caritat@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@aduh95/caritat@workspace:."
+  dependencies:
+    "@types/jest": ^27.4.0
+    "@types/js-yaml": ^4.0.5
+    "@types/minimist": ^1.2.2
+    "@types/node": ^17.0.10
+    jest: ^27.4.7
+    js-yaml: ^4.1.0
+    ts-jest: ^27.1.3
+    typescript: ^4.5.4
+    yargs: ^17.3.1
+  bin:
+    countBallotsFromGit: dist/bin/countBallotsFromGit.js
+    decryptBallot: dist/bin/decryptBallot.js
+    encryptBallot: dist/bin/encryptBallot.js
+    extractEncryptedPrivateKey: dist/bin/extractEncryptedPrivateKey.ts
+    voteFromGit: dist/bin/voteFromGit.js
+  languageName: unknown
+  linkType: soft
+
 "@babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.7":
   version: 7.16.7
   resolution: "@babel/code-frame@npm:7.16.7"
@@ -1181,24 +1203,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"caritat@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "caritat@workspace:."
-  dependencies:
-    "@types/jest": ^27.4.0
-    "@types/js-yaml": ^4.0.5
-    "@types/minimist": ^1.2.2
-    "@types/node": ^17.0.10
-    jest: ^27.4.7
-    js-yaml: ^4.1.0
-    ts-jest: ^27.1.3
-    typescript: ^4.5.4
-    yargs: ^17.3.1
-  bin:
-    caritat: ./dist/app.js
-  languageName: unknown
-  linkType: soft
-
 "chalk@npm:^2.0.0":
   version: 2.4.2
   resolution: "chalk@npm:2.4.2"
@@ -1695,7 +1699,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"fsevents@npm:^2.3.2":
+fsevents@^2.3.2:
   version: 2.3.2
   resolution: "fsevents@npm:2.3.2"
   dependencies:
@@ -3240,7 +3244,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"resolve@npm:^1.20.0":
+resolve@^1.20.0:
   version: 1.21.0
   resolution: "resolve@npm:1.21.0"
   dependencies:
@@ -3717,7 +3721,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typescript@npm:^4.5.4":
+typescript@^4.5.4:
   version: 4.5.4
   resolution: "typescript@npm:4.5.4"
   bin:
