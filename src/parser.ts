@@ -56,10 +56,12 @@ export function templateBallot(
     : "";
 
   const header = vote_data.headerInstructions
-    ? "# " + vote_data.headerInstructions.replace("\n", "\n# ")
+    ? "# " +
+      vote_data.headerInstructions.trim().replaceAll("\n", "\n# ") +
+      "\n\n"
     : "";
   const footer = vote_data.footerInstructions
-    ? "\n# " + vote_data.footerInstructions.replace("\n", "\n# ")
+    ? "\n# " + vote_data.footerInstructions.trim().replaceAll("\n", "\n# ")
     : "";
   const candidates: string[] = vote_data.candidates;
 
@@ -68,10 +70,10 @@ export function templateBallot(
     author: `${user.username} <${user.emailAddress}>`,
     poolChecksum: vote_data.checksum,
   };
-  candidates.forEach((candidate: string) => {
-    template.preferences.push({ title: candidate, score: 0 });
-  });
-  return subject + header + "\n" + yaml.dump(template) + footer;
+  template.preferences.push(
+    ...candidates.map((title) => ({ title, score: 0 }))
+  );
+  return subject + header + yaml.dump(template) + footer;
 }
 
 export function checkBallot(
