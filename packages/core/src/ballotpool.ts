@@ -1,5 +1,3 @@
-import { URL } from "url";
-
 export class BallotPool {
   public ballots: { [author: string]: { url: URL; index: number } } =
     Object.create(null);
