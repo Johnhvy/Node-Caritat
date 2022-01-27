@@ -12,7 +12,7 @@ export default async function encryptData(
 ) {
   const secret = await subtle.exportKey(
     "raw",
-    await subtle.generateKey(SYMMETRIC_ALGO, true, [])
+    await subtle.generateKey(SYMMETRIC_ALGO, true, ["encrypt"])
   );
   const salt = getRandomValues(new Uint8Array(SYMMETRIC_ALGO.saltSize));
 

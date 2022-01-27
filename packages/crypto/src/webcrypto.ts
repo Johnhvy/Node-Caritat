@@ -1,5 +1,9 @@
-import { webcrypto } from "crypto";
+const webcrypto: typeof window.crypto =
+  typeof crypto !== "undefined"
+    ? crypto
+    : await import("node:crypto")
+        .then((module) => module.default.webcrypto as any)
+        .catch(() => ({} as any));
 
-export default webcrypto as any as typeof window.crypto;
-export const { subtle, getRandomValues } =
-  webcrypto as any as typeof window.crypto;
+export default webcrypto;
+export const { subtle, getRandomValues } = webcrypto;
