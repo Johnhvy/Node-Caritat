@@ -4,8 +4,8 @@ import type { VotingMethodFunction } from "./votingMethodlmplementation";
 const singleRound: VotingMethodFunction = (
   candidates: VoteCandidate[],
   votes: Ballot[]
-) => {
-  return new Map(
+) =>
+  new Map(
     candidates.map((candidate) => [
       candidate,
       votes.filter(
@@ -15,5 +15,4 @@ const singleRound: VotingMethodFunction = (
       ).length,
     ])
   );
-};
 export default singleRound;
