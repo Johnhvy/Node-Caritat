@@ -18,13 +18,13 @@ export type VoteMethod =
   | "MajorityJudgment"
   | "Condorcet"
   | "InstantRunoff"
-  | "Scored";
+  | "Scored"
+  | string;
 
 export type Rank = number;
 export interface Ballot {
   voter: Actor;
-  preferences: { [name: VoteCandidate]: Rank };
-  integrity: string;
+  preferences: Map<VoteCandidate, Rank>;
 }
 
 export interface VoteResult {
@@ -111,6 +111,8 @@ export function vote(
       return voteInstantRunoff(options, authorizedVoters, votes);
     case "Scored":
       return voteScored(options, authorizedVoters, votes);
+    case "SingleRound":
+      return;
     default:
       break;
   }
@@ -193,14 +195,12 @@ export default class Vote {
 
   public addBallotFile(ballotData: BallotFileFormat): Ballot {
     if (checkBallot(ballotData, this.voteFileData)) {
-      let preferences: { [name: VoteCandidate]: Rank } = {};
-      ballotData.preferences.forEach((element) => {
-        preferences[element.title] = element.score;
-      });
+      let preferences: Map<VoteCandidate, Rank> = new Map(
+        ballotData.preferences.map((element) => [element.title, element.score])
+      );
       let ballot: Ballot = {
         voter: { id: ballotData.author },
-        preferences: preferences,
-        integrity: "todo",
+        preferences,
       };
       this.addBallot(ballot);
       return ballot;
@@ -227,7 +227,7 @@ export default class Vote {
     this.#votes.push(ballot);
   }
 
-  public getResult(method?: VoteMethod): VoteResult {
+  public count(method?: VoteMethod): VoteResult {
     if (this.#targetMethod == null) throw new Error("Set targetMethod before");
     return vote(
       this.#candidates,
