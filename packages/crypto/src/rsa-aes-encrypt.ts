@@ -4,7 +4,16 @@ import importRsaKey from "./importRsaKey.js";
 
 import { subtle, getRandomValues } from "./webcrypto.js";
 
-const MAGIC_NUMBER = new TextEncoder().encode("Salted__");
+const MAGIC_NUMBER = [
+  83, // 'S'
+  97, // 'a'
+  108, // 'l'
+  116, // 't'
+  101, // 'e'
+  100, // 'd'
+  95, // '_'
+  95, // '_'
+];
 
 export default async function encryptData(
   rawData: BufferSource,
@@ -26,10 +35,21 @@ export default async function encryptData(
   )) as ArrayBuffer;
 
   const { iv, key } = await deriveKeyIv(secret, salt, "encrypt");
-  const data = await subtle.encrypt({ ...SYMMETRIC_ALGO, iv }, key, rawData);
+  const encryptedData = await subtle.encrypt(
+    { ...SYMMETRIC_ALGO, iv },
+    key,
+    rawData
+  );
 
-  return {
-    encryptedSecret,
-    data: Uint8Array.of(...MAGIC_NUMBER, ...salt, ...new Uint8Array(data)),
-  };
+  const data = new Uint8Array(
+    MAGIC_NUMBER.length + SYMMETRIC_ALGO.saltSize + encryptedData.byteLength
+  );
+  data.set(MAGIC_NUMBER);
+  data.set(salt, MAGIC_NUMBER.length);
+  data.set(
+    new Uint8Array(encryptedData),
+    MAGIC_NUMBER.length + SYMMETRIC_ALGO.saltSize
+  );
+
+  return { encryptedSecret, data };
 }
