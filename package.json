@@ -1,15 +1,11 @@
 {
-  "name": "@aduh95/caritat",
-  "version": "0.2.2",
+  "name": "caritat",
+  "private": true,
   "packageManager": "yarn@3.1.1",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/stduhpf/caritat.git"
-  },
-  "dependencies": {
-    "js-yaml": "^4.1.0",
-    "yargs": "^17.3.1"
   },
   "devDependencies": {
     "@types/jest": "^27.4.0",
@@ -24,17 +20,7 @@
     "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest"
   },
   "type": "module",
-  "exports": {
-    "./package.json": "./package.json"
-  },
-  "bin": {
-    "countBallotsFromGit": "dist/bin/countBallotsFromGit.js",
-    "decryptBallot": "dist/bin/decryptBallot.js",
-    "encryptBallot": "dist/bin/encryptBallot.js",
-    "extractEncryptedPrivateKey": "dist/bin/extractEncryptedPrivateKey.js",
-    "voteUsingGit": "dist/bin/voteUsingGit.js"
-  },
-  "files": [
-    "dist/"
+  "workspaces": [
+    "packages/*"
   ]
 }

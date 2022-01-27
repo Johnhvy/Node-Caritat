@@ -1,0 +1,23 @@
+{
+  "name": "@aduh95/caritat",
+  "version": "0.2.2",
+  "files": [
+    "dist/"
+  ],
+  "dependencies": {
+    "@aduh95/caritat-crypto": "workspace:*",
+    "js-yaml": "^4.1.0",
+    "yargs": "^17.3.1"
+  },
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "bin": {
+    "countBallotsFromGit": "dist/bin/countBallotsFromGit.js",
+    "decryptBallot": "dist/bin/decryptBallot.js",
+    "encryptBallot": "dist/bin/encryptBallot.js",
+    "extractEncryptedPrivateKey": "dist/bin/extractEncryptedPrivateKey.js",
+    "voteUsingGit": "dist/bin/voteUsingGit.js"
+  },
+  "type": "module"
+}

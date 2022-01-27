@@ -7,7 +7,7 @@
 /coverage/
 
 node_modules/
-dist/
+packages/*/dist/
 
 tests/*.js
 src/*.js

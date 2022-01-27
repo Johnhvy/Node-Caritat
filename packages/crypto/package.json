@@ -1,0 +1,11 @@
+{
+  "name": "@aduh95/caritat-crypto",
+  "version": "0.1.0",
+  "_types": "./types.d.ts",
+  "exports": {
+    "./package.json": "./package.json",
+    "./decrypt": "./dist/rsa-aes-decrypt.js",
+    "./encrypt": "./dist/rsa-aes-encrypt.js"
+  },
+  "type": "module"
+}

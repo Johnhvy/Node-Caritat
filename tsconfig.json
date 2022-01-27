@@ -6,7 +6,10 @@
   "files": [],
   "references": [
     {
-      "path": "./src/"
+      "path": "./packages/crypto/"
+    },
+    {
+      "path": "./packages/core/"
     },
     {
       "path": "./tests/"

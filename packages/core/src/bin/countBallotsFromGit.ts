@@ -9,7 +9,8 @@ import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
-import decryptData from "../crypto/rsa-aes-decrypt.js";
+// @ts-ignore
+import decryptData from "@aduh95/caritat-crypto/decrypt";
 import Vote from "../vote.js";
 import readStdIn from "../utils/readStdin.js";
 

@@ -34,10 +34,6 @@ const parsedArgs = parseArgs().options({
       "Email address of the voter (when not provided, look into the git config)",
     type: "string",
   },
-  abstain: {
-    describe: "Use this flag to create a blank ballot and skip the voting",
-    type: "boolean",
-  },
   ["gpg-sign"]: {
     alias: "S",
     describe: "GPG-sign commits.",
@@ -93,30 +89,22 @@ if (!vote.allowedVoters?.includes(author)) {
   console.warn({ author, allowedVoters: vote.allowedVoters });
 }
 
-const plainTextBallot = templateBallot(vote, { username, emailAddress });
-let rawBallot: BufferSource;
+await fs.writeFile(
+  path.join(cwd, subPath, `${handle || username}.yml`),
+  templateBallot(vote, { username, emailAddress })
+);
 
-if (parsedArgs.abstain) {
-  console.log("skipping vote...");
-  rawBallot = Buffer.from(plainTextBallot);
-} else {
-  await fs.writeFile(
-    path.join(cwd, subPath, `${handle || username}.yml`),
-    plainTextBallot
-  );
-
-  console.log("Ballot is ready for edit.");
-  const editor = EDITOR || (os.platform() === "win32" && "notepad");
-  await runChildProcessAsync(editor, [
-    path.join(cwd, subPath, `${handle || username}.yml`),
-  ]);
-  rawBallot = await fs.readFile(
-    path.join(cwd, subPath, `${handle || username}.yml`)
-  );
-}
+console.log("Ballot is ready for edit.");
+const editor = EDITOR || (os.platform() === "win32" && "notepad");
+await runChildProcessAsync(editor, [
+  path.join(cwd, subPath, `${handle || username}.yml`),
+]);
 
 console.log("Encrypting ballot with vote public key...");
-const { encryptedSecret, data } = await encryptData(rawBallot, vote.publicKey);
+const { encryptedSecret, data } = await encryptData(
+  await fs.readFile(path.join(cwd, subPath, `${handle || username}.yml`)),
+  vote.publicKey
+);
 
 await fs.writeFile(
   path.join(cwd, subPath, `${handle || username}.json`),
@@ -124,7 +112,7 @@ await fs.writeFile(
     author,
     encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
     data: Buffer.from(data).toString("base64"),
-  }) + "\n"
+  })
 );
 
 console.log("Commit encrypted ballot.");
@@ -162,13 +150,6 @@ try {
     spawnArgs,
   });
   await runChildProcessAsync(GIT_BIN, ["rebase", "FETCH_HEAD"], { spawnArgs });
-  if (parsedArgs["gpg-sign"] === true) {
-    await runChildProcessAsync(
-      GIT_BIN,
-      ["commit", "--amend", "--no-edit", "-S"],
-      { spawnArgs }
-    );
-  }
 
   console.log("Pushing to the remote repository...");
   await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {

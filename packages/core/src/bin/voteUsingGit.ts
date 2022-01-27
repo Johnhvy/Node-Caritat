@@ -9,6 +9,7 @@ import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 
+// @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
 
