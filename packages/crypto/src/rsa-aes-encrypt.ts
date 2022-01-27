@@ -2,7 +2,7 @@ import { ASYMMETRIC_ALGO, SYMMETRIC_ALGO } from "./config.js";
 import deriveKeyIv from "./deriveKeyIv.js";
 import importRsaKey from "./importRsaKey.js";
 
-import { subtle, getRandomValues } from "./webcrypto.js";
+import crypto, { subtle } from "./webcrypto.js";
 
 const MAGIC_NUMBER = [
   83, // 'S'
@@ -23,7 +23,7 @@ export default async function encryptData(
     "raw",
     await subtle.generateKey(SYMMETRIC_ALGO, true, ["encrypt"])
   );
-  const salt = getRandomValues(new Uint8Array(SYMMETRIC_ALGO.saltSize));
+  const salt = crypto.getRandomValues(new Uint8Array(SYMMETRIC_ALGO.saltSize));
 
   const publicKey = await importRsaKey(publicKeyASCII);
 

@@ -6,4 +6,4 @@ const webcrypto: typeof window.crypto =
         .catch(() => ({} as any));
 
 export default webcrypto;
-export const { subtle, getRandomValues } = webcrypto;
+export const { subtle } = webcrypto;
