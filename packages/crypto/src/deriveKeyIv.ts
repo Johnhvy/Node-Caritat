@@ -1,7 +1,6 @@
-import * as crypto from "crypto";
 import { KEY_DERIVATION_ALGO, SYMMETRIC_ALGO } from "./config.js";
 
-const { subtle } = crypto.webcrypto as any as typeof window.crypto;
+import { subtle } from "./webcrypto.js";
 
 export default async function deriveKeyIv(
   secret: BufferSource,

@@ -1,9 +1,8 @@
-import { URL } from "url";
-import { BallotPool } from "../dist/ballotpool";
+import { BallotPool } from "../dist/ballotpool.js";
 import { loadYmlFile } from "../dist/parser.js";
 import type { VoteFileFormat } from "../src/parser";
 
-const fixturesURL = new URL("./fixtures/", import.meta.url);
+const fixturesURL = new URL("../../../test/fixtures/", import.meta.url);
 
 const ballotDirURL = new URL("./ballots/", fixturesURL);
 

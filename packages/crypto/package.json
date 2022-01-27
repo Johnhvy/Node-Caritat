@@ -5,7 +5,15 @@
   "exports": {
     "./package.json": "./package.json",
     "./decrypt": "./dist/rsa-aes-decrypt.js",
-    "./encrypt": "./dist/rsa-aes-encrypt.js"
+    "./encrypt": "./dist/rsa-aes-encrypt.js",
+    "./webcrypto": {
+      "node": "./dist/webcrypto.node.js",
+      "default": "./dist/webcrypto.web.js"
+    }
+  },
+  "imports": {
+    "#encrypt": "./dist/rsa-aes-encrypt.js",
+    "#decrypt": "./dist/rsa-aes-decrypt.js"
   },
   "type": "module"
 }

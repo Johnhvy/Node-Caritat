@@ -3195,7 +3195,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"jest-environment-node@npm:^27.4.6":
+"jest-environment-node@npm:27.4.6":
   version: 27.4.6
   resolution: "jest-environment-node@npm:27.4.6"
   dependencies:
@@ -3206,6 +3206,20 @@ __metadata:
     jest-mock: ^27.4.6
     jest-util: ^27.4.2
   checksum: 3f146e7819f65b1dc0252573cddadc8c565a566ddf7c06c93eded51cccfc55f4765373fb2aaafeb4d8b76ec62b062e1bd4f1da6b9f57429af6789ef8bbada3cb
+  languageName: node
+  linkType: hard
+
+"jest-environment-node@patch:jest-environment-node@npm:27.4.6#.yarn/patches/jest-environment-node-npm-27.4.6-596a121c86::locator=caritat%40workspace%3A.":
+  version: 27.4.6
+  resolution: "jest-environment-node@patch:jest-environment-node@npm%3A27.4.6#.yarn/patches/jest-environment-node-npm-27.4.6-596a121c86::version=27.4.6&hash=efa30b&locator=caritat%40workspace%3A."
+  dependencies:
+    "@jest/environment": ^27.4.6
+    "@jest/fake-timers": ^27.4.6
+    "@jest/types": ^27.4.2
+    "@types/node": "*"
+    jest-mock: ^27.4.6
+    jest-util: ^27.4.2
+  checksum: 448874044244662995b74c62ef56579ba40e99b01153ba26f68701aec326807afa87661860547d3cf133b76b931143dd62bce639f6d07944163175c516ee67b0
   languageName: node
   linkType: hard
 

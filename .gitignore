@@ -9,14 +9,6 @@
 node_modules/
 packages/*/dist/
 
-tests/*.js
-src/*.js
-key.bin
-key.bin.enc
-key.pem
-public.pem
-ballotBob.yml.enc
-ballotBob.yml
+test/*.js
+packages/*/test/*.js
 
-!/tests/fixtures/key.pem
-!/tests/fixtures/public.pem

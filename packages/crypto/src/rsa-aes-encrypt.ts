@@ -1,10 +1,8 @@
-import * as crypto from "crypto";
 import { ASYMMETRIC_ALGO, SYMMETRIC_ALGO } from "./config.js";
 import deriveKeyIv from "./deriveKeyIv.js";
 import importRsaKey from "./importRsaKey.js";
 
-const { subtle, getRandomValues } =
-  crypto.webcrypto as any as typeof window.crypto;
+import { subtle, getRandomValues } from "./webcrypto.js";
 
 const MAGIC_NUMBER = new TextEncoder().encode("Salted__");
 

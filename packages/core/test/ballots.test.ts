@@ -2,7 +2,7 @@ import BallotPoolGit from "../dist/ballotpool.js";
 
 import type { CommitNode } from "../src/ballotpool.js";
 
-const fixturesURL = new URL("./fixtures/", import.meta.url);
+const fixturesURL = new URL("../../../test/fixtures/", import.meta.url);
 
 const commitTree: CommitNode[] = [
   { sha: "0", author: "riri", isValid: true },

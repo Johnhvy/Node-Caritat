@@ -1,9 +1,8 @@
-import * as crypto from "crypto";
 import { ASYMMETRIC_ALGO, SYMMETRIC_ALGO } from "./config.js";
 import deriveKeyIv from "./deriveKeyIv.js";
 import importRsaKey from "./importRsaKey.js";
 
-const { subtle } = crypto.webcrypto as any as typeof window.crypto;
+import { subtle } from "./webcrypto.js";
 
 export async function asymmetricDecrypt(
   privateKeyASCII: BufferSource,

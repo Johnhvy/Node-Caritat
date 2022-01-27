@@ -22,5 +22,8 @@
   "type": "module",
   "workspaces": [
     "packages/*"
-  ]
+  ],
+  "resolutions": {
+    "jest-environment-node": "patch:jest-environment-node@npm:27.4.6#.yarn/patches/jest-environment-node-npm-27.4.6-596a121c86"
+  }
 }

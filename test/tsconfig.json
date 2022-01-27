@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "declaration": false
+  },
+  "include": ["../packages/*/test/*.test.ts", "./*.test.ts"]
+}

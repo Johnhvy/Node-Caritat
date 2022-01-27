@@ -1,7 +1,6 @@
-import * as crypto from "crypto";
 import { ASYMMETRIC_ALGO } from "./config.js";
 
-const { subtle } = crypto.webcrypto as any as typeof window.crypto;
+import { subtle } from "./webcrypto.js";
 
 const textDecoder = new TextDecoder();
 

@@ -2,11 +2,10 @@
 
 import * as fs from "fs";
 import * as crypto from "crypto";
-import encryptBallot from "../dist/crypto/rsa-aes-encrypt.js";
-import decryptBallot from "../dist/crypto/rsa-aes-decrypt.js";
-// import runChildProcessAsync from "../dist/utils/runChildProcessAsync.js";
+import encryptBallot from "../dist/rsa-aes-encrypt.js";
+import decryptBallot from "../dist/rsa-aes-decrypt.js";
 
-const fixturesURL = new URL("./fixtures/", import.meta.url);
+const fixturesURL = new URL("../../../test/fixtures/", import.meta.url);
 
 const publicKeyURL = new URL("./public.pem", fixturesURL);
 const privateKeyURL = new URL("./key.pem", fixturesURL);
@@ -38,14 +37,3 @@ it("should be able to correctly decrypt what it has encrypted", async () => {
     Array.from(new Uint32Array(rawData))
   );
 });
-
-// let shDecryptedData = await runChildProcessAsync(
-//   ".sh/decryptBallot.sh",
-//   [base64Secret, base64Data, privateKeyPath],
-//   {
-//     captureStdout: true,
-//   }
-// );
-
-// it("should be able to be decrypt-able by shell script", () =>
-//   expect(shDecryptedData).toBe(rawData));
