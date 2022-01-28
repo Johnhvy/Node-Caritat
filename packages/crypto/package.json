@@ -4,6 +4,7 @@
   "files": [
     "dist/"
   ],
+  "license": "MIT",
   "exports": {
     "./package.json": "./package.json",
     "./decrypt": "./dist/rsa-aes-decrypt.js",
