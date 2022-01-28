@@ -1,7 +1,7 @@
 import type { Ballot, VoteCandidate } from "../vote";
 import type { VotingMethodFunction } from "./votingMethodlmplementation";
 
-const singleRound: VotingMethodFunction = (
+const condorcet: VotingMethodFunction = (
   candidates: VoteCandidate[],
   votes: Ballot[]
 ) => {
@@ -29,4 +29,4 @@ const singleRound: VotingMethodFunction = (
 
   return candidateScores;
 };
-export default singleRound;
+export default condorcet;

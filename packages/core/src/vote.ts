@@ -7,6 +7,7 @@ import {
   VoteFileFormat,
 } from "./parser.js";
 import type { PathOrFileDescriptor } from "fs";
+import condorcet from "./votingMethods/condorcet.js";
 
 export interface Actor {
   id: string;
@@ -29,6 +30,7 @@ export interface Ballot {
 
 export interface VoteResult {
   winner: VoteCandidate;
+  winners?: VoteCandidate[];
 }
 
 function voteMajorityJudgment(
@@ -44,40 +46,15 @@ function voteCondorcet(
   authorizedVoters: Actor[],
   votes: Ballot[]
 ) {
-  let scores: Map<VoteCandidate, number> = new Map(
-    options.map((option: VoteCandidate) => [option, 0])
+  const scoresAsMap: Map<VoteCandidate, number> = condorcet(options, votes);
+  const scores = [...scoresAsMap];
+  const maxScore = scores.reduce((accumulator, currentValue) =>
+    currentValue[1] > accumulator[1] ? currentValue : accumulator
   );
-  options.forEach((firstOption: VoteCandidate, index: number) => {
-    for (let jndex = index + 1; jndex < options.length; jndex++) {
-      let secondOption: VoteCandidate = options[jndex];
-      let firstWins = 0;
-      let secondWins = 0;
-      votes.forEach((ballot: Ballot) => {
-        if (authorizedVoters.includes(ballot.voter)) {
-          let firstScore = ballot.preferences[firstOption];
-          let secondScore = ballot.preferences[secondOption];
-          if (firstScore > secondScore) firstWins++;
-          else secondWins++;
-        }
-      });
-      let duelWinner: VoteCandidate =
-        firstWins > secondWins ? firstOption : secondOption;
-
-      scores.set(duelWinner, scores.get(duelWinner) + 1);
-    }
-  });
-  let maxScore = 0;
-  let winner_s: VoteCandidate[] = [];
-  scores.forEach((value: number, key: VoteCandidate) => {
-    if (value == maxScore) {
-      winner_s.push(key);
-    }
-    if (value > maxScore) {
-      maxScore = value;
-      winner_s = [key];
-    }
-  });
-  return { winner: winner_s[Math.floor(Math.random() * winner_s.length)] };
+  return {
+    winner: maxScore,
+    winners: scores.filter((value) => value[1] == maxScore[1]),
+  };
 }
 
 function voteInstantRunoff(
@@ -101,7 +78,7 @@ export function vote(
   authorizedVoters: Actor[],
   votes: Ballot[],
   method: VoteMethod
-): VoteResult {
+): any {
   switch (method) {
     case "MajorityJudgment":
       return voteMajorityJudgment(options, authorizedVoters, votes);

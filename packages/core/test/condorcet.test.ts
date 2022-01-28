@@ -11,7 +11,7 @@ it("should return a map for a vote", () => {
     ["a"],
     [
       {
-        voter: { id: "b" },
+        voter: { id: "1" },
         preferences: new Map([["a", 1]]),
       },
     ]
@@ -24,7 +24,7 @@ it("should return a map for a vote", () => {
       ["a", "b"],
       [
         {
-          voter: { id: "b" },
+          voter: { id: "1" },
           preferences: new Map([["a", 1]]),
         },
       ]
@@ -40,15 +40,140 @@ it("should return a map for two votes", () => {
     ["a"],
     [
       {
-        voter: { id: "b" },
+        voter: { id: "1" },
         preferences: new Map([["a", 1]]),
       },
       {
-        voter: { id: "c" },
+        voter: { id: "2" },
         preferences: new Map([["a", 1]]),
       },
     ]
   );
 
   expect([...result]).toStrictEqual([["a", 0]]);
+});
+
+it("should return the correct result", () => {
+  expect([
+    ...condorcet(
+      ["a", "b"],
+      [
+        {
+          voter: { id: "1" },
+          preferences: new Map([["a", 1]]),
+        },
+        {
+          voter: { id: "2" },
+          preferences: new Map([["a", 1]]),
+        },
+      ]
+    ),
+  ]).toStrictEqual([
+    ["a", 1],
+    ["b", 0],
+  ]);
+  expect([
+    ...condorcet(
+      ["a", "b"],
+      [
+        {
+          voter: { id: "1" },
+          preferences: new Map([["b", 1]]),
+        },
+        {
+          voter: { id: "2" },
+          preferences: new Map([["b", 1]]),
+        },
+      ]
+    ),
+  ]).toStrictEqual([
+    ["a", 0],
+    ["b", 1],
+  ]);
+  expect([
+    ...condorcet(
+      ["a", "b"],
+      [
+        {
+          voter: { id: "1" },
+          preferences: new Map([["a", 1]]),
+        },
+        {
+          voter: { id: "2" },
+          preferences: new Map([["b", 1]]),
+        },
+        {
+          voter: { id: "3" },
+          preferences: new Map([["b", 1]]),
+        },
+      ]
+    ),
+  ]).toStrictEqual([
+    ["a", 0],
+    ["b", 1],
+  ]);
+  expect([
+    ...condorcet(
+      ["a", "b", "c"],
+      [
+        {
+          voter: { id: "1" },
+          preferences: new Map([
+            ["a", 1],
+            ["b", 0.5],
+          ]),
+        },
+        {
+          voter: { id: "2" },
+          preferences: new Map([
+            ["b", 1],
+            ["c", 0.5],
+          ]),
+        },
+        {
+          voter: { id: "3" },
+          preferences: new Map([
+            ["c", 1],
+            ["a", 0.5],
+          ]),
+        },
+      ]
+    ),
+  ]).toStrictEqual([
+    ["a", 1],
+    ["b", 1],
+    ["c", 1],
+  ]);
+  expect([
+    ...condorcet(
+      ["a", "b", "c"],
+      [
+        {
+          voter: { id: "1" },
+          preferences: new Map([
+            ["a", 1],
+            ["b", 0.5],
+          ]),
+        },
+        {
+          voter: { id: "2" },
+          preferences: new Map([
+            ["b", 1],
+            ["a", 0.5],
+          ]),
+        },
+        {
+          voter: { id: "3" },
+          preferences: new Map([
+            ["c", 1],
+            ["a", 0.5],
+          ]),
+        },
+      ]
+    ),
+  ]).toStrictEqual([
+    ["a", 2],
+    ["b", 1],
+    ["c", 0],
+  ]);
 });
