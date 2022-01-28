@@ -17,7 +17,9 @@
     "typescript": "^4.5.4"
   },
   "scripts": {
-    "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest",
+    "web:dev": "yarn workspace web-ui dev",
+    "web:deploy": "yarn workspace web-ui build --outDir ./dist"
   },
   "type": "module",
   "workspaces": [
