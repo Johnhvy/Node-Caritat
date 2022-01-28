@@ -1,60 +1,41 @@
 <script lang="ts">
-  // @ts-ignore
-  import encryptData from "@aduh95/caritat-crypto/encrypt";
-  import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
+  import CopyEncrytptedBallotForm from "./CopyEncrytptedBallotForm.svelte";
+  import FillBallotForm from "./FillBallotForm.svelte";
+  import FindPrForm from "./FindPRForm.svelte";
 
-  const url = globalThis.location?.hash.slice(1);
-  let fetchedBallot, fetchedPublicKey;
-  if (url) {
-    fetchedBallot = fetch(url + "ballot.yml").then((response) =>
-      response.ok
-        ? response.text()
-        : Promise.reject(
-            new Error(`Fetch error: ${response.status} ${response.statusText}`)
-          )
-    );
-    fetchedPublicKey = fetch(url + "public.pem").then((response) =>
-      response.ok
-        ? response.arrayBuffer()
-        : Promise.reject(
-            new Error(`Fetch error: ${response.status} ${response.statusText}`)
-          )
-    );
-  }
+  let encryptDataPromise = Promise.reject("no data received");
 
-  const textEncoder =
-    typeof TextEncoder === "undefined" ? { encode() {} } : new TextEncoder();
+  let url = globalThis.location?.hash.slice(1);
 
-  async function onSubmit(this: HTMLFormElement, event: SubmitEvent) {
-    event.preventDefault();
-    const textarea = this.elements.namedItem("ballot") as HTMLInputElement;
-    const { encryptedSecret, data } = await encryptData(
-      textEncoder.encode(textarea.value),
-      await fetchedPublicKey
+  let step = url ? 1 : 0;
+
+  addEventListener("hashchange", () => {
+    url = globalThis.location?.hash.slice(1);
+
+    step = url ? Math.max(step, 1) : 0;
+  });
+
+  function registerEncrypedBallot(promise) {
+    encryptDataPromise = promise;
+    promise.then(
+      () => {
+        step = 2;
+      },
+      () => {
+        step = Math.min(step, 1);
+      }
     );
-    textarea.value = JSON.stringify({
-      encryptedSecret: uint8ArrayToBase64(new Uint8Array(encryptedSecret)),
-      data: uint8ArrayToBase64(data),
-    });
-    textarea.readOnly = true;
   }
 </script>
 
 <h1>Caritat</h1>
 
-{#await fetchedBallot}
-  <p>...loading</p>
-{:then ballotPlainText}
-  <form on:submit={onSubmit}>
-    <textarea name="ballot">{ballotPlainText}</textarea>
-    {#await fetchedPublicKey}
-      <button type="button">Loading public key…</button>
-    {:then}
-      <button type="submit">Encrypt ballot</button>
-    {/await}
-  </form>
-{:catch error}
-  <p>
-    Visit <a href="https://kit.svelte.dev">kit.svelte.dev</a> to read the documentation
-  </p>
-{/await}
+<details open={step === 0}>
+  <FindPrForm {url} />
+</details>
+<details open={step === 1}>
+  <FillBallotForm {url} {registerEncrypedBallot} />
+</details>
+<details open={step === 2}>
+  <CopyEncrytptedBallotForm {url} {encryptDataPromise} />
+</details>
