@@ -71,4 +71,4 @@ for await (const dirent of await fs.opendir(path.join(cwd, subPath))) {
 }
 
 await Promise.all(decryptPromises);
-console.log(vote.getResult());
+console.log(vote.count());
