@@ -4,6 +4,7 @@
   "files": [
     "dist/"
   ],
+  "license": "MIT",
   "dependencies": {
     "@aduh95/caritat-crypto": "workspace:*",
     "js-yaml": "^4.1.0",

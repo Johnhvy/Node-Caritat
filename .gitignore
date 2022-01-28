@@ -8,7 +8,9 @@
 
 node_modules/
 packages/*/dist/
+packages/core/README.md
 
 test/*.js
+**/src/*.js
 packages/*/test/*.js
 
