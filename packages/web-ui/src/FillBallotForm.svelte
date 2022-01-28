@@ -1,28 +1,15 @@
 <script lang="ts">
+  import { beforeUpdate } from "svelte";
+
   // @ts-ignore
   import encryptData from "@aduh95/caritat-crypto/encrypt";
   // @ts-ignore
   import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
+  import fetchFromGitHub from "./fetchDataFromGitHub";
 
   export let url, registerEncrypedBallot;
 
   let fetchedBallot, fetchedPublicKey;
-  if (url) {
-    fetchedBallot = fetch(url + "ballot.yml").then((response) =>
-      response.ok
-        ? response.text()
-        : Promise.reject(
-            new Error(`Fetch error: ${response.status} ${response.statusText}`)
-          )
-    );
-    fetchedPublicKey = fetch(url + "public.pem").then((response) =>
-      response.ok
-        ? response.arrayBuffer()
-        : Promise.reject(
-            new Error(`Fetch error: ${response.status} ${response.statusText}`)
-          )
-    );
-  }
 
   const textEncoder =
     typeof TextEncoder === "undefined" ? { encode() {} } : new TextEncoder();
@@ -43,6 +30,13 @@
       })()
     );
   }
+
+  fetchedBallot = fetchedPublicKey = Promise.reject("no data");
+  beforeUpdate(() => {
+    fetchFromGitHub(url, (errOfResult) => {
+      [fetchedBallot, fetchedPublicKey] = errOfResult;
+    });
+  });
 </script>
 
 <summary>Fill in ballot</summary>
