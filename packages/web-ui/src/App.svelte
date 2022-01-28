@@ -37,5 +37,5 @@
   <FillBallotForm {url} {registerEncrypedBallot} />
 </details>
 <details open={step === 2}>
-  <CopyEncrytptedBallotForm {url} {encryptDataPromise} />
+  <CopyEncrytptedBallotForm {encryptDataPromise} />
 </details>

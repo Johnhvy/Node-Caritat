@@ -1,9 +1,9 @@
 <script lang="ts">
   import { beforeUpdate } from "svelte";
 
-  export let url, encryptDataPromise;
+  export let encryptDataPromise;
 
-  let copyPromise;
+  let copyPromise: Promise<string>;
   function copyToClipboard() {
     copyPromise = encryptDataPromise.then((data) =>
       navigator.clipboard.writeText(data)
