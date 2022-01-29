@@ -19,8 +19,8 @@
   "scripts": {
     "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc --build",
-    "deploy:core": "rm -r packages/core/dist && tsc --build && cp README.md packages/core/. && yarn workspace @aduh95/caritat npm publish --access public",
-    "deploy:crypto": "rm -r packages/crypto/dist && tsc --build && yarn workspace @aduh95/caritat-crypto npm publish --access public",
+    "deploy:core": "rm -rf packages/core/dist && tsc --build && cp README.md packages/core/. && yarn workspace @aduh95/caritat npm publish --access public",
+    "deploy:crypto": "rm -rf packages/crypto/dist && tsc --build && yarn workspace @aduh95/caritat-crypto npm publish --access public",
     "deploy:web": "yarn workspace web-ui deploy",
     "web:dev": "yarn workspace web-ui dev",
     "web:deploy": "yarn workspace web-ui deploy"
