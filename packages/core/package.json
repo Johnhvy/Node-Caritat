@@ -1,10 +1,14 @@
 {
   "name": "@aduh95/caritat",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "files": [
     "dist/"
   ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stduhpf/caritat.git"
+  },
   "dependencies": {
     "@aduh95/caritat-crypto": "workspace:*",
     "js-yaml": "^4.1.0",
