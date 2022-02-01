@@ -1,4 +1,4 @@
-import { Actor } from "../vote.js";
+import type { Actor } from "../vote.js";
 
 export default function getParticipation(
   authorizedVoters: Actor[],

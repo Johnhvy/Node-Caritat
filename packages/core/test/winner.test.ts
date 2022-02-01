@@ -1,14 +1,4 @@
-import { VoteCandidate } from "../dist/vote";
-import { CandidateScores } from "../dist/votingMethods/votingMethodImplementation";
-
-function* findWinners(
-  scores: CandidateScores
-): Generator<VoteCandidate, void, unknown> {
-  let maxScore = Math.max(...scores.values());
-  for (const [candidate, score] of scores) {
-    if (score === maxScore) yield candidate;
-  }
-}
+import findWinners from "../dist/utils/findWinner";
 
 it("should find the winner based on the scores of the candidates", () => {
   expect(

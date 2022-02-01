@@ -12,6 +12,7 @@ import singleRound from "./votingMethods/singleRound.js";
 import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
 import getParticipation from "./utils/participation.js";
 import createSummary from "./utils/createSummary.js";
+import findWinners from "./utils/findWinner.js";
 
 export interface Actor {
   id: string;
@@ -179,7 +180,7 @@ export default class Vote {
         this.#authorizedVoters,
         this.#votes.length
       );
-      const winners = [];
+      const winners = Array.from(findWinners(this.result));
       return createSummary({
         subject: this.subject,
         endDate: new Date(),
