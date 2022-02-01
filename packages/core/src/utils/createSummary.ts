@@ -1,4 +1,4 @@
-import type { Actor, Ballot, VoteCandidate } from "../vote";
+import type { Ballot, VoteCandidate } from "../vote";
 import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
 
 function displayWinners(winners: VoteCandidate[]) {
@@ -31,7 +31,7 @@ export default function createSummary({
     .sort((a, b) => a.voter.id.localeCompare(b.voter.id));
   const participants = sortedBallots.map((ballot) => ballot.voter);
   return `# Election results
-  
+
 Subject: ${subject}  
 ${startDate ? `Start date: ${startDate}  \n` : ""}End date: ${endDate}
 
@@ -43,7 +43,7 @@ ${
 }
 
 Participation: ${Math.round(participation * 10_000) / 100}%
-  
+
 **Winning candidate(s)**: ${displayWinners(winners)}
 
 ## Table of results
@@ -54,7 +54,7 @@ ${Array.from(result)
   .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
   .map((result) => `| ${result[0]} | ${result[1]} |`)
   .join("\n")}
-    
+
 ## Voting data
 
 <details><summary>Private key used to encrypt ballots</summary>
