@@ -1,6 +1,12 @@
 import type { Actor, Ballot, VoteCandidate } from "../vote";
 import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
 
+function displayWinners(winners: VoteCandidate[]) {
+  if (winners.length === 1) return winners[0];
+  const delimiter = "\n - ";
+  return delimiter + winners.join(delimiter);
+}
+
 export default function createSummary({
   subject,
   startDate,
@@ -38,8 +44,8 @@ ${
 
 Participation: ${Math.round(participation * 10_000) / 100}%
   
-**Winning candidate(s)**: ${winners.join(", ")}
-  
+**Winning candidate(s)**: ${displayWinners(winners)}
+
 ## Table of results
 
 | Candidate | Number of won duels |
