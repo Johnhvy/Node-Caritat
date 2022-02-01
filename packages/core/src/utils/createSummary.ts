@@ -3,6 +3,7 @@ import type { CandidateScores } from "../votingMethods/votingMethodImplementatio
 import cleanMarkdown from "./cleanMarkdown.js";
 
 function displayWinners(winners: VoteCandidate[]) {
+  if (winners.length === 0) return "None.";
   if (winners.length === 1) return cleanMarkdown(winners[0]);
   const delimiter = "\n - ";
   return delimiter + winners.map(cleanMarkdown).join(delimiter);
@@ -87,7 +88,9 @@ ${
 
 Participation: ${Math.round(participation * 10_000) / 100}%
 
-**Winning candidate(s)**: ${displayWinners(winners)}
+**Winning candidate${winners.length === 1 ? "" : "s"}**: ${displayWinners(
+    winners
+  )}
 
 ## Table of results
 
