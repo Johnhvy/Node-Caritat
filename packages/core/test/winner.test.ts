@@ -1,5 +1,5 @@
 import { VoteCandidate } from "../dist/vote";
-import { CandidateScores } from "../dist/votingMethods/votingMethodlmplementation";
+import { CandidateScores } from "../dist/votingMethods/votingMethodImplementation";
 
 function* findWinners(
   scores: CandidateScores

@@ -1,4 +1,4 @@
-import type { Actor, Ballot, VoteCandidate, VoteResult } from "../vote";
+import type { Ballot, VoteCandidate } from "../vote";
 
 export type CandidateScores = Map<VoteCandidate, number>;
 

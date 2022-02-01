@@ -1,5 +1,5 @@
 import type { Ballot, VoteCandidate } from "../vote";
-import type { VotingMethodFunction } from "./votingMethodlmplementation";
+import type { VotingMethodFunction } from "./votingMethodImplementation";
 
 const singleRound: VotingMethodFunction = (
   candidates: VoteCandidate[],

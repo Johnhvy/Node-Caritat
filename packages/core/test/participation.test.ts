@@ -1,15 +1,5 @@
-import { Actor } from "../dist/vote";
-
-function getParticipation(
-  authorizedVoters: Actor[],
-  ballotCount: number
-): number {
-  const expectedVotes = authorizedVoters.length;
-  if (expectedVotes === 0) return 1;
-  const participation = ballotCount / authorizedVoters.length;
-  if (participation > 1) throw new Error("More ballots than authorized voters");
-  return participation;
-}
+import type { Actor } from "../dist/vote";
+import getParticipation from "../dist/utils/participation.js";
 
 const authorizedVoters = Array.from(
   { length: 10 },

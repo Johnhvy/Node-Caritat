@@ -8,6 +8,10 @@ import {
 } from "./parser.js";
 import type { PathOrFileDescriptor } from "fs";
 import condorcet from "./votingMethods/condorcet.js";
+import singleRound from "./votingMethods/singleRound.js";
+import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
+import getParticipation from "./utils/participation.js";
+import createSummary from "./utils/createSummary.js";
 
 export interface Actor {
   id: string;
@@ -33,63 +37,16 @@ export interface VoteResult {
   winners?: VoteCandidate[];
 }
 
-function voteMajorityJudgment(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
-
-function voteCondorcet(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  const scoresAsMap: Map<VoteCandidate, number> = condorcet(options, votes);
-  const scores = [...scoresAsMap];
-  const maxScore = scores.reduce((accumulator, currentValue) =>
-    currentValue[1] > accumulator[1] ? currentValue : accumulator
-  );
-  return {
-    winner: maxScore,
-    winners: scores.filter((value) => value[1] == maxScore[1]),
-  };
-}
-
-function voteInstantRunoff(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
-
-function voteScored(
-  options: VoteCandidate[],
-  authorizedVoters: Actor[],
-  votes: Ballot[]
-) {
-  return null;
-}
-
 export function vote(
   options: VoteCandidate[],
-  authorizedVoters: Actor[],
   votes: Ballot[],
   method: VoteMethod
-): any {
+): CandidateScores {
   switch (method) {
-    case "MajorityJudgment":
-      return voteMajorityJudgment(options, authorizedVoters, votes);
     case "Condorcet":
-      return voteCondorcet(options, authorizedVoters, votes);
-    case "InstantRunoff":
-      return voteInstantRunoff(options, authorizedVoters, votes);
-    case "Scored":
-      return voteScored(options, authorizedVoters, votes);
+      return condorcet(options, votes);
     case "SingleRound":
-      return;
+      return singleRound(options, votes);
     default:
       break;
   }
@@ -100,13 +57,13 @@ export default class Vote {
   #candidates: VoteCandidate[];
   #authorizedVoters: Actor[];
   #votes: Ballot[];
+  public subject: string;
+  private result: CandidateScores;
   /**
    * Once the voting method is set, trying to change it would probably be vote manipulation, so it can only be set if already null
    * Trying to see the result with some voting method while the target is undefined would force it to be said method, for the same reasons
    */
   #targetMethod: VoteMethod = null;
-
-  #checksum: string;
 
   private textDecoder = new TextDecoder();
 
@@ -117,20 +74,22 @@ export default class Vote {
     authorizedVoters?: Actor[];
     votes?: Ballot[];
     targetMethod?: VoteMethod;
+    subject?: string;
   }) {
     this.#candidates = options?.candidates ?? [];
     this.#authorizedVoters = options?.authorizedVoters ?? [];
     this.#votes = options?.votes ?? [];
     this.#targetMethod = options?.targetMethod;
+    this.subject = options?.subject ?? "";
   }
 
   public loadFromFile(voteFilePath: PathOrFileDescriptor): void {
     let voteData: VoteFileFormat = loadYmlFile<VoteFileFormat>(voteFilePath);
     this.voteFileData = voteData;
-    this.#checksum = voteData.checksum;
     this.#candidates = voteData.candidates;
     this.#targetMethod = voteData.method as VoteMethod;
     this.#authorizedVoters = voteData.allowedVoters as any[] as Actor[];
+    this.subject = voteData.subject ?? "Unknown vote";
   }
 
   public set targetMethod(method: VoteMethod) {
@@ -204,13 +163,34 @@ export default class Vote {
     this.#votes.push(ballot);
   }
 
-  public count(method?: VoteMethod): VoteResult {
+  public count(method?: VoteMethod): CandidateScores {
     if (this.#targetMethod == null) throw new Error("Set targetMethod before");
-    return vote(
+    this.result = vote(
       this.#candidates,
-      this.#authorizedVoters,
       this.#votes,
       method ?? this.#targetMethod
     );
+    return this.result;
+  }
+
+  public generateSummary(privateKey: string) {
+    if (this.result != null) {
+      const participation = getParticipation(
+        this.#authorizedVoters,
+        this.#votes.length
+      );
+      const winners = [];
+      return createSummary({
+        subject: this.subject,
+        endDate: new Date(),
+        participants: this.#authorizedVoters ?? null,
+        participation,
+        winners,
+        result: this.result,
+        privateKey,
+      });
+    } else {
+      throw new Error("Can't summarize vote that hasn't been counted yet.");
+    }
   }
 }
