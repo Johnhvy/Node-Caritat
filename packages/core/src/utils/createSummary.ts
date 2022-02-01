@@ -2,6 +2,12 @@ import type { Ballot, VoteCandidate } from "../vote";
 import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
 import cleanMarkdown from "./cleanMarkdown.js";
 
+// @ts-ignore
+const formatter = new Intl.ListFormat("en", {
+  style: "long",
+  type: "conjunction",
+});
+
 function displayWinners(winners: VoteCandidate[]) {
   if (winners.length === 0) return "None.";
   if (winners.length === 1) return cleanMarkdown(winners[0]);
@@ -9,6 +15,26 @@ function displayWinners(winners: VoteCandidate[]) {
   return delimiter + winners.map(cleanMarkdown).join(delimiter);
 }
 
+function summarizeCondorcetBallot(ballot: Ballot, indentLength = 0) {
+  const orderedPreferences = new Map() as Map<number, VoteCandidate[]>;
+  for (const [candidate, score] of ballot.preferences) {
+    const candidatesForThisScore = orderedPreferences.get(score);
+    const markdownCandidate = `**${cleanMarkdown(candidate)}**`;
+    if (candidatesForThisScore == null) {
+      orderedPreferences.set(score, [markdownCandidate]);
+    } else {
+      candidatesForThisScore.push(markdownCandidate);
+    }
+  }
+  const indent = " ".repeat(indentLength);
+  return Array.from(orderedPreferences.keys())
+    .sort((a, b) => b - a)
+    .map(
+      (score, i) =>
+        `${indent}${i + 1}. ${formatter.format(orderedPreferences.get(score))}`
+    )
+    .join("\n");
+}
 function summarizeBallot(ballot: Ballot) {
   let maxNote = Number.MIN_SAFE_INTEGER;
   let minNote = Number.MAX_SAFE_INTEGER;
@@ -23,25 +49,11 @@ function summarizeBallot(ballot: Ballot) {
   let maxCandidates = [];
   for (const [candidate, score] of ballot.preferences) {
     if (score !== minNote && score !== maxNote) {
-      const delimiter = `\n${" ".repeat(4)}- `;
-      return (
-        "Expressed preferences:" +
-        delimiter +
-        Array.from(
-          ballot.preferences,
-          ([candidate, score]) =>
-            `**${cleanMarkdown(candidate)}**: \`${score}\``
-        ).join(delimiter)
-      );
+      return "Order of preference:\n" + summarizeCondorcetBallot(ballot, 4);
     }
     const group = score === minNote ? minCandidates : maxCandidates;
     group.push(`**${cleanMarkdown(candidate)}**`);
   }
-  // @ts-ignore
-  const formatter = new Intl.ListFormat("en", {
-    style: "long",
-    type: "conjunction",
-  });
   if (maxCandidates.length <= minCandidates.length) {
     return "Voted for " + formatter.format(maxCandidates) + ".";
   } else {
