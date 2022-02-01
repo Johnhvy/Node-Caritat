@@ -89,7 +89,7 @@ export default class Vote {
     this.voteFileData = voteData;
     this.#candidates = voteData.candidates;
     this.#targetMethod = voteData.method as VoteMethod;
-    this.#authorizedVoters = voteData.allowedVoters as any[] as Actor[];
+    this.#authorizedVoters = voteData.allowedVoters.map((id) => ({ id }));
     this.subject = voteData.subject ?? "Unknown vote";
   }
 
@@ -181,13 +181,14 @@ export default class Vote {
         this.#votes.length
       );
       const winners = Array.from(findWinners(this.result));
+
       return createSummary({
         subject: this.subject,
         endDate: new Date(),
-        participants: this.#authorizedVoters ?? null,
         participation,
         winners,
         result: this.result,
+        ballots: this.#votes,
         privateKey,
       });
     } else {

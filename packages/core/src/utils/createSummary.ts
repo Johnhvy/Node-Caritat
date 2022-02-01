@@ -1,11 +1,10 @@
-import type { Actor, VoteCandidate } from "../vote";
+import type { Actor, Ballot, VoteCandidate } from "../vote";
 import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
 
 export default function createSummary({
   subject,
   startDate,
   endDate,
-  participants,
   participation,
   winners,
   result,
@@ -15,33 +14,55 @@ export default function createSummary({
   subject: string;
   startDate?: Date;
   endDate: Date;
-  participants: Actor[];
   participation: number;
   winners: VoteCandidate[];
   result: CandidateScores;
-  ballots?: string[];
+  ballots: Ballot[];
   privateKey: string;
 }): string {
-  return `# Election results\n\nSubject: ${subject}  \n${
-    startDate ? `Start date: ${startDate}  \n` : ""
-  }End date: ${endDate}${
-    participants
-      ? "\n\nParticipants:\n\n" +
-        participants.map((actor) => `- ${actor.id}`).join("\n")
-      : ""
-  }\n\nParticipation: ${
-    participation * 100
-  }%\n\n**Winning candidate(s)**: ${winners.join(
-    ", "
-  )}\n\n## Table of results\n\n| Candidate | Number of won duels |\n| --------- | ------------------- |\n${[
-    ...result,
-  ]
-    .map((result) => `| ${result[0]} | ${result[1]} |`)
-    .join("\n")}\n\n## Full voting data\n\n${
-    ballots
-      ? `<details><summary>Ballots</summary>\n\n${"```yaml"}\n${ballots.join(
-          "```\n\n```yaml\n"
-        )}\n${"```"}\n\n</details>\n\n`
-      : ""
-  }<details><summary>Private key used to encrypt ballots</summary>\n\n\`\`\`\n${privateKey}\n\`\`\`\n\n</details>\n`;
+  const sortedBallots = ballots
+    .slice()
+    .sort((a, b) => a.voter.id.localeCompare(b.voter.id));
+  const participants = sortedBallots.map((ballot) => ballot.voter);
+  return `# Election results
+  
+Subject: ${subject}
+${startDate ? `Start date: ${startDate}\n` : ""}End date: ${endDate}
+
+${
+  participants
+    ? "Participants:\n\n" +
+      participants.map((actor, i) => `- ${actor.id}[^${i}]`).join("\n")
+    : ""
+}
+
+Participation: ${Math.round(participation * 10_000) / 100}%
+  
+**Winning candidate(s)**: ${winners.join(", ")}
+  
+## Table of results
+
+| Candidate | Number of won duels |
+| --------- | ------------------- |
+${Array.from(result)
+  .sort(([, scoreA], [, scoreB]) => scoreB - scoreA)
+  .map((result) => `| ${result[0]} | ${result[1]} |`)
+  .join("\n")}
+    
+## Voting data
+
+<details><summary>Private key used to encrypt ballots</summary>
+
+${"```\n" + privateKey + "```"}
+
+</details>
+
+${ballots
+  .map(
+    (ballot, i) =>
+      `[^${i}]: ${Array.from(ballot.preferences, (a) => a.join(": ")).join(
+        ", "
+      )}`
+  )
+  .join("\n")}\n`;
 }
