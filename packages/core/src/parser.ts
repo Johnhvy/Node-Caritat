@@ -91,8 +91,11 @@ export function checkBallot(
   return (
     ballotFile.poolChecksum === voteFile.checksum &&
     ballotFile.author != null &&
-    ballotFile.preferences.every((preference) =>
-      voteFile.candidates.some((candidate) => candidate === preference.title)
+    ballotFile.preferences.every(
+      (preference) =>
+        voteFile.candidates.some(
+          (candidate) => candidate === preference.title
+        ) && Number.isSafeInteger(preference.score)
     )
   );
 }
