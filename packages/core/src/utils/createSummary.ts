@@ -22,7 +22,7 @@ export default function createSummary({
   ballots?: string[];
   privateKey: string;
 }): string {
-  return `# Election results\n\nSubject:${subject}  \n${
+  return `# Election results\n\nSubject: ${subject}  \n${
     startDate ? `Start date: ${startDate}  \n` : ""
   }End date: ${endDate}${
     participants
