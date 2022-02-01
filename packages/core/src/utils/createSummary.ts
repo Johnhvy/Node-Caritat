@@ -27,11 +27,11 @@ function summarizeCondorcetBallot(ballot: Ballot, indentLength = 0) {
     }
   }
   const indent = " ".repeat(indentLength);
-  return Array.from(orderedPreferences.keys())
-    .sort((a, b) => b - a)
+  return Array.from(orderedPreferences)
+    .sort((a, b) => b[0] - a[0])
     .map(
-      (score, i) =>
-        `${indent}${i + 1}. ${formatter.format(orderedPreferences.get(score))}`
+      ([, candidates], i) =>
+        `${indent}${i + 1}. ${formatter.format(candidates)}`
     )
     .join("\n");
 }
