@@ -12,8 +12,8 @@ export default function createSummary({
   privateKey,
 }: {
   subject: string;
-  startDate?: Date;
-  endDate: Date;
+  startDate?: string;
+  endDate: string;
   participation: number;
   winners: VoteCandidate[];
   result: CandidateScores;
@@ -26,8 +26,8 @@ export default function createSummary({
   const participants = sortedBallots.map((ballot) => ballot.voter);
   return `# Election results
   
-Subject: ${subject}
-${startDate ? `Start date: ${startDate}\n` : ""}End date: ${endDate}
+Subject: ${subject}  
+${startDate ? `Start date: ${startDate}  \n` : ""}End date: ${endDate}
 
 ${
   participants

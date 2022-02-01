@@ -184,7 +184,7 @@ export default class Vote {
 
       return createSummary({
         subject: this.subject,
-        endDate: new Date(),
+        endDate: new Date().toISOString(),
         participation,
         winners,
         result: this.result,
