@@ -9,7 +9,7 @@ function main(argv: string[]): void {
 
   let ballotFile: BallotFileFormat = loadYmlFile<BallotFileFormat>(ballotPath);
   if (checkBallot(ballotFile, voteFile)) {
-    console.group("valid");
+    console.log("valid");
     process.exit(0);
   } else {
     console.log("invalid");

@@ -142,7 +142,7 @@ export default class Vote {
       this.addBallot(ballot);
       return ballot;
     } else {
-      console.log("invalid Ballot");
+      console.warn("Invalid Ballot");
     }
     return null;
   }
