@@ -32,7 +32,7 @@ const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
 const spawnArgs = { cwd };
 
-console.log("Cloning remote repository...");
+console.error("Cloning remote repository...");
 await runChildProcessAsync(
   GIT_BIN,
   ["clone", "--branch", branch, "--no-tags", "--depth=1", repoUrl, "."],
@@ -51,6 +51,8 @@ const privateKey = parsedArgs.key
 const decryptPromises = [];
 for await (const dirent of await fs.opendir(path.join(cwd, subPath))) {
   if (dirent.isDirectory() || !dirent.name.endsWith(".json")) continue;
+
+  console.error("reading", dirent.name, "...");
 
   // TODO: check git history for tempering
 
@@ -71,4 +73,6 @@ for await (const dirent of await fs.opendir(path.join(cwd, subPath))) {
 }
 
 await Promise.all(decryptPromises);
-console.log(vote.count());
+
+const result = vote.count();
+console.log(vote.generateSummary(privateKey.toString()));
