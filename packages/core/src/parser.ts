@@ -1,11 +1,12 @@
 import * as yaml from "js-yaml";
 import * as fs from "fs";
 import * as crypto from "crypto";
+import { VoteMethod } from "./vote";
 
 export interface VoteFileFormat {
   candidates: string[];
   allowedVoters: string[];
-  method: string;
+  method: VoteMethod;
   publicKey: string;
   encryptedPrivateKey: string;
   subject?: string;

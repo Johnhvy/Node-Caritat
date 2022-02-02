@@ -24,7 +24,7 @@ export type VoteMethod =
   | "Condorcet"
   | "InstantRunoff"
   | "Scored"
-  | string;
+  | "SingleRound";
 
 export type Rank = number;
 export interface Ballot {
