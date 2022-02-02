@@ -1,13 +1,11 @@
 import fs from "fs/promises";
-import { readSync } from "fs";
 import path from "path";
 import os from "os";
-import { env } from "process";
+import { env, stdin, stdout } from "process";
+import { once } from "events";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import cliArgsForGit from "./utils/cliArgsForGit.js";
-
-import readline from "readline";
 
 // @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
@@ -18,17 +16,7 @@ import {
   templateBallot,
   VoteFileFormat,
 } from "./parser.js";
-import { summarizeCondorcetBallot } from "./summary/condorcetSummary.js";
-
-function getChar() {
-  let buffer = Buffer.alloc(1);
-  let char = "";
-  while (char !== "Y" && char !== "y" && char !== "N" && char !== "n") {
-    readSync(0, buffer, 0, 1, 0);
-    char = buffer.toString("utf8");
-  }
-  return char;
-}
+import CondorcetElectionSummary from "./summary/condorcetSummary.js";
 
 export const cliArgs = {
   ...cliArgsForGit,
@@ -106,11 +94,6 @@ export default async function voteUsingGit({
   signCommits,
   doNotCleanTempFiles,
 }) {
-  const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout,
-  });
-
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
   const spawnArgs = { cwd };
 
@@ -170,24 +153,19 @@ export default async function voteUsingGit({
         };
         switch (vote.method) {
           case "Condorcet":
+            console.log("\nHere's how you ballot will be interpreted:\n");
             console.log(
-              "Your order of preferences:\n",
-              summarizeCondorcetBallot(ballot)
+              CondorcetElectionSummary.prototype.summarizeBallot(ballot)
             );
             break;
           default:
             break;
         }
-        editFile = await new Promise(async (resolve) => {
-          let char = "";
-          while (char.toUpperCase() !== "N" && char.toUpperCase() !== "Y")
-            char = await new Promise((resolve) =>
-              rl.question("Do you want to continue (Y/N)?", (answer) =>
-                resolve(answer.charAt(0))
-              )
-            );
-          resolve(char.toUpperCase() === "N");
-        });
+        stdout.write("\nWould you like to re-edit the ballot? [y/N] ");
+        let chars = await once(stdin, "data");
+        editFile =
+          chars[0] !== 0x79 && // n
+          chars[0] !== 0x59; // N
       }
     }
   }
@@ -260,5 +238,4 @@ export default async function voteUsingGit({
   if (!doNotCleanTempFiles) {
     await fs.rm(cwd, { recursive: true, force: true });
   }
-  rl.close();
 }
