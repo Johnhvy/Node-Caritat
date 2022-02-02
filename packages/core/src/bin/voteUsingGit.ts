@@ -11,7 +11,14 @@ import cliArgsForGit from "../utils/cliArgsForGit.js";
 
 // @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
-import { loadYmlFile, templateBallot, VoteFileFormat } from "../parser.js";
+import {
+  BallotFileFormat,
+  loadYmlFile,
+  parseYml,
+  templateBallot,
+  VoteFileFormat,
+} from "../parser.js";
+import { summarizeCondorcetBallot } from "../summary/condorcetSummary.js";
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
@@ -101,6 +108,7 @@ if (parsedArgs.abstain) {
   console.log("skipping vote...");
   rawBallot = Buffer.from(plainTextBallot);
 } else {
+  const textDecoder = new TextDecoder();
   await fs.writeFile(
     path.join(cwd, subPath, `${handle || username}.yml`),
     plainTextBallot
@@ -114,6 +122,29 @@ if (parsedArgs.abstain) {
   rawBallot = await fs.readFile(
     path.join(cwd, subPath, `${handle || username}.yml`)
   );
+  {
+    const ballotData = parseYml<BallotFileFormat>(
+      textDecoder.decode(rawBallot)
+    );
+
+    let preferences = new Map(
+      ballotData.preferences.map((element) => [element.title, element.score])
+    );
+    let ballot = {
+      voter: { id: ballotData.author },
+      preferences,
+    };
+    switch (vote.method) {
+      case "Condorcet":
+        console.log(
+          "Your order of preferences:",
+          summarizeCondorcetBallot(ballot)
+        );
+        break;
+      default:
+        break;
+    }
+  }
 }
 
 console.log("Encrypting ballot with vote public key...");
