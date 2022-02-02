@@ -1,5 +1,9 @@
 #!/usr/bin/env node
 
+// Usage: curl -L <url-to-vote.yml> | npx --package=@aduh95/caritat extractEncryptedPrivateKey | gpg -d |\
+//          npx --package=@aduh95/caritat countBallotsFromGit -r <repo> -b <branch> -p <subpath> |\
+//          gh pr comment <url-to-pr> --body-file -
+
 import { stdout, argv } from "process";
 import fs from "fs/promises";
 
