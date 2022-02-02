@@ -3,7 +3,6 @@ import {
   checkBallot,
   loadYmlFile,
   parseYml,
-  templateBallot,
   VoteFileFormat,
 } from "./parser.js";
 import type { PathOrFileDescriptor } from "fs";
@@ -11,8 +10,8 @@ import condorcet from "./votingMethods/condorcet.js";
 import singleRound from "./votingMethods/singleRound.js";
 import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
 import getParticipation from "./utils/participation.js";
-import createSummary from "./utils/createSummary.js";
 import findWinners from "./utils/findWinner.js";
+import CondorcetElectionSummary from "./summary/condorcetSummary.js";
 
 export interface Actor {
   id: string;
@@ -182,7 +181,7 @@ export default class Vote {
       );
       const winners = Array.from(findWinners(this.result));
 
-      return createSummary({
+      return new CondorcetElectionSummary({
         subject: this.subject,
         endDate: new Date().toISOString(),
         participation,
@@ -190,7 +189,7 @@ export default class Vote {
         result: this.result,
         ballots: this.#votes,
         privateKey,
-      });
+      }).toString();
     } else {
       throw new Error("Can't summarize vote that hasn't been counted yet.");
     }
