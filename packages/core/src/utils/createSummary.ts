@@ -68,7 +68,7 @@ export default function createSummary({
   participation,
   winners,
   result,
-  ballots,
+  ballots: unsortedBallots,
   privateKey,
 }: {
   subject: string;
@@ -80,7 +80,7 @@ export default function createSummary({
   ballots: Ballot[];
   privateKey: string;
 }): string {
-  const sortedBallots = ballots
+  const sortedBallots = unsortedBallots
     .slice()
     .sort((a, b) => a.voter.id.localeCompare(b.voter.id));
   const participants = sortedBallots.map((ballot) => ballot.voter);
@@ -121,7 +121,7 @@ ${"```\n" + privateKey + "```"}
 
 </details>
 
-${ballots
+${sortedBallots
   .map((ballot, i) => `[^${i}]: ${summarizeBallot(ballot)}`)
   .join("\n")}\n`;
 }
