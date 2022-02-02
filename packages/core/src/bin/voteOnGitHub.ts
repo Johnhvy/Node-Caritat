@@ -9,13 +9,16 @@ const parsedArgs = parseArgs()
     ...(cliArgs as any),
 
     // Disable CLI flags that are provided in the PR-url.
-    repo: undefined,
-    branch: undefined,
-    handle: undefined,
+    repo: { hidden: true },
+    branch: { hidden: true },
+    path: { hidden: true },
+    handle: { hidden: true },
 
     protocol: {
       describe:
-        "the protocol to use to pull the remote repository, either SSH or HTTP (defaults to SSH if a public SSH key is found for the current user)",
+        "the protocol to use to pull the remote repository, either SSH or " +
+        "HTTP (defaults to SSH if a public SSH key is found for the current " +
+        "user, otherwise default to HTTP)",
       type: "string",
     },
     login: {
@@ -37,7 +40,7 @@ const parsedArgs = parseArgs()
   })
   .command(
     "$0 <pr-url>",
-    "extract vote info from GitHub pull request",
+    "Extract vote info from GitHub pull request, and spawn a vote instance.",
     (yargs) => {
       yargs.positional("pr-url", {
         demandOption: true,
