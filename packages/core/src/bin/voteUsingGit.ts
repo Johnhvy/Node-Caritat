@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "fs/promises";
+import { readSync } from "fs";
 import path from "path";
 import os from "os";
 import { env } from "process";
@@ -19,6 +20,16 @@ import {
   VoteFileFormat,
 } from "../parser.js";
 import { summarizeCondorcetBallot } from "../summary/condorcetSummary.js";
+
+function getChar() {
+  let buffer = Buffer.alloc(1);
+  let char = "";
+  while (char !== "Y" && char !== "y" && char !== "N" && char !== "n") {
+    readSync(0, buffer, 0, 1, 0);
+    char = buffer.toString("utf8");
+  }
+  return char;
+}
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
@@ -114,35 +125,42 @@ if (parsedArgs.abstain) {
     plainTextBallot
   );
 
-  console.log("Ballot is ready for edit.");
-  const editor = EDITOR || (os.platform() === "win32" && "notepad");
-  await runChildProcessAsync(editor, [
-    path.join(cwd, subPath, `${handle || username}.yml`),
-  ]);
-  rawBallot = await fs.readFile(
-    path.join(cwd, subPath, `${handle || username}.yml`)
-  );
-  {
-    const ballotData = parseYml<BallotFileFormat>(
-      textDecoder.decode(rawBallot)
+  let editFile = true;
+  while (editFile) {
+    editFile = false;
+    console.log("Ballot is ready for edit.");
+    const editor = EDITOR || (os.platform() === "win32" && "notepad");
+    await runChildProcessAsync(editor, [
+      path.join(cwd, subPath, `${handle || username}.yml`),
+    ]);
+    rawBallot = await fs.readFile(
+      path.join(cwd, subPath, `${handle || username}.yml`)
     );
+    {
+      const ballotData = parseYml<BallotFileFormat>(
+        textDecoder.decode(rawBallot)
+      );
 
-    let preferences = new Map(
-      ballotData.preferences.map((element) => [element.title, element.score])
-    );
-    let ballot = {
-      voter: { id: ballotData.author },
-      preferences,
-    };
-    switch (vote.method) {
-      case "Condorcet":
-        console.log(
-          "Your order of preferences:",
-          summarizeCondorcetBallot(ballot)
-        );
-        break;
-      default:
-        break;
+      let preferences = new Map(
+        ballotData.preferences.map((element) => [element.title, element.score])
+      );
+      let ballot = {
+        voter: { id: ballotData.author },
+        preferences,
+      };
+      switch (vote.method) {
+        case "Condorcet":
+          console.log(
+            "Your order of preferences:\n",
+            summarizeCondorcetBallot(ballot)
+          );
+          break;
+        default:
+          break;
+      }
+      console.log("Do you want to continue (Y/N)?");
+      const char = getChar();
+      editFile = char === "N" || char === "n";
     }
   }
 }
