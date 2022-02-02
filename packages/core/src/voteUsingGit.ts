@@ -7,6 +7,8 @@ import { env } from "process";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import cliArgsForGit from "./utils/cliArgsForGit.js";
 
+import readline from "readline";
+
 // @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 import {
@@ -104,6 +106,11 @@ export default async function voteUsingGit({
   signCommits,
   doNotCleanTempFiles,
 }) {
+  const rl = readline.createInterface({
+    input: process.stdin,
+    output: process.stdout,
+  });
+
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
   const spawnArgs = { cwd };
 
@@ -171,13 +178,19 @@ export default async function voteUsingGit({
           default:
             break;
         }
-        console.log("Do you want to continue (Y/N)?");
-        const char = getChar();
-        editFile = char === "N" || char === "n";
+        editFile = await new Promise(async (resolve) => {
+          let char = "";
+          while (char.toUpperCase() !== "N" && char.toUpperCase() !== "Y")
+            char = await new Promise((resolve) =>
+              rl.question("Do you want to continue (Y/N)?", (answer) =>
+                resolve(answer.charAt(0))
+              )
+            );
+          resolve(char.toUpperCase() === "N");
+        });
       }
     }
   }
-
   console.log("Encrypting ballot with vote public key...");
   const { encryptedSecret, data } = await encryptData(
     rawBallot,
@@ -247,4 +260,5 @@ export default async function voteUsingGit({
   if (!doNotCleanTempFiles) {
     await fs.rm(cwd, { recursive: true, force: true });
   }
+  rl.close();
 }
