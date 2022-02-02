@@ -115,9 +115,11 @@ ${Array.from(result)
 
 ## Voting data
 
-<details><summary>Private key used to encrypt ballots</summary>
+<details><summary>Private key to decrypt ballots</summary>
 
-${"```\n" + privateKey + "```"}
+${"```"}
+${privateKey}
+${"```"}
 
 </details>
 
