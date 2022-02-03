@@ -16,7 +16,10 @@ import {
   templateBallot,
   VoteFileFormat,
 } from "./parser.js";
-import CondorcetElectionSummary from "./summary/condorcetSummary.js";
+import CondorcetElectionSummary, {
+  getSummarizedBallot,
+  summarizeCondorcetBallotForVoter,
+} from "./summary/condorcetSummary.js";
 
 export const cliArgs = {
   ...cliArgsForGit,
@@ -147,16 +150,14 @@ export default async function voteUsingGit({
             element.score,
           ])
         );
-        let ballot = {
+        let ballot = getSummarizedBallot({
           voter: { id: ballotData.author },
           preferences,
-        };
+        });
         switch (vote.method) {
           case "Condorcet":
             console.log("\nHere's how you ballot will be interpreted:\n");
-            console.log(
-              CondorcetElectionSummary.prototype.summarizeBallot(ballot)
-            );
+            console.log(summarizeCondorcetBallotForVoter(ballot));
             break;
           default:
             break;
