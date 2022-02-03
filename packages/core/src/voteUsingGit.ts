@@ -161,8 +161,10 @@ export default async function voteUsingGit({
           default:
             break;
         }
-        stdout.write("\nWould you like to re-edit the ballot? [y/N] ");
+        stdout.write("\nDo you want to cast this vote? [Y/n] ");
+        stdin.resume();
         let chars = await once(stdin, "data");
+        stdin.pause();
         editFile =
           chars[0] !== 0x79 && // n
           chars[0] !== 0x59; // N
