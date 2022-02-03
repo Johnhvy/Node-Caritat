@@ -135,21 +135,32 @@ const subPath = files
   )
   ?.slice(0, -voteFileCanonicalName.length);
 
+const handle = parsedArgs.login || data.viewer.login;
+
 const protocol =
   parsedArgs.protocol ?? (data.viewer.publicKeys.totalCount ? "ssh" : "http");
 
+function getHTTPRepoUrl(repoUrl: string, login: string) {
+  const url = new URL(repoUrl + ".git");
+  url.username = login;
+  return url.toString();
+}
+const repoUrl =
+  protocol === "ssh"
+    ? data.repository.sshUrl
+    : getHTTPRepoUrl(data.repository.url, handle);
+
 console.log({
-  repo,
+  repoUrl,
   branch,
   subPath,
-  protocol,
 });
 
 await voteUsingGit({
   username: data.viewer.name,
   ...(await getEnv(parseArgs)),
-  repoUrl: protocol === "ssh" ? data.repository.sshUrl : data.repository.url,
+  repoUrl,
   branch,
   subPath,
-  handle: parsedArgs.login || data.viewer.login,
+  handle,
 });
