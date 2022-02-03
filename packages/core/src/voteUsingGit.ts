@@ -166,8 +166,8 @@ export default async function voteUsingGit({
         let chars = await once(stdin, "data");
         stdin.pause();
         editFile =
-          chars[0] !== 0x79 && // n
-          chars[0] !== 0x59; // N
+          chars[0][0] === 0x6e || // n
+          chars[0][0] === 0x4e; // N
       }
     }
   }
