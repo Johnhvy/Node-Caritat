@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Usage: ./$0.sh <username> <repo-url> <branch-name> [<path-to-vote-folder>]
+# Usage: ./voteUsingGit.sh <username> <repo-url> <branch-name> [<path-to-vote-folder>]
 
 username=$1
 repoUrl=$2

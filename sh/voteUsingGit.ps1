@@ -1,4 +1,4 @@
-# Usage: ./$0.sh <username> <repo-url> <branch-name> [<path-to-vote-folder>]
+# Usage: ./voteUsingGit.ps1 <username> <repo-url> <branch-name> [<path-to-vote-folder>]
 
 $env = Get-Location
 
