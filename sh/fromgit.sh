@@ -7,7 +7,7 @@ repoUrl=$2
 branch=$3
 path=$4
 
-__dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+__dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P )"
 
 [ -z "$path" ] && path="."
 

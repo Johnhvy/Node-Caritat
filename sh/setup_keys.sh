@@ -3,9 +3,6 @@
 [ -z "$OPENSSL_BIN" ] && OPENSSL_BIN=openssl
 [ -z "$GPG_BIN" ] && GPG_BIN=gpg
 
-# generate aes secret
-secret=$("$OPENSSL_BIN" rand 32)
-
 private="$("$OPENSSL_BIN" genpkey -algorithm RSA -outform PEM)"
 
 public="$(printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout)"

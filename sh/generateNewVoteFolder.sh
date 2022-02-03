@@ -2,7 +2,7 @@
 
 outDir=$1
 
-__dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 ; pwd -P )"
+__dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P )"
 
 [ -z "$outDir" ] && outDir="./vote"
 mkdir -p "$outDir"
@@ -32,11 +32,13 @@ private="$("$OPENSSL_BIN" genpkey -algorithm RSA -outform PEM)"
 
 printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout > "$outDir/public.pem"
 
-echo "publicKey: |" >> "$outDir/vote.yml"
-awk '{ print "  " $0 }' "$outDir/public.pem" >> "$outDir/vote.yml"
+{
+  echo "publicKey: |"
+  awk '{ print "  " $0 }' "$outDir/public.pem"
 
-echo "encryptedPrivateKey: |" >> "$outDir/vote.yml"
-printf "%s" "$private" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'  >> "$outDir/vote.yml"
+  echo "encryptedPrivateKey: |"
+  printf "%s" "$private" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'
+} >> "$outDir/vote.yml"
 
 $EDITOR "$outDir/vote.yml"
 
