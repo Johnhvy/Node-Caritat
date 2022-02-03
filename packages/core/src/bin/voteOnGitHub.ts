@@ -40,7 +40,7 @@ const parsedArgs = parseArgs()
   })
   .command(
     "$0 <pr-url>",
-    "Extract vote info from GitHub pull request, and spawn a vote instance.",
+    "Extracts vote info from GitHub pull request, and starts a vote instance.",
     (yargs) => {
       yargs.positional("pr-url", {
         demandOption: true,
@@ -59,6 +59,7 @@ if (prUrlInfo == null) {
 }
 
 const [, owner, repo, prNumber] = prUrlInfo;
+console.log(`Looking into GitHub pull request ${owner}/${repo}#${prNumber}...`);
 
 const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
     repository(owner: $owner, name: $repo) {
@@ -85,6 +86,7 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
   }
 `;
 
+console.log("Getting info from GitHub API...");
 const { data } = JSON.parse(
   await runChildProcessAsync(
     parsedArgs["gh-binary"] as string,
@@ -114,6 +116,7 @@ if (merged || closed) {
   console.warn("The pull request seems to be closed.");
 }
 
+console.log(`Locating vote.yml on commit ${sha}...`);
 const files = await runChildProcessAsync(
   parsedArgs["gh-binary"] as string,
   [
@@ -150,14 +153,19 @@ const repoUrl =
     ? data.repository.sshUrl
     : getHTTPRepoUrl(data.repository.url, handle);
 
-console.log({
+const username = data.viewer.name;
+
+console.log("All relevant information has been retrieved:", {
   repoUrl,
   branch,
   subPath,
+
+  username,
+  handle,
 });
 
 await voteUsingGit({
-  username: data.viewer.name,
+  username,
   ...(await getEnv(parseArgs)),
   repoUrl,
   branch,
