@@ -14,28 +14,62 @@ authenticate votes.
 
 #### Node.js CLI
 
-<!-- TODO -->
+Requires [Node.js](https://nodejs.org) 16+ and [git](https://git-scm.com).
 
-WIP
+If the vote is setup on a GitHub pull request and you have
+[`gh`](https://cli.github.com) locally installed and logged in to your GitHub
+account:
+
+```sh
+npx --package=@aduh95/caritat voteOnGitHub <pr-url>
+```
+
+Otherwise, you can specify the details manually:
+
+```sh
+npx --package=@aduh95/caritat voteUsingGit \
+  --repo=<repo-url> --branch=<branch-name> \
+  --path=<subfolder-where-the-vote-data-is-stored> \
+  --handle=<your-github-handle>
+```
 
 #### Shell scripts
 
 You can use one of the shell script from the `sh/` folder. Requires `openssl`
-and `git` to be available on the local machine, and some prior knowledge of
-those tools by the user.
+(LibreSSL CLI is not compatible) and `git` to be available on the local machine.
 
-#### Web UI (coming (maybe) later)
+On a Unix-like OS:
 
-Not currently available. Caritat uses only Web-compatible APIs for the voting
-process, the goal is to have a web UI that allows to vote from the web. If you'd
-like to help, please chime in.
+```sh
+sh/voteUsingGit.sh <your-github-handle> <repo-url> <branch-name> <subfolder-where-the-vote-data-is-stored>
+```
+
+On Windows:
+
+```sh
+sh/voteUsingGit.ps1 <your-github-handle> <repo-url> <branch-name> <subfolder-where-the-vote-data-is-stored>
+```
+
+#### Web UI
+
+Only works for vote that are hosted on a GitHub pull request.
+
+Visit <https://stduhpf.github.io/caritat/>, paste the URL of the pull request,
+and create the JSON file containing your encrypted ballot using GitHub web UI.
 
 ### Setup a vote using Caritat
 
-<!-- TODO -->
+Use the `sh/generateNewVoteFolder.sh` script.
 
-That's very much a manual process for the time being, the plan is to have a CLI
-helping with that in the future.
+```sh
+sh/generateNewVoteFolder.sh <path-to-dir>
+```
+
+This will generate three files that will be used to let participants vote. You
+can then commit those files and push this to a new branch (optionally open the
+vote pull request).
+If you are participating to that vote yourself, you should cast your vote right away
+using one of the methods described above.
 
 ## FAQ
 
