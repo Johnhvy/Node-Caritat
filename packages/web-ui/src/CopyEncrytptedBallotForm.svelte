@@ -3,11 +3,14 @@
 
   export let encryptDataPromise: Promise<string | never>;
 
-  let copyPromise: Promise<string>;
-  function copyToClipboard() {
+  let copyPromise: Promise<void>;
+  let showError: boolean;
+  function copyToClipboard(ev?: Event) {
     copyPromise = encryptDataPromise.then((data) =>
       navigator.clipboard.writeText(data)
     );
+    // Don't show the error if there was no user interactions:
+    showError = ev != null;
   }
 
   beforeUpdate(copyToClipboard);
@@ -25,7 +28,9 @@
     {:then}
       Copied to the clipboard!
     {:catch error}
-      An error occured: {error?.message ?? error}
+      {#if showError}
+        An error occured: {error?.message ?? error}
+      {/if}
     {/await}
   </div>
   <button type="button" on:click={copyToClipboard}>Copy to clipboard</button>
