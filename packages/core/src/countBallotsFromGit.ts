@@ -86,7 +86,7 @@ export default async function countFromGit({
     });
   }
 
-  const cp = streamChildProcessStdout(
+  const gitLog = streamChildProcessStdout(
     GIT_BIN,
     [
       "--no-pager",
@@ -100,7 +100,7 @@ export default async function countFromGit({
 
   const decryptPromises = [];
   let currentCommit;
-  for await (const line of cp) {
+  for await (const line of gitLog) {
     if (line.startsWith("///")) {
       if (vote.canAcceptCommit(currentCommit)) {
         decryptPromises.push(
