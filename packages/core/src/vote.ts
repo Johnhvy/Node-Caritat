@@ -2,6 +2,7 @@ import {
   BallotFileFormat,
   checkBallot,
   loadYmlFile,
+  loadYmlString,
   parseYml,
   VoteFileFormat,
 } from "./parser.js";
@@ -52,6 +53,12 @@ export function vote(
   }
   return null;
 }
+interface Commit {
+  sha: string;
+  author: string;
+  signatureStatus: string;
+  files: string[];
+}
 
 export default class Vote {
   #candidates: VoteCandidate[];
@@ -64,6 +71,8 @@ export default class Vote {
    * Trying to see the result with some voting method while the target is undefined would force it to be said method, for the same reasons
    */
   #targetMethod: VoteMethod = null;
+
+  #alreadyCommittedVoters = new Set();
 
   private textDecoder = new TextDecoder();
 
@@ -85,6 +94,14 @@ export default class Vote {
 
   public loadFromFile(voteFilePath: PathOrFileDescriptor): void {
     let voteData: VoteFileFormat = loadYmlFile<VoteFileFormat>(voteFilePath);
+    this.voteFromVoteData(voteData);
+  }
+  public loadFromString(voteFileContents: string): void {
+    let voteData: VoteFileFormat =
+      loadYmlString<VoteFileFormat>(voteFileContents);
+    this.voteFromVoteData(voteData);
+  }
+  private voteFromVoteData(voteData: VoteFileFormat) {
     this.voteFileData = voteData;
     this.#candidates = voteData.candidates;
     this.#targetMethod = voteData.method as VoteMethod;
@@ -114,6 +131,20 @@ export default class Vote {
     }
 
     this.#candidates.push(candidate);
+  }
+
+  canAcceptCommit(commit?: Commit): boolean {
+    if (commit == null) return false;
+
+    if (commit.files.length !== 1) return false;
+    if (this.#alreadyCommittedVoters.has(commit.author)) return false;
+    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
+      return false;
+
+    // TODO: check commits signatures?
+
+    this.#alreadyCommittedVoters.add(commit.author);
+    return true;
   }
 
   public addAuthorizedVoter(

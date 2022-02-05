@@ -37,20 +37,27 @@ export function parseYml<T>(document: string): T {
   }
 }
 
-export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
-  try {
-    const documentBuffer: Buffer = fs.readFileSync(filePath);
-    const document: string = documentBuffer.toString();
-    const data: T = yaml.load(document) as T;
-    if (instanceOfVoteFile(data)) {
-      const hash = crypto.createHash("sha512");
+export function loadYmlString<T>(
+  document: string,
+  encoding?: crypto.Encoding,
+  documentBuffer?: crypto.BinaryLike
+): T {
+  const data: T = yaml.load(document) as T;
+  if (instanceOfVoteFile(data)) {
+    const hash = crypto.createHash("sha512");
+    if (documentBuffer) {
       hash.update(documentBuffer);
-      data.checksum = hash.digest().toString("base64");
+    } else {
+      hash.update(document, encoding);
     }
-    return data;
-  } catch (e) {
-    console.log(e);
+    data.checksum = hash.digest().toString("base64");
   }
+  return data;
+}
+export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
+  const documentBuffer: Buffer = fs.readFileSync(filePath);
+  const document: string = documentBuffer.toString();
+  return loadYmlString<T>(document, null, documentBuffer);
 }
 
 export function templateBallot(
