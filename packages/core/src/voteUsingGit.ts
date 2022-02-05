@@ -16,7 +16,7 @@ import {
   templateBallot,
   VoteFileFormat,
 } from "./parser.js";
-import CondorcetElectionSummary, {
+import {
   getSummarizedBallot,
   summarizeCondorcetBallotForVoter,
 } from "./summary/condorcetSummary.js";
