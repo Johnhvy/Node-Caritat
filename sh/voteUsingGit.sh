@@ -13,7 +13,7 @@ __dirname="$( cd -- "$(dirname "$0")" >/dev/null 2>&1 || exit ; pwd -P )"
 
 # shellcheck disable=SC2016
 [ -z "$EDITOR" ] && echo 'Please define the $EDITOR env variable' && exit
-[ -x "$EDITOR" ] || echo "Editor defined in the env is not executable; its current value is: $EDITOR" && exit
+[ -x "$(command -v "$EDITOR" || echo "$EDITOR")" ] || echo "Editor defined in the env is not executable; its current value is: $EDITOR" && exit
 [ -x "$__dirname/encryptBallot.sh" ] || echo "Cannot find executable: $__dirname/encryptBallot.sh" && exit
 
 tmpDir=$(mktemp -d 2>/dev/null || mktemp -d -t /tmp/caritat.XXXXXX)
