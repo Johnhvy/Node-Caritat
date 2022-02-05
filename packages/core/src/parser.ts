@@ -94,11 +94,12 @@ export function templateBallot(
 
 export function checkBallot(
   ballotFile: BallotFileFormat,
-  voteFile: VoteFileFormat
+  voteFile: VoteFileFormat,
+  author?: string
 ): boolean {
   return (
     ballotFile.poolChecksum === voteFile.checksum &&
-    ballotFile.author != null &&
+    (author ?? ballotFile.author) != null &&
     ballotFile.preferences.every(
       (preference) =>
         voteFile.candidates.some(

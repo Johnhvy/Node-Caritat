@@ -53,7 +53,7 @@ export function vote(
   }
   return null;
 }
-interface Commit {
+export interface VoteCommit {
   sha: string;
   author: string;
   signatureStatus: string;
@@ -133,7 +133,7 @@ export default class Vote {
     this.#candidates.push(candidate);
   }
 
-  canAcceptCommit(commit?: Commit): boolean {
+  canAcceptCommit(commit?: VoteCommit): boolean {
     if (commit == null) return false;
 
     if (commit.files.length !== 1) return false;
@@ -162,13 +162,13 @@ export default class Vote {
     this.#authorizedVoters.push(actor);
   }
 
-  public addBallotFile(ballotData: BallotFileFormat): Ballot {
-    if (checkBallot(ballotData, this.voteFileData)) {
+  public addBallotFile(ballotData: BallotFileFormat, author?: string): Ballot {
+    if (checkBallot(ballotData, this.voteFileData, author)) {
       let preferences: Map<VoteCandidate, Rank> = new Map(
         ballotData.preferences.map((element) => [element.title, element.score])
       );
       let ballot: Ballot = {
-        voter: { id: ballotData.author },
+        voter: { id: author ?? ballotData.author },
         preferences,
       };
       this.addBallot(ballot);
@@ -179,9 +179,10 @@ export default class Vote {
     return null;
   }
 
-  public addBallotFromBufferSource(data: BufferSource): void {
+  public addBallotFromBufferSource(data: BufferSource, author?: string): void {
     this.addBallotFile(
-      parseYml<BallotFileFormat>(this.textDecoder.decode(data))
+      parseYml<BallotFileFormat>(this.textDecoder.decode(data)),
+      author
     );
   }
 

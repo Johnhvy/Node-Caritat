@@ -11,6 +11,7 @@ import cliArgsForGit from "./utils/cliArgsForGit.js";
 
 // @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";
+import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 
 export const cliArgs = {
@@ -123,7 +124,7 @@ export default async function countFromGit({
   );
 
   const decryptPromises = [];
-  let currentCommit;
+  let currentCommit: VoteCommit;
   for await (const line of gitLog) {
     if (line.startsWith("///")) {
       if (vote.canAcceptCommit(currentCommit)) {
@@ -142,7 +143,9 @@ export default async function countFromGit({
                 privateKey
               );
             })
-            .then((data: BufferSource) => vote.addBallotFromBufferSource(data))
+            .then((data: BufferSource) =>
+              vote.addBallotFromBufferSource(data, currentCommit.author)
+            )
         );
       } else if (currentCommit != null) {
         console.log("Discarding commit", currentCommit);
