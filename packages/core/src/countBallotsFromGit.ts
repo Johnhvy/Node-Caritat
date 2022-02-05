@@ -68,15 +68,29 @@ export default async function countFromGit({
     { spawnArgs }
   );
 
-  const vote = new Vote();
-  vote.loadFromString(
-    await readFileAtRevision(
-      GIT_BIN,
-      firstCommitSha,
+  const hasVoteFilesBeenTampered = await runChildProcessAsync(
+    GIT_BIN,
+    [
+      "--no-pager",
+      "log",
+      "--format=%%",
+      `${firstCommitSha}..HEAD`,
+      "--",
       path.join(subPath, "vote.yml"),
-      spawnArgs
-    )
+      path.join(subPath, "ballot.yml"),
+      path.join(subPath, "public.yml"),
+    ],
+    { captureStdout: true }
   );
+
+  if (hasVoteFilesBeenTampered) {
+    throw new Error(
+      "Some magic files have been tampered with since start of the vote"
+    );
+  }
+
+  const vote = new Vote();
+  vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
 
   if (!privateKey) {
     const encryptedKeyFile = path.join(cwd, "privateKey.enc");
@@ -92,7 +106,7 @@ export default async function countFromGit({
       "--no-pager",
       "log",
       `${firstCommitSha}..HEAD`,
-      '--format="///%H %G? %an <%ae>"',
+      "--format=///%H %G? %an <%ae>",
       "--name-only",
     ],
     spawnArgs
@@ -120,13 +134,13 @@ export default async function countFromGit({
             })
             .then((data: BufferSource) => vote.addBallotFromBufferSource(data))
         );
-      } else {
+      } else if (currentCommit != null) {
         console.log("Discarding commit", currentCommit);
       }
       currentCommit = {
         sha: line.substr(3, 40),
-        signatureStatus: line.charAt(45),
-        author: line.slice(47),
+        signatureStatus: line.charAt(44),
+        author: line.slice(46),
         files: [],
       };
     } else if (line !== "") {

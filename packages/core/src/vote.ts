@@ -138,8 +138,10 @@ export default class Vote {
 
     if (commit.files.length !== 1) return false;
     if (this.#alreadyCommittedVoters.has(commit.author)) return false;
-    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
+    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author)) {
+      console.warn(commit.author, "is not in the list of allowed voters.");
       return false;
+    }
 
     // TODO: check commits signatures?
 
