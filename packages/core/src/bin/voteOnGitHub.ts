@@ -26,11 +26,6 @@ const parsedArgs = parseArgs()
         "GitHub handle (if not provided, will be fetched using GitHub CLI)",
       type: "string",
     },
-    username: {
-      describe:
-        "User public name (if not provided, will be fetched using GitHub CLI)",
-      type: "string",
-    },
     "gh-binary": {
       describe: "Path to the GitHub CLI executable",
       default: "gh",
@@ -80,7 +75,6 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
     }
     viewer {
       ${parsedArgs.login ? "" : "login"}
-      ${parsedArgs.username ? "" : "name"}
       ${parsedArgs.protocol ? "" : "publicKeys(first: 1) {totalCount}"}
     }
   }
@@ -153,19 +147,15 @@ const repoUrl =
     ? data.repository.sshUrl
     : getHTTPRepoUrl(data.repository.url, handle);
 
-const username = data.viewer.name;
-
 console.log("All relevant information has been retrieved:", {
   repoUrl,
   branch,
   subPath,
 
-  username,
   handle,
 });
 
 await voteUsingGit({
-  username,
   ...(await getEnv(parseArgs)),
   repoUrl,
   branch,
