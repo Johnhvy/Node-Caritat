@@ -198,6 +198,8 @@ export default async function voteUsingGit({
     [
       "commit",
       ...(signCommits ? ["-S"] : []),
+      `--author`,
+      author,
       "-m",
       `vote from ${handle || username}`,
     ],
