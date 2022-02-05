@@ -23,6 +23,11 @@ export const cliArgs = {
     normalize: true,
     type: "string",
   },
+  mailmap: {
+    describe: "Path to the mailmap file",
+    normalize: true,
+    type: "string",
+  },
 };
 
 export async function getEnv(
@@ -58,6 +63,7 @@ export default async function countFromGit({
   subPath,
   privateKey,
   firstCommitSha,
+  mailmap,
 }): Promise<void> {
   const spawnArgs = { cwd };
 
@@ -100,13 +106,15 @@ export default async function countFromGit({
     });
   }
 
+  fs.cp(mailmap, path.join(cwd, ".mailmap"));
+
   const gitLog = streamChildProcessStdout(
     GIT_BIN,
     [
       "--no-pager",
       "log",
       `${firstCommitSha}..HEAD`,
-      "--format=///%H %G? %an <%ae>",
+      "--format=///%H %G? %aN <%aE>",
       "--name-only",
     ],
     spawnArgs

@@ -27,4 +27,5 @@ await countFromGit({
   subPath,
   privateKey,
   firstCommitSha: parsedArgs.fromCommit,
+  mailmap: parsedArgs.mailmap,
 });

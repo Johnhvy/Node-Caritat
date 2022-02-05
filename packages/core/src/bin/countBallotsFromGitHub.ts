@@ -168,4 +168,5 @@ await countFromGit({
   subPath,
   privateKey,
   firstCommitSha: sha,
+  mailmap: parsedArgs.mailmap,
 });
