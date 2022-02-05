@@ -133,20 +133,18 @@ export default class Vote {
     this.#candidates.push(candidate);
   }
 
-  canAcceptCommit(commit?: VoteCommit): boolean {
-    if (commit == null) return false;
-
-    if (commit.files.length !== 1) return false;
-    if (this.#alreadyCommittedVoters.has(commit.author)) return false;
-    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author)) {
-      console.warn(commit.author, "is not in the list of allowed voters.");
-      return false;
-    }
+  reasonToDiscardCommit(commit: VoteCommit): string {
+    if (commit.files.length !== 1)
+      return "This commit touches more than one file";
+    if (this.#alreadyCommittedVoters.has(commit.author))
+      return "The commit author has already voted";
+    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
+      return "The commit author is not in the list of allowed voters.";
 
     // TODO: check commits signatures?
 
     this.#alreadyCommittedVoters.add(commit.author);
-    return true;
+    return null;
   }
 
   public addAuthorizedVoter(
