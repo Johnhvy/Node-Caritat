@@ -17,7 +17,8 @@ export const cliArgs = {
   ...cliArgsForGit,
   key: {
     alias: "k",
-    describe: "Path to the private key file",
+    describe:
+      "Path to the private key file (use - to read from stdin). If not provided, the private key will be extracted from the vote.yml file.",
     demandOption: false,
     normalize: true,
     type: "string",
@@ -62,6 +63,13 @@ export default async function countFromGit({
 
   const vote = new Vote();
   vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
+  if (!privateKey) {
+    const encryptedKeyFile = path.join(cwd, "privateKey.enc");
+    await fs.writeFile(encryptedKeyFile, vote.voteFileData.encryptedPrivateKey);
+    privateKey = await runChildProcessAsync("gpg", ["-d", encryptedKeyFile], {
+      captureStdout: true,
+    });
+  }
 
   // TODO: check commits signatures?
 

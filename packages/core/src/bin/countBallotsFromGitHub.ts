@@ -47,9 +47,10 @@ const parsedArgs = parseArgs()
     }
   ).argv;
 
-const privateKey = parsedArgs.key
-  ? await fs.readFile(parsedArgs.key as string)
-  : await readStdIn(false);
+const privateKey =
+  parsedArgs.key === "-"
+    ? await readStdIn(false)
+    : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
 const prUrlInfo = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)$/.exec(
   parsedArgs.prUrl as any
@@ -77,7 +78,7 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
         merged
       }
       ${parsedArgs.protocol === "http" ? "" : "sshUrl"}
-      ${parsedArgs.protocol === "ssh" ? "" : "url"}q
+      ${parsedArgs.protocol === "ssh" ? "" : "url"}
       visibility
     }
     viewer {

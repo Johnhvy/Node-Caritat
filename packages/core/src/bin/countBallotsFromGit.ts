@@ -15,9 +15,10 @@ const parsedArgs = parseArgs().options({
 
 const { repo: repoUrl, branch, path: subPath } = parsedArgs;
 
-const privateKey = parsedArgs.key
-  ? await fs.readFile(parsedArgs.key as string)
-  : await readStdIn(false);
+const privateKey =
+  parsedArgs.key === "-"
+    ? await readStdIn(false)
+    : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
 await countFromGit({
   ...(await getEnv(parseArgs)),
