@@ -3,7 +3,7 @@
   import FillBallotForm from "./FillBallotForm.svelte";
   import FindPrForm from "./FindPRForm.svelte";
 
-  let encryptDataPromise = Promise.reject("no data received");
+  let encryptDataPromise = new Promise(() => {});
 
   let url = globalThis.location?.hash.slice(1);
 

@@ -1,7 +1,7 @@
 <script lang="ts">
   import { beforeUpdate } from "svelte";
 
-  export let encryptDataPromise;
+  export let encryptDataPromise: Promise<string | never>;
 
   let copyPromise: Promise<string>;
   function copyToClipboard() {
