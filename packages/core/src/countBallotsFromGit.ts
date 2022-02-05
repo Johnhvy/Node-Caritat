@@ -14,6 +14,7 @@ import decryptData from "@aduh95/caritat-crypto/decrypt";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 
+// TODO add GPG argument.
 export const cliArgs = {
   ...cliArgsForGit,
   key: {
@@ -91,6 +92,7 @@ export default async function countFromGit({
   );
 
   if (hasVoteFilesBeenTampered) {
+    // TODO: add flag to ignore this exception.
     throw new Error(
       "Some magic files have been tampered with since start of the vote"
     );
