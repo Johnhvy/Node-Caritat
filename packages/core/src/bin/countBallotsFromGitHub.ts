@@ -162,7 +162,7 @@ console.log("All relevant information has been retrieved:", {
 });
 
 await countFromGit({
-  ...(await getEnv(parseArgs)),
+  ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
   subPath,

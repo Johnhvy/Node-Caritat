@@ -8,7 +8,7 @@ const parsedArgs = parseArgs().options(cliArgs as any).argv;
 const { repo: repoUrl, branch, path: subPath } = parsedArgs;
 
 await voteUsingGit({
-  ...(await getEnv(parseArgs)),
+  ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
   subPath,

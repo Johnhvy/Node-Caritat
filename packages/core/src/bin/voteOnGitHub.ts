@@ -156,7 +156,7 @@ console.log("All relevant information has been retrieved:", {
 });
 
 await voteUsingGit({
-  ...(await getEnv(parseArgs)),
+  ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
   subPath,

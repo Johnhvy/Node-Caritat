@@ -33,7 +33,7 @@ export const cliArgs = {
 };
 
 export async function getEnv(
-  parsedArgs
+  parsedArgs: Record<string, unknown>
 ): Promise<{ GIT_BIN: string; cwd: string }> {
   const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 

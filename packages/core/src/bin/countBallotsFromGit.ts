@@ -21,7 +21,7 @@ const privateKey =
     : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
 await countFromGit({
-  ...(await getEnv(parseArgs)),
+  ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
   subPath,
