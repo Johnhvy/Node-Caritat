@@ -3,6 +3,7 @@ import path from "path";
 import os from "os";
 import { env, stdin, stdout } from "process";
 import { once } from "events";
+import { webcrypto as crypto } from "crypto";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import cliArgsForGit from "./utils/cliArgsForGit.js";
@@ -178,8 +179,15 @@ export default async function voteUsingGit({
     vote.publicKey
   );
 
+  const jsonFilePath = path.join(
+    cwd,
+    subPath,
+    `${
+      handle || username.replace(/\W/g, "") || (crypto as any).randomUUID()
+    }.json`
+  );
   await fs.writeFile(
-    path.join(cwd, subPath, `${handle || username}.json`),
+    jsonFilePath,
     JSON.stringify({
       author,
       encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
@@ -188,11 +196,7 @@ export default async function voteUsingGit({
   );
 
   console.log("Commit encrypted ballot.");
-  await runChildProcessAsync(
-    GIT_BIN,
-    ["add", path.join(cwd, subPath, `${handle || username}.json`)],
-    { spawnArgs }
-  );
+  await runChildProcessAsync(GIT_BIN, ["add", jsonFilePath], { spawnArgs });
   await runChildProcessAsync(
     GIT_BIN,
     [
