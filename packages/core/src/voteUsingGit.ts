@@ -26,7 +26,7 @@ export const cliArgs = {
   ...cliArgsForGit,
   editor: {
     describe:
-      "Path to the preferred text editor (when not provided, looks for $EDITOR in the environment)",
+      "Path to the preferred text editor (when not provided, looks for $VISUAL, $EDITOR, git core.editor and finally fallbacks to vi (or notepad on Windows))",
     normalize: true,
     type: "string",
   },
@@ -63,7 +63,7 @@ export async function getEnv(parsedArgs) {
       env.EDITOR ||
       runChildProcessAsync(GIT_BIN, ["config", "--get", "core.editor"], {
         captureStdout: true,
-      }).catch(() => ""),
+      }).catch(() => (os.platform() === "win32" ? "notepad" : "vi")),
     parsedArgs["username"] ||
       runChildProcessAsync(GIT_BIN, ["config", "--get", "user.name"], {
         captureStdout: true,
@@ -133,8 +133,7 @@ export default async function voteUsingGit({
     while (editFile) {
       editFile = false;
       console.log("Ballot is ready for edit.");
-      const editor = EDITOR || (os.platform() === "win32" && "notepad");
-      await runChildProcessAsync(editor, [
+      await runChildProcessAsync(EDITOR, [
         path.join(cwd, subPath, `${handle || username}.yml`),
       ]);
       rawBallot = await fs.readFile(
