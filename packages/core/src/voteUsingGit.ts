@@ -227,16 +227,13 @@ export default async function voteUsingGit({
     await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
       spawnArgs,
     });
-    await runChildProcessAsync(GIT_BIN, ["rebase", "FETCH_HEAD"], {
-      spawnArgs,
-    });
-    if (signCommits) {
-      await runChildProcessAsync(
-        GIT_BIN,
-        ["commit", "--amend", "--no-edit", "-S"],
-        { spawnArgs }
-      );
-    }
+    await runChildProcessAsync(
+      GIT_BIN,
+      ["rebase", "FETCH_HEAD", ...(signCommits ? ["-S"] : []), "--quiet"],
+      {
+        spawnArgs,
+      }
+    );
 
     console.log("Pushing to the remote repository...");
     await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
