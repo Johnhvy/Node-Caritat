@@ -9,6 +9,10 @@ but we want to require only N (<=M) shareholders needed to be able to reconstruc
 To do that, the solution presented here consist on recursively splitting the key into a "tree" of sub-keys, with M branches at each depth level and N-1 depth levels.
 For each depth level and each parent node, every user is missing a different branch of the tree. That way every key is missing M^(N-1) - (M-1)^(N-1) parts of the key
 
+If only (N-1) shareholders agree to try to reconstruct the key, they will have to guess chunkSize*(N-1)! bits of information to brute-force the rest of the key
+
+15, 42, 156, 720, 3960, 30240
+
 Example with M = 4 and n = 3 , Key = O123456789ABCDEF
 
 every part is missing 4^2 - 3^2 = 7 characters (replaced with zeros)
@@ -124,17 +128,29 @@ interface KeyPart {
 
 const shareHolders = 5;
 const neededParts = 4;
-const minimalEntropy = 32;
+const minimalEntropy = 10;
 
 const maxDepth = neededParts - 1;
 
-const chunkSize = Math.ceil(minimalEntropy / maxDepth);
+const fact = (n: number) => (n ? fact(n - 1) * n : 1);
+const fmd = fact(maxDepth);
+
+const chunkSize = Math.ceil(minimalEntropy / fmd);
+
+console.log("chunkSize: ", chunkSize);
+console.log(
+  "Minimal entropy: ",
+  chunkSize * fmd,
+  "bytes\t(Targeted: ",
+  minimalEntropy,
+  "bytes)"
+);
 
 const chunkCount = shareHolders ** maxDepth;
 
 const secret = new Uint8Array(chunkSize * chunkCount);
 
-crypto.getRandomValues(secret);
+// crypto.getRandomValues(secret);
 secret.fill(0xff);
 const buffer: Uint8Array = new Uint8Array(secret);
 
@@ -155,3 +171,4 @@ const regeneratedSecret = regenerateSecret(usedParts);
 console.log(Buffer.from(secret).toString("hex"));
 console.log("\n");
 console.log(Buffer.from(regeneratedSecret).toString("hex"));
+111111111111111111111111;
