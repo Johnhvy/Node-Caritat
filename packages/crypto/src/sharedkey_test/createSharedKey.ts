@@ -7,9 +7,11 @@ We want to create a cryptographic key that no single party has control over. For
 but we want to require only N (<=M) shareholders needed to be able to reconstruct the original key.
 
 To do that, the solution presented here consist on recursively splitting the key into a "tree" of sub-keys, with M branches at each depth level and N-1 depth levels.
-For each depth level and each parent node, every user is missing a different branch of the tree.
+For each depth level and each parent node, every user is missing a different branch of the tree. That way every key is missing M^(N-1) - (M-1)^(N-1) parts of the key
 
 Example with M = 4 and n = 3 , Key = O123456789ABCDEF
+
+every part is missing 4^2 - 3^2 = 7 characters (replaced with zeros)
 
 key part 0: 0000056709AB0DEF
                 root
@@ -66,8 +68,18 @@ function redactKeyPart(
 ): void {
   if (depth > maxDepth) return;
   const subKeyLength = keyLength / shareHolders;
+  // console.log(
+  //   currentShareHolder,
+  //   shareHolders,
+  //   maxDepth,
+  //   keyLength,
+  //   offset,
+  //   depth
+  // );
   for (let subKey = 0; subKey < shareHolders; subKey++) {
     if (subKey == currentShareHolder) {
+      // console.log(Buffer.from(buffer).toString("hex").replaceAll("00", "__"));
+      // console.log(subKey, keyLength * subKey);
       buffer.fill(
         0,
         offset + subKeyLength * subKey,
@@ -112,7 +124,7 @@ interface KeyPart {
 
 const shareHolders = 5;
 const neededParts = 4;
-const minimalEntropy = 1;
+const minimalEntropy = 32;
 
 const maxDepth = neededParts - 1;
 
@@ -129,9 +141,9 @@ const buffer: Uint8Array = new Uint8Array(secret);
 let usedParts: KeyPart[] = [];
 
 for (let i = 0; i < shareHolders; i++) {
-  redactKeyPart(buffer, i, shareHolders, neededParts);
+  redactKeyPart(buffer, i, shareHolders, maxDepth);
   console.log(Buffer.from(buffer).toString("hex").replaceAll("00", "__"));
-  if (i < neededParts - 1)
+  if (i < neededParts)
     usedParts = [...usedParts, { index: i, buffer: new Uint8Array(buffer) }];
   console.log("\n");
   buffer.set(secret);
