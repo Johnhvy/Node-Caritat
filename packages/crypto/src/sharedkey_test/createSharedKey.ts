@@ -150,8 +150,8 @@ const chunkCount = shareHolders ** maxDepth;
 
 const secret = new Uint8Array(chunkSize * chunkCount);
 
-// crypto.getRandomValues(secret);
-secret.fill(0xff);
+crypto.getRandomValues(secret);
+// secret.fill(0xff);
 const buffer: Uint8Array = new Uint8Array(secret);
 
 let usedParts: KeyPart[] = [];
@@ -171,4 +171,3 @@ const regeneratedSecret = regenerateSecret(usedParts);
 console.log(Buffer.from(secret).toString("hex"));
 console.log("\n");
 console.log(Buffer.from(regeneratedSecret).toString("hex"));
-111111111111111111111111;
