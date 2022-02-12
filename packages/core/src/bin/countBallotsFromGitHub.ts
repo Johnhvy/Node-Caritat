@@ -61,7 +61,9 @@ if (prUrlInfo == null) {
 }
 
 const [, owner, repo, prNumber] = prUrlInfo;
-console.log(`Looking into GitHub pull request ${owner}/${repo}#${prNumber}...`);
+console.warn(
+  `Looking into GitHub pull request ${owner}/${repo}#${prNumber}...`
+);
 
 const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
     repository(owner: $owner, name: $repo) {
@@ -89,7 +91,7 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
   }
 `;
 
-console.log("Getting info from GitHub API...");
+console.warn("Getting info from GitHub API...");
 const { data } = JSON.parse(
   await runChildProcessAsync(
     parsedArgs["gh-binary"] as string,
@@ -124,7 +126,7 @@ if (merged || closed) {
   console.warn("The pull request seems to be closed.");
 }
 
-console.log(`Locating vote.yml on commit ${sha}...`);
+console.warn(`Locating vote.yml on commit ${sha}...`);
 const files = await runChildProcessAsync(
   parsedArgs["gh-binary"] as string,
   [
@@ -161,7 +163,7 @@ const repoUrl =
     ? data.repository.sshUrl
     : getHTTPRepoUrl(data.repository.url, handle);
 
-console.log("All relevant information has been retrieved:", {
+console.warn("All relevant information has been retrieved:", {
   repoUrl,
   branch,
   subPath,
