@@ -24,7 +24,7 @@ export function summarizeCondorcetBallotForElectionSummary(
   const indent = " ".repeat(indentLength);
   return ballot.orderedCandidates
     .map(
-      (candidates, i) => `${indent}${i + 1}. ${formatter.format(candidates)}`
+      (candidates, i) => `${indent}${i + 1}. ${formatter.format(candidates)}.`
     )
     .join("\n");
 }
@@ -36,11 +36,11 @@ export function summarizeCondorcetBallotForVoter(
   if (ballot.maxCandidates && ballot.minCandidates) {
     const { maxCandidates, minCandidates } = ballot;
     return (
-      `Your favorite option(s) is/are:\n - ${maxCandidates.join("\n - ")}\n` +
+      `Your favorite option(s) is/are:\n - ${maxCandidates.join(".\n - ")}.\n` +
       `\n` +
       `Your least favorite option(s) is/are:\n - ${minCandidates.join(
-        "\n - "
-      )}\n` +
+        ".\n - "
+      )}.\n` +
       `\n` +
       `Your are voting ${
         maxCandidates.length <= minCandidates.length
@@ -52,17 +52,17 @@ export function summarizeCondorcetBallotForVoter(
   const indent = " ".repeat(indentLength);
   return (
     `Your favorite option(s) is/are:\n - ${ballot.orderedCandidates[0].join(
-      "\n - "
-    )}\n` +
+      ".\n - "
+    )}.\n` +
     `\n` +
     `Your least favorite option(s) is/are:\n - ${ballot.orderedCandidates
       .at(-1)
-      .join("\n - ")}\n` +
+      .join(".\n - ")}.\n` +
     `\n` +
     "The complete list of your preferences is:\n" +
     ballot.orderedCandidates
       .map(
-        (candidates, i) => `${indent}${i + 1}. ${formatter.format(candidates)}`
+        (candidates, i) => `${indent}${i + 1}. ${formatter.format(candidates)}.`
       )
       .join("\n")
   );
@@ -91,7 +91,9 @@ export function getSummarizedBallot(ballot: Ballot): BallotSummarize {
       const orderedPreferences = new Map() as Map<number, VoteCandidate[]>;
       for (const [candidate, score] of ballot.preferences) {
         const candidatesForThisScore = orderedPreferences.get(score);
-        const markdownCandidate = `**${cleanMarkdown(candidate)}**`;
+        const markdownCandidate = `**${cleanMarkdown(
+          candidate.replace(/\.$/, "")
+        )}**`;
         if (candidatesForThisScore == null) {
           orderedPreferences.set(score, [markdownCandidate]);
         } else {
@@ -105,7 +107,7 @@ export function getSummarizedBallot(ballot: Ballot): BallotSummarize {
       };
     }
     const group = score === minNote ? minCandidates : maxCandidates;
-    group.push(`**${cleanMarkdown(candidate)}**`);
+    group.push(`**${cleanMarkdown(candidate).replace(/\.$/, "")}**`);
   }
   return { minCandidates, maxCandidates };
 }

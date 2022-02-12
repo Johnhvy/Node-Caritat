@@ -66,6 +66,7 @@ export default async function countFromGit({
   privateKey,
   firstCommitSha,
   mailmap,
+  startDate = undefined,
 }): Promise<void> {
   const spawnArgs = { cwd };
 
@@ -125,40 +126,44 @@ export default async function countFromGit({
     spawnArgs
   );
 
-  const decryptPromises = [];
   let currentCommit: VoteCommit;
+  function countCurrentCommit() {
+    if (currentCommit == null) return;
+
+    const reason = vote.reasonToDiscardCommit(currentCommit);
+    if (reason == null) {
+      const { author } = currentCommit;
+      decryptPromises.push(
+        readFileAtRevision(
+          GIT_BIN,
+          currentCommit.sha,
+          currentCommit.files[0],
+          spawnArgs
+        )
+          .then((fileContents) => {
+            const { encryptedSecret, data } = JSON.parse(fileContents);
+            return decryptData(
+              Buffer.from(encryptedSecret, "base64"),
+              Buffer.from(data, "base64"),
+              privateKey
+            );
+          })
+          .then((data: BufferSource) =>
+            vote.addBallotFromBufferSource(data, author)
+          )
+      );
+    } else {
+      console.warn("Discarding commit", {
+        commitInfo: currentCommit,
+        reason,
+      });
+    }
+  }
+
+  const decryptPromises = [];
   for await (const line of gitLog) {
     if (line.startsWith("///")) {
-      if (currentCommit != null) {
-        const reason = vote.reasonToDiscardCommit(currentCommit);
-        if (reason == null) {
-          const { author } = currentCommit;
-          decryptPromises.push(
-            readFileAtRevision(
-              GIT_BIN,
-              currentCommit.sha,
-              currentCommit.files[0],
-              spawnArgs
-            )
-              .then((fileContents) => {
-                const { encryptedSecret, data } = JSON.parse(fileContents);
-                return decryptData(
-                  Buffer.from(encryptedSecret, "base64"),
-                  Buffer.from(data, "base64"),
-                  privateKey
-                );
-              })
-              .then((data: BufferSource) =>
-                vote.addBallotFromBufferSource(data, author)
-              )
-          );
-        } else {
-          console.warn("Discarding commit", {
-            commitInfo: currentCommit,
-            reason,
-          });
-        }
-      }
+      countCurrentCommit();
       currentCommit = {
         sha: line.substr(3, 40),
         signatureStatus: line.charAt(44),
@@ -169,9 +174,10 @@ export default async function countFromGit({
       currentCommit?.files.push(line);
     }
   }
+  countCurrentCommit();
 
   await Promise.all(decryptPromises);
 
   const result = vote.count();
-  console.log(vote.generateSummary(privateKey.toString()));
+  console.log(vote.generateSummary(privateKey.toString(), startDate));
 }

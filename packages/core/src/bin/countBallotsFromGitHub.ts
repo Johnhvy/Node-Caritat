@@ -75,6 +75,7 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
         }
         headRefName
         closed
+        createdAt
         merged
       }
       ${parsedArgs.protocol === "http" ? "" : "sshUrl"}
@@ -112,7 +113,12 @@ const { pullRequest } = data.repository;
 
 const sha = pullRequest.commits.nodes[0].commit.oid;
 
-const { headRefName: branch, merged, closed } = pullRequest;
+const {
+  headRefName: branch,
+  createdAt: startDate,
+  merged,
+  closed,
+} = pullRequest;
 
 if (merged || closed) {
   console.warn("The pull request seems to be closed.");
@@ -159,6 +165,8 @@ console.log("All relevant information has been retrieved:", {
   repoUrl,
   branch,
   subPath,
+  sha,
+  startDate,
 });
 
 await countFromGit({
@@ -169,4 +177,5 @@ await countFromGit({
   privateKey,
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
+  startDate,
 });

@@ -61,27 +61,19 @@ export default abstract class ElectionSummary {
   public toString() {
     return `# Election results
 
-Subject: ${cleanMarkdown(this.subject)}  
-${this.startDate ? `Start date: ${this.startDate}  \n` : ""}End date: ${
+**Subject**: ${cleanMarkdown(this.subject)}  
+${this.startDate ? `**Start date**: ${this.startDate}  \n` : ""}**End date**: ${
       this.endDate
-    }
+    }  
+**Participation**: ${Math.round(this.participation * 10_000) / 100}%
 
-${
-  this.participants
-    ? "Participants:\n\n" +
-      this.participants
-        .map((actor, i) => `- ${cleanMarkdown(actor.id)}[^${i}]`)
-        .join("\n")
-    : ""
-}
-
-Participation: ${Math.round(this.participation * 10_000) / 100}%
+## Results
 
 **Winning candidate${this.winners.length === 1 ? "" : "s"}**: ${displayWinners(
       this.winners
     )}
 
-## Table of results
+### Table of results
 
 | Candidate | ${this.scoreText} |
 | --------- | ------------------- |
@@ -91,6 +83,15 @@ ${Array.from(this.result)
   .join("\n")}
 
 ## Voting data
+
+${
+  this.participants
+    ? "**Participants**:\n\n" +
+      this.participants
+        .map((actor, i) => `- ${cleanMarkdown(actor.id)}[^${i}]`)
+        .join("\n")
+    : ""
+}
 
 <details><summary>Private key to decrypt ballots</summary>
 

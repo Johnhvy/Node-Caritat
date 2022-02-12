@@ -205,7 +205,7 @@ export default class Vote {
     return this.result;
   }
 
-  public generateSummary(privateKey: string) {
+  public generateSummary(privateKey: string, startDate?: string) {
     if (this.result != null) {
       const participation = getParticipation(
         this.#authorizedVoters,
@@ -215,6 +215,7 @@ export default class Vote {
 
       return new CondorcetElectionSummary({
         subject: this.subject,
+        startDate,
         endDate: new Date().toISOString(),
         participation,
         winners,
