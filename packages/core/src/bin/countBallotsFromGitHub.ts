@@ -28,6 +28,12 @@ const parsedArgs = parseArgs()
         "GitHub handle (if not provided, will be fetched using GitHub CLI)",
       type: "string",
     },
+    "post-comment": {
+      describe:
+        "Post the comment containing the election summary to the pull request",
+      default: false,
+      type: "boolean",
+    },
     "gh-binary": {
       describe: "Path to the GitHub CLI executable",
       default: "gh",
@@ -171,7 +177,7 @@ console.warn("All relevant information has been retrieved:", {
   startDate,
 });
 
-await countFromGit({
+const summary = await countFromGit({
   ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
@@ -181,3 +187,15 @@ await countFromGit({
   mailmap: parsedArgs.mailmap,
   startDate,
 });
+
+if (parsedArgs.postComment) {
+  await runChildProcessAsync(parsedArgs["gh-binary"] as string, [
+    "pr",
+    "comment",
+    parsedArgs.prUrl,
+    "-b",
+    summary,
+  ]);
+} else {
+  console.log(summary);
+}

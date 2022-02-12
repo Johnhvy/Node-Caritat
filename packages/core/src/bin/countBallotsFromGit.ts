@@ -20,12 +20,14 @@ const privateKey =
     ? await readStdIn(false)
     : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
-await countFromGit({
-  ...(await getEnv(parsedArgs)),
-  repoUrl,
-  branch,
-  subPath,
-  privateKey,
-  firstCommitSha: parsedArgs.fromCommit,
-  mailmap: parsedArgs.mailmap,
-});
+console.log(
+  await countFromGit({
+    ...(await getEnv(parsedArgs)),
+    repoUrl,
+    branch,
+    subPath,
+    privateKey,
+    firstCommitSha: parsedArgs.fromCommit,
+    mailmap: parsedArgs.mailmap,
+  })
+);

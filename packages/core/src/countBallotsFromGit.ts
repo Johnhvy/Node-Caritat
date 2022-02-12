@@ -68,7 +68,7 @@ export default async function countFromGit({
   firstCommitSha,
   mailmap,
   startDate = undefined,
-}): Promise<void> {
+}): Promise<string> {
   const spawnArgs = { cwd };
 
   console.error("Cloning remote repository...");
@@ -183,7 +183,8 @@ export default async function countFromGit({
   await Promise.all(decryptPromises);
 
   const result = vote.count();
-  console.log(
-    vote.generateSummary(privateKey.toString(), { startDate, discardedCommits })
-  );
+  return vote.generateSummary(privateKey.toString(), {
+    startDate,
+    discardedCommits,
+  });
 }
