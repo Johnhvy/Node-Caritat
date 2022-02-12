@@ -108,27 +108,17 @@ function redactKeyPart(
  * @param parts the parts of the key, with their respective indexes.
  * @returns the regenerated keys. If not enough keys are fed, some part of the key will be stay replaced with zeros.
  */
-function regenerateSecret(parts: KeyPart[]): Uint8Array {
-  const buffer: Uint8Array = new Uint8Array(parts[0].buffer);
-  return buffer.map((value, index) => {
-    let i = 0;
-    while (value == 0) {
-      i++;
-      if (i >= parts.length) break;
-      value = parts[i].buffer[index];
-    }
-    return value;
-  });
-}
-
-interface KeyPart {
-  index: number;
-  buffer: Uint8Array;
+function regenerateSecret(parts: Uint8Array[]): Uint8Array {
+  const buffer: Uint8Array = new Uint8Array(parts[0].byteLength);
+  for (let i = 0; i < buffer.length; i++) {
+    buffer[i] = parts.reduce((pv, cv) => pv | cv[i], 0);
+  }
+  return buffer;
 }
 
 const shareHolders = 5;
 const neededParts = 4;
-const minimalEntropy = 10;
+const minimalEntropy = 1;
 
 const maxDepth = neededParts - 1;
 
@@ -136,6 +126,7 @@ const fact = (n: number) => (n ? fact(n - 1) * n : 1);
 const fmd = fact(maxDepth);
 
 const chunkSize = Math.ceil(minimalEntropy / fmd);
+const chunkCount = shareHolders ** maxDepth;
 
 console.log("chunkSize: ", chunkSize);
 console.log(
@@ -145,8 +136,7 @@ console.log(
   minimalEntropy,
   "bytes)"
 );
-
-const chunkCount = shareHolders ** maxDepth;
+console.log("Chunk count: ", chunkCount);
 
 const secret = new Uint8Array(chunkSize * chunkCount);
 
@@ -154,13 +144,12 @@ crypto.getRandomValues(secret);
 // secret.fill(0xff);
 const buffer: Uint8Array = new Uint8Array(secret);
 
-let usedParts: KeyPart[] = [];
+let usedParts: Uint8Array[] = [];
 
 for (let i = 0; i < shareHolders; i++) {
   redactKeyPart(buffer, i, shareHolders, maxDepth);
   console.log(Buffer.from(buffer).toString("hex").replaceAll("00", "__"));
-  if (i < neededParts)
-    usedParts = [...usedParts, { index: i, buffer: new Uint8Array(buffer) }];
+  if (i < neededParts - 1) usedParts.push(new Uint8Array(buffer));
   console.log("\n");
   buffer.set(secret);
 }
@@ -171,3 +160,4 @@ const regeneratedSecret = regenerateSecret(usedParts);
 console.log(Buffer.from(secret).toString("hex"));
 console.log("\n");
 console.log(Buffer.from(regeneratedSecret).toString("hex"));
+// console.log(Array.from(regeneratedSecret).filter((a) => a === 0).length);
