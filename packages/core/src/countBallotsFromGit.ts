@@ -13,6 +13,7 @@ import cliArgsForGit from "./utils/cliArgsForGit.js";
 import decryptData from "@aduh95/caritat-crypto/decrypt";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
+import { DiscardedCommit } from "./summary/electionSummary.js";
 
 // TODO add GPG argument.
 export const cliArgs = {
@@ -127,6 +128,7 @@ export default async function countFromGit({
   );
 
   let currentCommit: VoteCommit;
+  const discardedCommits: DiscardedCommit[] = [];
   function countCurrentCommit() {
     if (currentCommit == null) return;
 
@@ -153,10 +155,12 @@ export default async function countFromGit({
           )
       );
     } else {
-      console.warn("Discarding commit", {
+      const discardedCommit = {
         commitInfo: currentCommit,
         reason,
-      });
+      };
+      console.warn("Discarding commit", discardedCommit);
+      discardedCommits.push(discardedCommit);
     }
   }
 
@@ -179,5 +183,7 @@ export default async function countFromGit({
   await Promise.all(decryptPromises);
 
   const result = vote.count();
-  console.log(vote.generateSummary(privateKey.toString(), startDate));
+  console.log(
+    vote.generateSummary(privateKey.toString(), { startDate, discardedCommits })
+  );
 }

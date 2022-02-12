@@ -1,4 +1,4 @@
-import type { Actor, Ballot, VoteCandidate } from "../vote";
+import type { Actor, Ballot, VoteCandidate, VoteCommit } from "../vote";
 import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
 import cleanMarkdown from "../utils/cleanMarkdown.js";
 
@@ -9,6 +9,21 @@ function displayWinners(winners: VoteCandidate[]) {
   return delimiter + winners.map(cleanMarkdown).join(delimiter);
 }
 
+export interface DiscardedCommit {
+  commitInfo: VoteCommit;
+  reason: string;
+}
+export interface ElectionSummaryOptions {
+  subject: string;
+  startDate?: string;
+  endDate: string;
+  participation: number;
+  winners: VoteCandidate[];
+  result: CandidateScores;
+  ballots: Ballot[];
+  privateKey: string;
+  discardedCommits?: DiscardedCommit[];
+}
 export default abstract class ElectionSummary {
   subject: string;
   startDate?: string;
@@ -19,6 +34,7 @@ export default abstract class ElectionSummary {
   sortedBallots: Ballot[];
   privateKey: string;
   participants: Actor[];
+  discardedCommits: DiscardedCommit[];
 
   abstract scoreText: string;
 
@@ -31,22 +47,15 @@ export default abstract class ElectionSummary {
     result,
     ballots: unsortedBallots,
     privateKey,
-  }: {
-    subject: string;
-    startDate?: string;
-    endDate: string;
-    participation: number;
-    winners: VoteCandidate[];
-    result: CandidateScores;
-    ballots: Ballot[];
-    privateKey: string;
-  }) {
+    discardedCommits,
+  }: ElectionSummaryOptions) {
     this.subject = subject;
     this.startDate = startDate;
     this.endDate = endDate;
     this.participation = participation;
     this.winners = winners;
     this.result = result;
+    this.discardedCommits = discardedCommits;
 
     this.sortedBallots = unsortedBallots
       .slice()
@@ -100,6 +109,20 @@ ${this.privateKey}
 ${"```"}
 
 </details>
+${
+  this.discardedCommits?.length
+    ? `
+<details><summary>Discarded commits</summary>
+
+Some commits have not been taken into account when counting the ballots:
+
+${"```json"}
+${JSON.stringify(this.discardedCommits, undefined, 2)}
+${"```"}
+
+</details>`
+    : ""
+}
 
 ${this.sortedBallots
   .map((ballot, i) => `[^${i}]: ${this.summarizeBallot(ballot)}`)

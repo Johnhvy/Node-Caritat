@@ -13,6 +13,7 @@ import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
 import getParticipation from "./utils/participation.js";
 import findWinners from "./utils/findWinner.js";
 import CondorcetElectionSummary from "./summary/condorcetSummary.js";
+import type { ElectionSummaryOptions } from "./summary/electionSummary.js";
 
 export interface Actor {
   id: string;
@@ -205,7 +206,10 @@ export default class Vote {
     return this.result;
   }
 
-  public generateSummary(privateKey: string, startDate?: string) {
+  public generateSummary(
+    privateKey: string,
+    options?: Partial<ElectionSummaryOptions>
+  ) {
     if (this.result != null) {
       const participation = getParticipation(
         this.#authorizedVoters,
@@ -215,13 +219,13 @@ export default class Vote {
 
       return new CondorcetElectionSummary({
         subject: this.subject,
-        startDate,
         endDate: new Date().toISOString(),
         participation,
         winners,
         result: this.result,
         ballots: this.#votes,
         privateKey,
+        ...options,
       }).toString();
     } else {
       throw new Error("Can't summarize vote that hasn't been counted yet.");
