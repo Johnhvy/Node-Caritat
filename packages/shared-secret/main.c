@@ -186,10 +186,6 @@ Key *regenerateKey(CompressedKey **parts)
         int key = 0;
         while (coords < 0 && key < shareHolders)
             coords = getCompressedCoordinates(i, parts[key++]->index, shareHolders, depth, digitBuffer);
-
-        if (key >= shareHolders)
-            printf("wtf"),
-                fflush(stdout);
         if (coords >= 0)
             buffer[i] = parts[key - 1]->data[coords];
     }
