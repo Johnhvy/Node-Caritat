@@ -1,15 +1,8 @@
-const fs = require("fs");
 const crypto = require("crypto");
-const loader = require("@assemblyscript/loader");
-const imports = {
-  /* imports go here */
-};
-const wasmModule = loader.instantiateSync(
-  fs.readFileSync(__dirname + "/build/untouched.wasm"),
-  imports
-);
+const wasmModule = require("./assembly/index.js");
 module.exports = {
   generateKeyParts,
+  reconstructKey,
 };
 
 const fact = (n) => (n ? fact(n - 1) * n : 1);
@@ -34,27 +27,25 @@ function* generateKeyParts(shareHolders, neededParts, minimalEntropy) {
 
   const secret = crypto.randomBytes(chunkCount * chunkSize);
 
-  console.log(secret.buffer);
+  console.log(secret.toString("hex"));
 
-  const keyBuffer_ptr = wasmModule.exports.__newArray(
-    wasmModule.exports.rawKey_ID,
-    secret
-  );
+  // const keyBuffer_ptr = wasmModule.exports.__newArray(
+  //   wasmModule.exports.rawKey_ID,
+  //   secret
+  // );
 
   const compressedLength = (shareHolders - 1) ** maxDepth * chunkSize + 3;
-  const partBuffer_ptr = wasmModule.exports.__newArray(
-    wasmModule.exports.compressedKey_ID,
-    compressedLength
-  );
+  // const partBuffer_ptr = wasmModule.exports.__newArray(
+  //   wasmModule.exports.compressedKey_ID,
+  //   compressedLength
+  // );
+  const partBuffer = new Uint8Array(compressedLength);
 
   for (let i = 0; i < neededParts; i++) {
-    wasmModule.exports.compressKey(
-      keyBuffer_ptr,
-      partBuffer_ptr,
-      shareHolders,
-      neededParts,
-      i
-    );
-    yield wasmModule.exports.__getArrayBuffer(partBuffer_ptr);
+    wasmModule.compressKey(secret, partBuffer, shareHolders, neededParts, i);
+    yield partBuffer.buffer.slice();
   }
+}
+function reconstructKey(...parts) {
+  return wasmModule.reconstructKey(parts);
 }
