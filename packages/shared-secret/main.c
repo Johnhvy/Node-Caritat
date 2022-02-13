@@ -84,6 +84,16 @@ int getDecompressedCoordinates(int compressedCoords, int index, int shareHolders
     return getNumberFromBaseDecomposition(shareHolders, bufferSize, digitBuffer);
 }
 
+// bool shouldGoToDestKey(int sourceIndex, int shareHolderIndex, int numberOfShareHolders, int depth)
+// {
+//     for (int i = 0; i < depth; ++i)
+//     {
+//         if (sourceIndex % (numberOfShareHolders *) == shareHolderIndex)
+//             return 0;
+//     }
+//     return 1;
+// }
+
 int getCompressedCoordinates(int compressedCoords, int index, int shareHolders, int bufferSize, int *digitBuffer)
 {
     getBaseDecompositionFromNumber(compressedCoords, shareHolders, bufferSize, digitBuffer);
@@ -120,7 +130,7 @@ Key *decompressKey(CompressedKey *compressedKey)
     int fullSize = chunkSize * int_pow(shareHolders, depth);
     int compressedSize = chunkSize * int_pow(shareHolders - 1, depth);
 
-    uint8_t *buffer = malloc(sizeof(*buffer) * fullSize);
+    uint8_t *buffer = malloc(sizeof(uint8_t) * fullSize);
     decompressBuffer(compressedKey->data, buffer, compressedSize, index, shareHolders, depth);
 
     Key *k = malloc(sizeof(*k));
@@ -244,13 +254,13 @@ int main(int argc, char **argv)
     key0.chunkSize = 1;
     key0.index = 0;
     key0.data = key0data;
-    printHexBuffer(key0.data, 25);
+    printHexBuffer(key0.data, fullsize);
 
     CompressedKey *cKey0 = compressKey(&key0);
-    printHexBuffer(cKey0->data, 16);
+    printHexBuffer(cKey0->data, compressedSize);
 
     Key *dcKey0 = decompressKey(cKey0);
-    printHexBuffer(dcKey0->data, 25);
+    printHexBuffer(dcKey0->data, fullsize);
 
     printf("\n");
 
@@ -261,13 +271,13 @@ int main(int argc, char **argv)
     key1.chunkSize = 1;
     key1.index = 1;
     key1.data = key1data;
-    printHexBuffer(key1.data, 25);
+    printHexBuffer(key1.data, fullsize);
 
     CompressedKey *cKey1 = compressKey(&key1);
-    printHexBuffer(cKey1->data, 16);
+    printHexBuffer(cKey1->data, compressedSize);
 
     Key *dcKey1 = decompressKey(cKey1);
-    printHexBuffer(dcKey1->data, 25);
+    printHexBuffer(dcKey1->data, fullsize);
 
     printf("\n");
 
@@ -278,36 +288,36 @@ int main(int argc, char **argv)
     key4.chunkSize = 1;
     key4.index = 4;
     key4.data = key4data;
-    printHexBuffer(key4.data, 25);
+    printHexBuffer(key4.data, fullsize);
 
     CompressedKey *cKey4 = compressKey(&key4);
-    printHexBuffer(cKey4->data, 16);
+    printHexBuffer(cKey4->data, compressedSize);
 
     Key *dcKey4 = decompressKey(cKey4);
-    printHexBuffer(dcKey4->data, 25);
+    printHexBuffer(dcKey4->data, fullsize);
 
     printf("\n");
 
     CompressedKey *compressedKeys[] = {cKey0, cKey1, cKey4};
 
     Key *decrypted = regenerateKey(compressedKeys);
-    printHexBuffer(decrypted->data, 25);
+    printHexBuffer(decrypted->data, fullsize);
 
     printf("\n");
 
     CompressedKey *gcKey1 = generateCompressedPartialKey(decrypted, 1);
-    printHexBuffer(cKey1->data, 16);
-    printHexBuffer(gcKey1->data, 16);
+    printHexBuffer(cKey1->data, compressedSize);
+    printHexBuffer(gcKey1->data, compressedSize);
     printf("\n");
 
     CompressedKey *gcKey0 = generateCompressedPartialKey(decrypted, 0);
-    printHexBuffer(cKey0->data, 16);
-    printHexBuffer(gcKey0->data, 16);
+    printHexBuffer(cKey0->data, compressedSize);
+    printHexBuffer(gcKey0->data, compressedSize);
     printf("\n");
 
     CompressedKey *gcKey4 = generateCompressedPartialKey(decrypted, 4);
-    printHexBuffer(cKey4->data, 16);
-    printHexBuffer(gcKey4->data, 16);
+    printHexBuffer(cKey4->data, compressedSize);
+    printHexBuffer(gcKey4->data, compressedSize);
     printf("\n");
 
     // free everything
