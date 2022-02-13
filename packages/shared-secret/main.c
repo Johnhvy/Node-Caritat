@@ -87,7 +87,7 @@ int getDecompressedCoordinates(int compressedCoords, int index, int shareHolders
 int getCompressedCoordinates(int compressedCoords, int index, int shareHolders, int bufferSize, int *digitBuffer)
 {
     getBaseDecompositionFromNumber(compressedCoords, shareHolders, bufferSize, digitBuffer);
-    // getCompressedCoordinatesDigits inlined to return -1 if coordinates is discarded
+    // getCompressedCoordinatesDigits inlined to return -1 if coordinates should be discarded
     for (int i = 0; i < bufferSize; i++)
     {
         if (digitBuffer[i] == index)
@@ -98,6 +98,17 @@ int getCompressedCoordinates(int compressedCoords, int index, int shareHolders, 
     return getNumberFromBaseDecomposition(shareHolders - 1, bufferSize, digitBuffer);
 }
 
+void decompressBuffer(uint8_t *source, uint8_t *dest, int sourceSize, int index, int shareHolders, int depth)
+{
+    memset(dest, 0, sizeof dest);
+    int digitBuffer[depth];
+    for (int i = 0; i < sourceSize; i++)
+    {
+        int coords = getDecompressedCoordinates(i, index, shareHolders, depth, digitBuffer);
+        dest[coords] = source[i];
+    }
+}
+
 Key *decompressKey(CompressedKey *compressedKey)
 {
     int shareHolders = compressedKey->shareHolders;
@@ -106,19 +117,12 @@ Key *decompressKey(CompressedKey *compressedKey)
     int index = compressedKey->index;
 
     int depth = neededParts - 1;
-
     int fullSize = chunkSize * int_pow(shareHolders, depth);
     int compressedSize = chunkSize * int_pow(shareHolders - 1, depth);
 
     uint8_t *buffer = malloc(sizeof(*buffer) * fullSize);
-    memset(buffer, 0, sizeof buffer);
+    decompressBuffer(compressedKey->data, buffer, compressedSize, index, shareHolders, depth);
 
-    int digitBuffer[depth];
-    for (int i = 0; i < compressedSize; i++)
-    {
-        int coords = getDecompressedCoordinates(i, index, shareHolders, depth, digitBuffer);
-        buffer[coords] = compressedKey->data[i];
-    }
     Key *k = malloc(sizeof(*k));
     k->shareHolders = shareHolders;
     k->neededParts = neededParts;
@@ -126,6 +130,17 @@ Key *decompressKey(CompressedKey *compressedKey)
     k->index = index;
     k->data = buffer;
     return k;
+}
+
+void compressBuffer(uint8_t *source, uint8_t *dest, int sourceSize, int index, int shareHolders, int depth)
+{
+    int digitBuffer[depth];
+    for (int i = 0; i < sourceSize; i++)
+    {
+        int coords = getCompressedCoordinates(i, index, shareHolders, depth, digitBuffer);
+        if (coords >= 0)
+            dest[coords] = source[i];
+    }
 }
 
 CompressedKey *compressKey(Key *key)
@@ -136,19 +151,12 @@ CompressedKey *compressKey(Key *key)
     int index = key->index;
 
     int depth = neededParts - 1;
-
     int fullSize = chunkSize * int_pow(shareHolders, depth);
     int compressedSize = chunkSize * int_pow(shareHolders - 1, depth);
 
     uint8_t *buffer = malloc(sizeof(*buffer) * compressedSize);
+    compressBuffer(key->data, buffer, fullSize, index, shareHolders, depth);
 
-    int digitBuffer[depth];
-    for (int i = 0; i < fullSize; i++)
-    {
-        int coords = getCompressedCoordinates(i, index, shareHolders, depth, digitBuffer);
-        if (coords >= 0)
-            buffer[coords] = key->data[i];
-    }
     CompressedKey *k = malloc(sizeof(*k));
     k->shareHolders = shareHolders;
     k->neededParts = neededParts;
@@ -166,11 +174,10 @@ Key *regenerateKey(CompressedKey **parts)
     int chunkSize = firstPart->chunkSize;
 
     int depth = neededParts - 1;
-
     int compressedSize = chunkSize * int_pow(shareHolders - 1, depth);
     int fullSize = chunkSize * int_pow(shareHolders, depth);
-    uint8_t *buffer = malloc(sizeof(*buffer) * fullSize);
 
+    uint8_t *buffer = malloc(sizeof(*buffer) * fullSize);
     int digitBuffer[depth];
 
     for (int i = 0; i < fullSize; i++)
@@ -207,6 +214,7 @@ CompressedKey *generateCompressedPartialKey(Key *fullKey, int index)
     tempKey.chunkSize = fullKey->chunkSize;
     tempKey.index = index;
     tempKey.data = fullKey->data;
+
     return compressKey(&tempKey);
 }
 
@@ -305,6 +313,28 @@ int main(int argc, char **argv)
     printHexBuffer(cKey4->data, 16);
     printHexBuffer(gcKey4->data, 16);
     printf("\n");
+
+    // free everything
+    free(cKey0->data);
+    free(cKey0);
+    free(dcKey0->data);
+    free(dcKey0);
+    free(gcKey0->data);
+    free(gcKey0);
+
+    free(cKey1->data);
+    free(cKey1);
+    free(dcKey1->data);
+    free(dcKey1);
+    free(gcKey1->data);
+    free(gcKey1);
+
+    free(cKey4->data);
+    free(cKey4);
+    free(dcKey4->data);
+    free(dcKey4);
+    free(gcKey4->data);
+    free(gcKey4);
 
     return 0;
 }
