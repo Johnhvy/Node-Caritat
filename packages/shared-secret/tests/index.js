@@ -1,5 +1,5 @@
-const assert = require("assert");
-const myModule = require("..");
+// const assert = require("assert");
+import * as myModule from "../index.js";
 
 console.log(
   Array.from(myModule.generateKeyParts(5, 3, 1), (a) =>

@@ -1,6 +1,5 @@
 {
   "compilerOptions": {
-    "watch": true,
     "allowSyntheticDefaultImports": true
   },
   "files": [],
@@ -13,6 +12,9 @@
     },
     {
       "path": "./test/"
+    },
+    {
+      "path": "./packages/shared-secret"
     }
   ]
 }

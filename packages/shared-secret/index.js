@@ -1,13 +1,9 @@
-const crypto = require("crypto");
-const wasmModule = require("./assembly/index.js");
-module.exports = {
-  generateKeyParts,
-  reconstructKey,
-};
+import * as crypto from "crypto";
+import * as wasmModule from "./dist/shareSecret.js";
 
 const fact = (n) => (n ? fact(n - 1) * n : 1);
 
-function* generateKeyParts(shareHolders, neededParts, minimalEntropy) {
+export function* generateKeyParts(shareHolders, neededParts, minimalEntropy) {
   const maxDepth = neededParts - 1;
 
   const fmd = fact(maxDepth);
@@ -46,6 +42,6 @@ function* generateKeyParts(shareHolders, neededParts, minimalEntropy) {
     yield partBuffer.buffer.slice();
   }
 }
-function reconstructKey(...parts) {
+export function reconstructKey(...parts) {
   return wasmModule.reconstructKey(parts);
 }

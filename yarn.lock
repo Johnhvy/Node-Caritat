@@ -28,13 +28,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@assemblyscript/loader@npm:^0.19.23":
-  version: 0.19.23
-  resolution: "@assemblyscript/loader@npm:0.19.23"
-  checksum: 38b693ebedca8257bc3fc50ce5dd4f301e7c263ccf3b6239e758f1e2347ca032f040bbec38e4124f3ec90d391f39ac5d56f79fd07efc0267b57f3ab25f7c58c3
-  languageName: node
-  linkType: hard
-
 "@babel/code-frame@npm:^7.12.13, @babel/code-frame@npm:^7.16.7":
   version: 7.16.7
   resolution: "@babel/code-frame@npm:7.16.7"
@@ -1096,20 +1089,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"assemblyscript@npm:^0.19.23":
-  version: 0.19.23
-  resolution: "assemblyscript@npm:0.19.23"
-  dependencies:
-    binaryen: 102.0.0-nightly.20211028
-    long: ^5.2.0
-    source-map-support: ^0.5.20
-  bin:
-    asc: bin/asc
-    asinit: bin/asinit
-  checksum: f5a5d808ccf5a5f5065c9690f67b74e8ab434d30c9dda688acaab92416ee296cdcae4b7a272ce1abd416e1e37e44aee61588713882c2638af037cf83c2ee933b
-  languageName: node
-  linkType: hard
-
 "async@npm:^2.6.1":
   version: 2.6.3
   resolution: "async@npm:2.6.3"
@@ -1214,15 +1193,6 @@ __metadata:
   version: 2.2.0
   resolution: "binary-extensions@npm:2.2.0"
   checksum: ccd267956c58d2315f5d3ea6757cf09863c5fc703e50fbeb13a7dc849b812ef76e3cf9ca8f35a0c48498776a7478d7b4a0418e1e2b8cb9cb9731f2922aaad7f8
-  languageName: node
-  linkType: hard
-
-"binaryen@npm:102.0.0-nightly.20211028":
-  version: 102.0.0-nightly.20211028
-  resolution: "binaryen@npm:102.0.0-nightly.20211028"
-  bin:
-    wasm-opt: bin/wasm-opt
-  checksum: d360de0f21e35b73e868837278161ae0d3ccca4a2f87bd02c1cf28750ab355e3469a6a56664ca078f3ed5c2baade6575871b63cc61c9f98f101e55fbbe4ff024
   languageName: node
   linkType: hard
 
@@ -1356,9 +1326,6 @@ __metadata:
 "caritat-shared-secret@workspace:packages/shared-secret":
   version: 0.0.0-use.local
   resolution: "caritat-shared-secret@workspace:packages/shared-secret"
-  dependencies:
-    "@assemblyscript/loader": ^0.19.23
-    assemblyscript: ^0.19.23
   languageName: unknown
   linkType: soft
 
@@ -3290,13 +3257,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"long@npm:^5.2.0":
-  version: 5.2.0
-  resolution: "long@npm:5.2.0"
-  checksum: 37aa4e67b9c3eebc6d9d675adcc9d06f06059ca268922a71273de389746bf07f0ff282f9e604d17fdf84c4149099b44e936ea2b621a6c4759a216621afa97efd
-  languageName: node
-  linkType: hard
-
 "lru-cache@npm:^6.0.0":
   version: 6.0.0
   resolution: "lru-cache@npm:6.0.0"
@@ -4208,7 +4168,7 @@ resolve@^1.20.0:
   languageName: node
   linkType: hard
 
-"source-map-support@npm:^0.5.20, source-map-support@npm:^0.5.6":
+"source-map-support@npm:^0.5.6":
   version: 0.5.21
   resolution: "source-map-support@npm:0.5.21"
   dependencies:
