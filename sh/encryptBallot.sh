@@ -16,10 +16,10 @@ printf '{"encryptedSecret":"'
 
 # encrypt as secret using rsa key
 printf "%s" "$secret" |\
-  "$OPENSSL_BIN" pkeyutl -encrypt -inkey "$publicKeyFile" -pubin \
-   -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 |\
+"$OPENSSL_BIN" pkeyutl -encrypt -inkey "$publicKeyFile" -pubin \
+-pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 |\
 # Encoding in base64 for JSON compat
-  "$OPENSSL_BIN" enc -base64 -A
+"$OPENSSL_BIN" enc -base64 -A
 
 printf '","data":"'
 # encrypt ballot using aes
