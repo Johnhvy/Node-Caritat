@@ -12,13 +12,7 @@ import streamChildProcessStdout from "../utils/streamChildProcessStdout.js";
 import path from "path";
 import os from "os";
 import { env } from "process";
-import {
-  BallotFileFormat,
-  checkBallot,
-  loadYmlFile,
-  parseYml,
-  VoteFileFormat,
-} from "../parser.js";
+
 import Vote, { VoteCommit } from "../vote.js";
 
 async function readFileAtRevision(
@@ -115,9 +109,6 @@ if (hasVoteFilesBeenTampered) {
   );
 }
 
-// const { encryptedPrivateKey } = loadYmlFile<VoteFileFormat>(
-//   path.join(cwd, subPath, "vote.yml")
-// );
 const vote = new Vote();
 vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
 
