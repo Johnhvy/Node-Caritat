@@ -138,7 +138,7 @@ export default class Vote {
     if (commit.files.length !== 1)
       return "This commit touches more than one file";
     if (this.#alreadyCommittedVoters.has(commit.author))
-      return "The commit author has already voted";
+      return "A more recent commit from this author exists";
     if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
       return "The commit author is not in the list of allowed voters.";
 
