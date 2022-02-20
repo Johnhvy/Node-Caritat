@@ -185,6 +185,7 @@ const summary = await countFromGit({
   privateKey,
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
+  decrypt: parsedArgs.decrypt,
   startDate,
 });
 
