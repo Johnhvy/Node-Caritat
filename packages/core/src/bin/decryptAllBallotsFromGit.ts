@@ -139,6 +139,7 @@ const gitLog = streamChildProcessStdout(
 );
 
 let currentCommit: VoteCommit;
+let td = new TextDecoder();
 async function decryptCurrentCommit() {
   if (currentCommit == null) return;
 
