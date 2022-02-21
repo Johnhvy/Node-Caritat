@@ -64,7 +64,7 @@ export async function getEnv(parsedArgs: Record<string, unknown>) {
   return {
     GIT_BIN,
     cwd,
-    doNotCleanTempFiles: parsedArgs.hasOwnProperty("do-not-clean"),
+    doNotCleanTempFiles: parsedArgs["do-not-clean"],
   };
 }
 
