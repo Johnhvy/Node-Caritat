@@ -28,7 +28,7 @@ const result = await countFromGit({
   privateKey,
   firstCommitSha: parsedArgs.fromCommit,
   mailmap: parsedArgs.mailmap,
-  decrypt: parsedArgs.decrypt,
+  commitJsonSummary: null,
 });
 
 switch (parsedArgs.summarize) {

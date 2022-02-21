@@ -240,7 +240,9 @@ export default async function voteUsingGit({
     });
   }
 
-  if (!doNotCleanTempFiles) {
+  if (doNotCleanTempFiles) {
+    console.info("The temp folder was not removed from the file system", cwd);
+  } else {
     await fs.rm(cwd, { recursive: true, force: true });
   }
 }

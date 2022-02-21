@@ -191,7 +191,11 @@ const summary = await countFromGit({
   privateKey,
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
-  decrypt: parsedArgs.decrypt,
+  commitJsonSummary: parsedArgs.commitJsonSummary
+    ? {
+        refs: [parsedArgs.prUrl],
+      }
+    : null,
 });
 
 if (parsedArgs.postComment) {
@@ -204,12 +208,3 @@ if (parsedArgs.postComment) {
   ]);
 }
 
-switch (parsedArgs.summarize) {
-  case "json":
-    console.log(JSON.stringify(summary, null, 2));
-    break;
-
-  case "md":
-    console.log(summary.generateSummary(privateKey.toString()));
-    break;
-}

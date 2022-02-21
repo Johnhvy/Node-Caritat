@@ -22,4 +22,10 @@ export default {
     normalize: true,
     string: true,
   },
+  "do-not-clean": {
+    describe:
+      "Do not clean temporary file and the end of the process and prints the path of the local git clone to stdout.",
+    type: "boolean",
+    default: false,
+  },
 };

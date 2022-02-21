@@ -41,27 +41,30 @@ export const cliArgs = {
     normalize: true,
     type: "string",
   },
-  decrypt: {
-    describe:
-      "Use this flag to automatically decrypt all ballot files and adds them to the repository.",
-    type: "boolean",
-  },
-  summarize: {
-    describe: "Specifies how the vote result should be displayed",
-    choices: ["md", "json", "no"],
-    default: "md",
-  },
 };
 
-export async function getEnv(
-  parsedArgs: Record<string, unknown>
-): Promise<{ GIT_BIN: string; cwd: string }> {
+async function openSummaryFile(root) {
+  const date = new Date().toISOString().slice(0, 10);
+  for (let i = 0; i < Number.MAX_SAFE_INTEGER; i++) {
+    try {
+      // TODO: `votes/` path should not be hardcoded.
+      const filepath = path.join(root, "votes", `${date}-${i}.json`);
+      const fd = await fs.open(filepath, "wx");
+      return { fd, filepath };
+    } catch {}
+  }
+
+  throw new Error("Could not create summary file");
+}
+
+export async function getEnv(parsedArgs: Record<string, unknown>) {
   const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
   return {
     GIT_BIN,
     cwd,
+    doNotCleanTempFiles: parsedArgs.hasOwnProperty("do-not-clean"),
   };
 }
 
@@ -87,7 +90,8 @@ export default async function countFromGit({
   privateKey,
   firstCommitSha,
   mailmap,
-  decrypt,
+  commitJsonSummary,
+  doNotCleanTempFiles,
 }): Promise<VoteResult> {
   const spawnArgs = { cwd };
 
@@ -147,8 +151,6 @@ export default async function countFromGit({
     spawnArgs
   );
 
-  let td = new TextDecoder();
-
   let currentCommit: VoteCommit;
   const discardedCommits: DiscardedCommit[] = [];
   function countCurrentCommit() {
@@ -175,34 +177,7 @@ export default async function countFromGit({
             })
             .then((data: BufferSource) => {
               vote.addBallotFromBufferSource(data, author);
-              if (decrypt) {
-                const strData = td.decode(data);
-                //   console.log(strData);
-                const jsonFilename = currentCommit.files[0];
-                const ymlFilename = jsonFilename.replace(
-                  /(\w+).json/g,
-                  "$1" + ".yml"
-                );
-                const ymlPath = path.join(cwd, ymlFilename);
-                fs.writeFile(ymlPath, strData, "utf-8").then(async () => {
-                  console.warn(`Decrypted ${ymlFilename}`);
-                  await runChildProcessAsync(
-                    GIT_BIN,
-                    ["add", ymlFilename, "--renormalize"],
-                    {
-                      spawnArgs,
-                    }
-                  );
-                  console.warn(`Added ${ymlFilename} to git`);
-                  await runChildProcessAsync(GIT_BIN, ["rm", jsonFilename], {
-                    spawnArgs,
-                  });
-                  console.warn(`Removed ${jsonFilename} from git`);
-                  resolve();
-                });
-              } else {
-                resolve();
-              }
+              resolve();
             })
         );
       } else {
@@ -235,5 +210,76 @@ export default async function countFromGit({
 
   await Promise.all(decryptPromises);
 
-  return vote.count({ discardedCommits });
+  const result = vote.count({ discardedCommits });
+
+  if (commitJsonSummary != null) {
+    const signCommits = true; // TODO: make this configurable.
+
+    const { fd, filepath } = await openSummaryFile(cwd);
+    try {
+      await fd.writeFile(
+        JSON.stringify(
+          { ...result.toJSON(), ...commitJsonSummary },
+          undefined,
+          2
+        )
+      );
+    } finally {
+      await fd.close();
+    }
+    await runChildProcessAsync(GIT_BIN, ["add", filepath], { spawnArgs });
+
+    // Remove all vote related files.
+    await runChildProcessAsync(GIT_BIN, ["rm", "-rf", subPath], { spawnArgs });
+
+    await runChildProcessAsync(
+      GIT_BIN,
+      [
+        "commit",
+        ...(signCommits ? ["-S"] : []),
+        "-m",
+        `close vote and aggregate results`,
+      ],
+      {
+        spawnArgs,
+      }
+    );
+
+    console.log("Pushing to the remote repository...");
+    try {
+      await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+        spawnArgs,
+      });
+    } catch {
+      console.log(
+        "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
+      );
+      await runChildProcessAsync(GIT_BIN, ["fetch", repoUrl, branch], {
+        spawnArgs,
+      });
+      await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
+        spawnArgs,
+      });
+      await runChildProcessAsync(
+        GIT_BIN,
+        ["rebase", "FETCH_HEAD", ...(signCommits ? ["-S"] : []), "--quiet"],
+        {
+          spawnArgs,
+        }
+      );
+
+      console.log("Pushing to the remote repository...");
+      await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+        spawnArgs,
+      });
+    }
+  }
+
+  if (doNotCleanTempFiles) {
+    console.info("The temp folder was not removed from the file system", cwd);
+  } else {
+    await fs.rm(cwd, { recursive: true, force: true });
+  }
+
+  return result;
 }
