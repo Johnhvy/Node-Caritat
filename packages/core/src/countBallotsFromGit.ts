@@ -222,7 +222,7 @@ export default async function countFromGit({
           { ...result.toJSON(), ...commitJsonSummary },
           undefined,
           2
-        )
+        ) + "\n"
       );
     } finally {
       await fd.close();
