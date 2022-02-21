@@ -34,6 +34,12 @@ const parsedArgs = parseArgs()
       default: false,
       type: "boolean",
     },
+    "commit-json-summary": {
+      describe:
+        "Delete all encrypted ballots and commit instead a JSON file containing all ballots",
+      default: false,
+      type: "boolean",
+    },
     "gh-binary": {
       describe: "Path to the GitHub CLI executable",
       default: "gh",
@@ -186,8 +192,6 @@ const summary = await countFromGit({
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
   decrypt: parsedArgs.decrypt,
-  summarize: parsedArgs.summarize,
-  startDate,
 });
 
 if (parsedArgs.postComment) {
@@ -196,8 +200,16 @@ if (parsedArgs.postComment) {
     "comment",
     parsedArgs.prUrl,
     "-b",
-    summary,
+    summary.generateSummary(privateKey.toString()),
   ]);
-} else {
-  console.log(summary);
+}
+
+switch (parsedArgs.summarize) {
+  case "json":
+    console.log(JSON.stringify(summary, null, 2));
+    break;
+
+  case "md":
+    console.log(summary.generateSummary(privateKey.toString()));
+    break;
 }

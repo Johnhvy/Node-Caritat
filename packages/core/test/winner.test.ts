@@ -1,4 +1,12 @@
-import findWinners from "../dist/utils/findWinner";
+import { VoteCandidate } from "../dist/vote.js";
+import VoteResult from "../dist/votingMethods/VoteResult.js";
+import type { CandidateScores } from "../src/votingMethods/VoteResult";
+
+function findWinners(
+  result: CandidateScores
+): Generator<VoteCandidate, void, unknown> {
+  return Reflect.apply(VoteResult.prototype.findWinners, { result }, []);
+}
 
 it("should find the winner based on the scores of the candidates", () => {
   expect(

@@ -20,16 +20,23 @@ const privateKey =
     ? await readStdIn(false)
     : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
-console.log(
-  await countFromGit({
-    ...(await getEnv(parsedArgs)),
-    repoUrl,
-    branch,
-    subPath,
-    privateKey,
-    firstCommitSha: parsedArgs.fromCommit,
-    mailmap: parsedArgs.mailmap,
-    decrypt: parsedArgs.decrypt,
-    summarize: parsedArgs.summarize,
-  })
-);
+const result = await countFromGit({
+  ...(await getEnv(parsedArgs)),
+  repoUrl,
+  branch,
+  subPath,
+  privateKey,
+  firstCommitSha: parsedArgs.fromCommit,
+  mailmap: parsedArgs.mailmap,
+  decrypt: parsedArgs.decrypt,
+});
+
+switch (parsedArgs.summarize) {
+  case "json":
+    console.log(JSON.stringify(result, null, 2));
+    break;
+
+  case "md":
+    console.log(result.generateSummary(privateKey.toString()));
+    break;
+}

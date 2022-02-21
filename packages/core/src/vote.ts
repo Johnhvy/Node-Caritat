@@ -7,13 +7,11 @@ import {
   VoteFileFormat,
 } from "./parser.js";
 import type { PathOrFileDescriptor } from "fs";
-import condorcet from "./votingMethods/condorcet.js";
-import singleRound from "./votingMethods/singleRound.js";
 import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
-import getParticipation from "./utils/participation.js";
-import findWinners from "./utils/findWinner.js";
-import CondorcetElectionSummary from "./summary/condorcetSummary.js";
-import type { ElectionSummaryOptions } from "./summary/electionSummary.js";
+import VoteResult from "./votingMethods/VoteResult.js";
+import CondorcetResult from "./votingMethods/CondorcetResult.js";
+import SingleRoundResult from "./votingMethods/SingleRoundResult.js";
+import { ElectionSummaryOptions } from "./summary/electionSummary.js";
 
 export interface Actor {
   id: string;
@@ -34,21 +32,14 @@ export interface Ballot {
   preferences: Map<VoteCandidate, Rank>;
 }
 
-export interface VoteResult {
-  winner: VoteCandidate;
-  winners?: VoteCandidate[];
-}
-
-export function vote(
-  options: VoteCandidate[],
-  votes: Ballot[],
+export function getVoteResultImplementation(
   method: VoteMethod
-): CandidateScores {
+): typeof VoteResult {
   switch (method) {
     case "Condorcet":
-      return condorcet(options, votes);
+      return CondorcetResult;
     case "SingleRound":
-      return singleRound(options, votes);
+      return SingleRoundResult;
     default:
       break;
   }
@@ -196,49 +187,20 @@ export default class Vote {
     this.#votes.push(ballot);
   }
 
-  public count(method?: VoteMethod): CandidateScores {
+  public count(
+    options?: Partial<ElectionSummaryOptions> & { method?: VoteMethod }
+  ): VoteResult {
     if (this.#targetMethod == null) throw new Error("Set targetMethod before");
-    this.result = vote(
+    const VoteResultImpl = getVoteResultImplementation(
+      options?.method ?? this.#targetMethod
+    );
+    // @ts-ignore
+    return new VoteResultImpl(
+      this.#authorizedVoters,
       this.#candidates,
+      this.subject,
       this.#votes,
-      method ?? this.#targetMethod
+      options
     );
-    return this.result;
-  }
-
-  public generateSummary(
-    privateKey: string,
-    options?: Partial<ElectionSummaryOptions>
-  ) {
-    if (this.result != null) {
-      const participation = getParticipation(
-        this.#authorizedVoters,
-        this.#votes.length
-      );
-      const winners = Array.from(findWinners(this.result));
-
-      return new CondorcetElectionSummary({
-        subject: this.subject,
-        endDate: new Date().toISOString(),
-        participation,
-        winners,
-        result: this.result,
-        ballots: this.#votes,
-        privateKey,
-        ...options,
-      }).toString();
-    } else {
-      throw new Error("Can't summarize vote that hasn't been counted yet.");
-    }
-  }
-
-  public getSummaryObject(refs?: string[]) {
-    const votes = Object.fromEntries(
-      this.#votes.map((ballot) => [
-        ballot.voter.id,
-        Object.fromEntries(ballot.preferences),
-      ])
-    );
-    return { description: this.subject, refs, votes };
   }
 }

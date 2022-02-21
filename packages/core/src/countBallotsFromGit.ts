@@ -14,6 +14,7 @@ import decryptData from "@aduh95/caritat-crypto/decrypt";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";
+import type VoteResult from "./votingMethods/VoteResult.js";
 
 // TODO To avoid lf/crlf issues:
 //  get the current values
@@ -87,9 +88,7 @@ export default async function countFromGit({
   firstCommitSha,
   mailmap,
   decrypt,
-  summarize,
-  startDate = undefined,
-}): Promise<string> {
+}): Promise<VoteResult> {
   const spawnArgs = { cwd };
 
   console.error("Cloning remote repository...");
@@ -236,12 +235,5 @@ export default async function countFromGit({
 
   await Promise.all(decryptPromises);
 
-  const result = vote.count();
-  if (summarize == "no") return result.toString();
-  if (summarize == "json")
-    return JSON.stringify(vote.getSummaryObject(), null, 2);
-  return vote.generateSummary(privateKey.toString(), {
-    startDate,
-    discardedCommits,
-  });
+  return vote.count({ discardedCommits });
 }
