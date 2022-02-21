@@ -231,4 +231,14 @@ export default class Vote {
       throw new Error("Can't summarize vote that hasn't been counted yet.");
     }
   }
+
+  public getSummaryObject(refs?: string[]) {
+    const votes = Object.fromEntries(
+      this.#votes.map((ballot) => [
+        ballot.voter.id,
+        Object.fromEntries(ballot.preferences),
+      ])
+    );
+    return { description: this.subject, refs, votes };
+  }
 }

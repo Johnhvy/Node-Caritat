@@ -30,5 +30,6 @@ console.log(
     firstCommitSha: parsedArgs.fromCommit,
     mailmap: parsedArgs.mailmap,
     decrypt: parsedArgs.decrypt,
+    summarize: parsedArgs.summarize,
   })
 );

@@ -15,6 +15,15 @@ import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";
 
+// TODO To avoid lf/crlf issues:
+//  get the current values
+//    git config --global --get core.eol
+//    git config --global --get core.autocrlf
+//  set to lf only
+//    git config --global core.eol lf
+//    git config --global core.autocrlf false
+//  then reset to the current values
+
 // TODO add GPG argument.
 export const cliArgs = {
   ...cliArgsForGit,
@@ -35,6 +44,11 @@ export const cliArgs = {
     describe:
       "Use this flag to automatically decrypt all ballot files and adds them to the repository.",
     type: "boolean",
+  },
+  summarize: {
+    describe: "Specifies how the vote result should be displayed",
+    choices: ["md", "json", "no"],
+    default: "md",
   },
 };
 
@@ -73,6 +87,7 @@ export default async function countFromGit({
   firstCommitSha,
   mailmap,
   decrypt,
+  summarize,
   startDate = undefined,
 }): Promise<string> {
   const spawnArgs = { cwd };
@@ -222,6 +237,9 @@ export default async function countFromGit({
   await Promise.all(decryptPromises);
 
   const result = vote.count();
+  if (summarize == "no") return result.toString();
+  if (summarize == "json")
+    return JSON.stringify(vote.getSummaryObject(), null, 2);
   return vote.generateSummary(privateKey.toString(), {
     startDate,
     discardedCommits,
