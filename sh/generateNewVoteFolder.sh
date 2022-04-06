@@ -42,4 +42,4 @@ printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout > "$outDir/publ
 
 $EDITOR "$outDir/vote.yml"
 
-node "$__dirname/../dist/bin/generateBallot.js" -f "$outDir/vote.yml" > "$outDir/ballot.yml"
+node "$__dirname/../packages/core/dist/bin/generateBallot.js" -f "$outDir/vote.yml" > "$outDir/ballot.yml"
