@@ -206,5 +206,14 @@ if (parsedArgs.postComment) {
     "-b",
     summary.generateSummary(privateKey.toString()),
   ]);
+} else {
+  console.log(
+    "To publish the results, you should use `--post-comment --commit-json-summary` CLI flags."
+  );
+  console.log(
+    "Participation:",
+    Math.round(summary.participation * 100_00) / 1_00,
+    "%"
+  );
+  console.log("Raw results:", summary.result);
 }
-
