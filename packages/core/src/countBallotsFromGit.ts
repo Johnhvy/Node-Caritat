@@ -159,16 +159,20 @@ export default async function countFromGit({
 
     const reason = vote.reasonToDiscardCommit(currentCommit);
     if (reason == null) {
-      const { author } = currentCommit;
+      const { sha, author } = currentCommit;
       decryptPromises.push(
-        readFileAtRevision(
-          GIT_BIN,
-          currentCommit.sha,
-          currentCommit.files[0],
-          spawnArgs
-        )
+        readFileAtRevision(GIT_BIN, sha, currentCommit.files[0], spawnArgs)
           .then((fileContents) => {
             const { encryptedSecret, data } = JSON.parse(fileContents);
+            if (!data || !encryptedSecret) {
+              console.warn(
+                "Vote file looks invalid, it's probably going to crash",
+                {
+                  commitInfo: { sha, author },
+                  fileContents,
+                }
+              );
+            }
             return decryptData(
               Buffer.from(encryptedSecret, "base64"),
               Buffer.from(data, "base64"),
