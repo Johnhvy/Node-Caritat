@@ -5,7 +5,8 @@
   import encryptData from "@aduh95/caritat-crypto/encrypt";
   // @ts-ignore
   import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
-  import fetchFromGitHub from "./fetchDataFromGitHub";
+  // @ts-ignore
+  import fetchFromGitHub from "./fetchDataFromGitHub.ts";
 
   export let url, registerEncrypedBallot;
 

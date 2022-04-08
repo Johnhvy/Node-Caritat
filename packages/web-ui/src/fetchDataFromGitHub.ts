@@ -33,14 +33,13 @@ async function _fetchRawVoteURL(url) {
   }
 
   return new URL(
-    new URL(voteUrl).pathname.replace("/raw/", "/"),
+    new URL(voteUrl.replaceAll("%2F", "/")).pathname.replace("/raw/", "/"),
     rawGitHubUserContentURL
   );
 }
 let requestCache = new Map();
 async function fetchRawVoteURL(url: string) {
   const cachedRequest = requestCache.get(url);
-  console.log({ cachedRequest, url });
   if (cachedRequest != null) return cachedRequest;
 
   try {
