@@ -92,7 +92,7 @@ export default async function countFromGit({
   mailmap,
   commitJsonSummary,
   doNotCleanTempFiles,
-}): Promise<VoteResult> {
+}): Promise<{ result: VoteResult; privateKey: Buffer }> {
   const spawnArgs = { cwd };
 
   console.error("Cloning remote repository...");
@@ -282,5 +282,5 @@ export default async function countFromGit({
     await fs.rm(cwd, { recursive: true, force: true });
   }
 
-  return result;
+  return { result, privateKey };
 }

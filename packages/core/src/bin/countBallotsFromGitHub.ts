@@ -183,7 +183,7 @@ console.warn("All relevant information has been retrieved:", {
   startDate,
 });
 
-const summary = await countFromGit({
+const { result: summary, privateKey: _privateKey } = await countFromGit({
   ...(await getEnv(parsedArgs)),
   repoUrl,
   branch,
@@ -204,7 +204,7 @@ if (parsedArgs.postComment) {
     "comment",
     parsedArgs.prUrl,
     "-b",
-    summary.generateSummary(privateKey.toString()),
+    summary.generateSummary(_privateKey.toString()),
   ]);
 } else {
   console.log(
