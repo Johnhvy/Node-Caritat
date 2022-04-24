@@ -1,9 +1,12 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import singleRound from "../dist/votingMethods/singleRound.js";
 
 it("should return an empty map for an empty vote", () => {
   let result = singleRound([], []);
 
-  expect(result.size).toBe(0);
+  assert.strictEqual(result.size, 0);
 });
 
 it("should return a map for a vote", () => {
@@ -17,22 +20,25 @@ it("should return a map for a vote", () => {
     ]
   );
 
-  expect([...result]).toStrictEqual([["a", 1]]);
+  assert.deepStrictEqual([...result], [["a", 1]]);
 
-  expect([
-    ...singleRound(
-      ["a", "b"],
-      [
-        {
-          voter: { id: "b" },
-          preferences: new Map([["a", 1]]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 1],
-    ["b", 0],
-  ]);
+  assert.deepStrictEqual(
+    [
+      ...singleRound(
+        ["a", "b"],
+        [
+          {
+            voter: { id: "b" },
+            preferences: new Map([["a", 1]]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 1],
+      ["b", 0],
+    ]
+  );
 });
 
 it("should return a map for two votes", () => {
@@ -50,5 +56,5 @@ it("should return a map for two votes", () => {
     ]
   );
 
-  expect([...result]).toStrictEqual([["a", 2]]);
+  assert.deepStrictEqual([...result], [["a", 2]]);
 });

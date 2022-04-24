@@ -1,3 +1,6 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import BallotPoolGit from "../dist/ballotpool.js";
 
 import type { CommitNode } from "../src/ballotpool.js";
@@ -14,35 +17,68 @@ const commitTree: CommitNode[] = [
 
 it("should add ballot without problem", () => {
   const pool = new BallotPoolGit(commitTree);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "0" })).toBe(true);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "0" }),
+    true
+  );
 });
 
 it("should fail to add ballot with invalid sha", () => {
   const pool = new BallotPoolGit(commitTree);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "-1" })).toBe(false);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "" })).toBe(false);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "-1" }),
+    false
+  );
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "" }),
+    false
+  );
 });
 
 it("should manage to add newer ballot with same author", () => {
   const pool = new BallotPoolGit(commitTree);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "3" })).toBe(true);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "2" })).toBe(true);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "3" }),
+    true
+  );
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "2" }),
+    true
+  );
 });
 
 it("should fail to add older ballot with same author", () => {
   const pool = new BallotPoolGit(commitTree);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "2" })).toBe(true);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "3" })).toBe(false);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "2" }),
+    true
+  );
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "3" }),
+    false
+  );
 });
 
 it("should refuse invalid commits", () => {
   const pool = new BallotPoolGit(commitTree);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "4" })).toBe(false);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "4" }),
+    false
+  );
 });
 
 it("should accept only the authorized voters", () => {
   const pool = new BallotPoolGit(commitTree, ["riri", "fifi"]);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "0" })).toBe(true);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "1" })).toBe(true);
-  expect(pool.addBallot({ url: fixturesURL, commitSha: "2" })).toBe(false);
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "0" }),
+    true
+  );
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "1" }),
+    true
+  );
+  assert.strictEqual(
+    pool.addBallot({ url: fixturesURL, commitSha: "2" }),
+    false
+  );
 });

@@ -11,9 +11,6 @@
       "path": "./packages/core/"
     },
     {
-      "path": "./test/"
-    },
-    {
       "path": "./packages/shared-secret"
     }
   ]

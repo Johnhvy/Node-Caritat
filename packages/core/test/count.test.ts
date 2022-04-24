@@ -1,3 +1,6 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import { BallotPool } from "../dist/ballotpool.js";
 import { loadYmlFile } from "../dist/parser.js";
 import type { VoteFileFormat } from "../src/parser";
@@ -32,5 +35,5 @@ it("should find the winner", () => {
   const pool: BallotPool = new BallotPool();
   const vote = new Vote(voteFileParsed, pool);
   const result = vote.count();
-  expect(result.winner).not.toBeNull();
+  assert.ok(result.winner != null);
 });

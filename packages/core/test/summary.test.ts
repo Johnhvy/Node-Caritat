@@ -1,3 +1,6 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import CondorcetSummary from "../dist/summary/condorcetSummary";
 
 const participants = [{ id: "a" }, { id: "b" }, { id: "c" }];
@@ -27,5 +30,5 @@ it("should contain winners", () => {
     .match(/\*\*Winning candidate.*\*\*\: (.*)/)[1]
     .split(", ")
     .map((winner) => winner.trim());
-  expect(summaryWinners).toStrictEqual([""]);
+  assert.deepStrictEqual(summaryWinners, [""]);
 });

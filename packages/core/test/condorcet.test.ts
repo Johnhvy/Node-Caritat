@@ -1,9 +1,12 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import condorcet from "../dist/votingMethods/condorcet.js";
 
 it("should return an empty map for an empty vote", () => {
   let result = condorcet([], []);
 
-  expect(result.size).toBe(0);
+  assert.strictEqual(result.size, 0);
 });
 
 it("should return a map for a vote", () => {
@@ -17,22 +20,25 @@ it("should return a map for a vote", () => {
     ]
   );
 
-  expect([...result]).toStrictEqual([["a", 0]]);
+  assert.deepStrictEqual([...result], [["a", 0]]);
 
-  expect([
-    ...condorcet(
-      ["a", "b"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([["a", 1]]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 1],
-    ["b", 0],
-  ]);
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([["a", 1]]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 1],
+      ["b", 0],
+    ]
+  );
 });
 
 it("should return a map for two votes", () => {
@@ -50,130 +56,145 @@ it("should return a map for two votes", () => {
     ]
   );
 
-  expect([...result]).toStrictEqual([["a", 0]]);
+  assert.deepStrictEqual([...result], [["a", 0]]);
 });
 
 it("should return the correct result", () => {
-  expect([
-    ...condorcet(
-      ["a", "b"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([["a", 1]]),
-        },
-        {
-          voter: { id: "2" },
-          preferences: new Map([["a", 1]]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 1],
-    ["b", 0],
-  ]);
-  expect([
-    ...condorcet(
-      ["a", "b"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([["b", 1]]),
-        },
-        {
-          voter: { id: "2" },
-          preferences: new Map([["b", 1]]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 0],
-    ["b", 1],
-  ]);
-  expect([
-    ...condorcet(
-      ["a", "b"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([["a", 1]]),
-        },
-        {
-          voter: { id: "2" },
-          preferences: new Map([["b", 1]]),
-        },
-        {
-          voter: { id: "3" },
-          preferences: new Map([["b", 1]]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 0],
-    ["b", 1],
-  ]);
-  expect([
-    ...condorcet(
-      ["a", "b", "c"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([
-            ["a", 1],
-            ["b", 0.5],
-          ]),
-        },
-        {
-          voter: { id: "2" },
-          preferences: new Map([
-            ["b", 1],
-            ["c", 0.5],
-          ]),
-        },
-        {
-          voter: { id: "3" },
-          preferences: new Map([
-            ["c", 1],
-            ["a", 0.5],
-          ]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 1],
-    ["b", 1],
-    ["c", 1],
-  ]);
-  expect([
-    ...condorcet(
-      ["a", "b", "c"],
-      [
-        {
-          voter: { id: "1" },
-          preferences: new Map([
-            ["a", 1],
-            ["b", 0.5],
-          ]),
-        },
-        {
-          voter: { id: "2" },
-          preferences: new Map([
-            ["b", 1],
-            ["a", 0.5],
-          ]),
-        },
-        {
-          voter: { id: "3" },
-          preferences: new Map([
-            ["c", 1],
-            ["a", 0.5],
-          ]),
-        },
-      ]
-    ),
-  ]).toStrictEqual([
-    ["a", 2],
-    ["b", 1],
-    ["c", 0],
-  ]);
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([["a", 1]]),
+          },
+          {
+            voter: { id: "2" },
+            preferences: new Map([["a", 1]]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 1],
+      ["b", 0],
+    ]
+  );
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([["b", 1]]),
+          },
+          {
+            voter: { id: "2" },
+            preferences: new Map([["b", 1]]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 0],
+      ["b", 1],
+    ]
+  );
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([["a", 1]]),
+          },
+          {
+            voter: { id: "2" },
+            preferences: new Map([["b", 1]]),
+          },
+          {
+            voter: { id: "3" },
+            preferences: new Map([["b", 1]]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 0],
+      ["b", 1],
+    ]
+  );
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b", "c"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([
+              ["a", 1],
+              ["b", 0.5],
+            ]),
+          },
+          {
+            voter: { id: "2" },
+            preferences: new Map([
+              ["b", 1],
+              ["c", 0.5],
+            ]),
+          },
+          {
+            voter: { id: "3" },
+            preferences: new Map([
+              ["c", 1],
+              ["a", 0.5],
+            ]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 1],
+      ["b", 1],
+      ["c", 1],
+    ]
+  );
+  assert.deepStrictEqual(
+    [
+      ...condorcet(
+        ["a", "b", "c"],
+        [
+          {
+            voter: { id: "1" },
+            preferences: new Map([
+              ["a", 1],
+              ["b", 0.5],
+            ]),
+          },
+          {
+            voter: { id: "2" },
+            preferences: new Map([
+              ["b", 1],
+              ["a", 0.5],
+            ]),
+          },
+          {
+            voter: { id: "3" },
+            preferences: new Map([
+              ["c", 1],
+              ["a", 0.5],
+            ]),
+          },
+        ]
+      ),
+    ],
+    [
+      ["a", 2],
+      ["b", 1],
+      ["c", 0],
+    ]
+  );
 });

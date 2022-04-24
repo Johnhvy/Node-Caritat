@@ -1,3 +1,6 @@
+import it from "node:test";
+import { strict as assert } from "node:assert";
+
 import { VoteCandidate } from "../dist/vote.js";
 import VoteResult from "../dist/votingMethods/VoteResult.js";
 import type { CandidateScores } from "../src/votingMethods/VoteResult";
@@ -9,7 +12,7 @@ function findWinners(
 }
 
 it("should find the winner based on the scores of the candidates", () => {
-  expect(
+  assert.deepStrictEqual(
     Array.from(
       findWinners(
         new Map([
@@ -18,9 +21,10 @@ it("should find the winner based on the scores of the candidates", () => {
           ["c", 0],
         ])
       )
-    )
-  ).toStrictEqual(["a"]);
-  expect(
+    ),
+    ["a"]
+  );
+  assert.deepStrictEqual(
     Array.from(
       findWinners(
         new Map([
@@ -29,9 +33,10 @@ it("should find the winner based on the scores of the candidates", () => {
           ["c", 0],
         ])
       )
-    )
-  ).toStrictEqual(["b"]);
-  expect(
+    ),
+    ["b"]
+  );
+  assert.deepStrictEqual(
     Array.from(
       findWinners(
         new Map([
@@ -40,12 +45,13 @@ it("should find the winner based on the scores of the candidates", () => {
           ["c", 2],
         ])
       )
-    )
-  ).toStrictEqual(["c"]);
+    ),
+    ["c"]
+  );
 });
 
 it("should find 3 winners", () => {
-  expect(
+  assert.deepStrictEqual(
     Array.from(
       findWinners(
         new Map([
@@ -54,6 +60,7 @@ it("should find 3 winners", () => {
           ["b", 1],
         ])
       )
-    ).sort()
-  ).toStrictEqual(["a", "b", "c"]);
+    ).sort(),
+    ["a", "b", "c"]
+  );
 });
