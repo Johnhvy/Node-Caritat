@@ -1,0 +1,8 @@
+{
+  "name": "@aduh95/caritat-ts-loader",
+  "version": "0.0.0",
+  "type": "module",
+  "dependencies": {
+    "sucrase": "^3.0.0"
+  }
+}

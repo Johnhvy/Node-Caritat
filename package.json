@@ -16,6 +16,9 @@
     "ts-jest": "^27.1.3",
     "typescript": "^4.5.4"
   },
+  "imports": {
+    "#ts-loader": "./packages/ts-loader/loader.js"
+  },
   "scripts": {
     "test": "tsc --build && NODE_OPTIONS=--experimental-vm-modules jest",
     "build": "tsc --build",
