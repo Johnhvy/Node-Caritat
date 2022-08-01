@@ -1,7 +1,11 @@
 import it from "node:test";
 import { strict as assert } from "node:assert";
 
-import condorcet from "../dist/votingMethods/condorcet.js";
+import CondorcetVote from "./CondorcetResult.js";
+
+function condorcet(a, b) {
+  return new CondorcetVote(null as any, a, "subject", b, {}).result;
+}
 
 it("should return an empty map for an empty vote", () => {
   let result = condorcet([], []);

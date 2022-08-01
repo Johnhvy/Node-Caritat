@@ -1,9 +1,9 @@
 import it from "node:test";
 import { strict as assert } from "node:assert";
 
-import BallotPoolGit from "../dist/ballotpool.js";
+import BallotPoolGit from "./ballotpool.js";
 
-import type { CommitNode } from "../src/ballotpool.js";
+import type { CommitNode } from "./ballotpool.js";
 
 const fixturesURL = new URL("../../../test/fixtures/", import.meta.url);
 

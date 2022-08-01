@@ -1,7 +1,12 @@
 import it from "node:test";
 import { strict as assert } from "node:assert";
 
-import singleRound from "../dist/votingMethods/singleRound.js";
+import SingleRound from "./SingleRoundResult.js";
+import type { Ballot } from "../vote.js";
+
+function singleRound(a: string[], b: Ballot[]) {
+  return new SingleRound(null as any, a, "subject", b, {}).result;
+}
 
 it("should return an empty map for an empty vote", () => {
   let result = singleRound([], []);
