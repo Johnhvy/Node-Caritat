@@ -1,9 +1,16 @@
+/**
+ * u8 represents an element in GF(2^8), which is a representation of a 7-degree polynomial.
+ * Examples:
+ * - 0b10101010 represents X^7+X^5+X^3+X, in which X can be either 0 or 1.
+ * - 0b10011001 represents X^7+X^4+X^3+1, in which X can be either 0 or 1.
+ * u8 coincides with a byte, which is conveninent for implementation puproses.
+ */
 type u8 = number;
 
 const BITS = 8;
 const ORDER_OF_GALOIS_FIELD = 2 ** BITS;
 const MAX_VALUE = ORDER_OF_GALOIS_FIELD - 1;
-//https://www.partow.net/programming/polynomials/index.html#deg08
+// https://www.partow.net/programming/polynomials/index.html#deg08
 const DEGREE_8_PRIMITIVE_POLYNOMIALS = [
   0b11101, 0b101011, 0b1011111, 0b1100011, 0b1100101, 0b1101001, 0b11000011,
   0b11100111,
@@ -12,6 +19,7 @@ const PRIMITIVE = DEGREE_8_PRIMITIVE_POLYNOMIALS[0];
 
 const logs = Array(MAX_VALUE);
 const exps = Array(MAX_VALUE);
+
 
 // Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2**8)
 for (let i = 0, x = 1; i < MAX_VALUE; i++) {
@@ -26,31 +34,55 @@ for (let i = 0, x = 1; i < MAX_VALUE; i++) {
   }
 }
 
-function multiplyPolynomials(a: u8, b: u8) {
+/**
+ * Multiply two polynomials in GF(2^8).
+ * @see https://en.wikipedia.org/wiki/Finite_field_arithmetic#Generator_based_tables
+ */
+function multiplyPolynomials(a: u8, b: u8): u8 {
+  if (a === 0 || b === 0) return 0;
   // a*b = exp(log(a)+log(b))
-  if (a * b === 0) return 0;
   return exps[(logs[a] + logs[b]) % MAX_VALUE];
 }
 
-function dividePolynomials(a: u8, b: u8) {
-  // a/b = exp(log(a)-log(b))
+function dividePolynomials(a: u8, b: u8): u8 {
+  if (b === 0) throw new RangeError("Div/0");
   if (a === 0) return 0;
-  if (b === 0) throw new Error("Div/0");
+  // a/b = exp(log(a)-log(b))
   return exps[(logs[a] + MAX_VALUE - logs[b]) % MAX_VALUE];
 }
 
-function addPolynomials(a: u8, b: u8) {
-  // Addition in ℤ/2ℤ is a xor. Therefore, for polynomials on ℤ/2ℤ, it is the same as a bitwise xor
+/**
+ * Addition in ℤ/2ℤ is a xor. Therefore, for polynomials on ℤ/2ℤ, it is the same as a
+ * bitwise xor.
+ * @see https://en.wikipedia.org/wiki/Finite_field_arithmetic#Addition_and_subtraction
+ */
+function addPolynomials(a: u8, b: u8): u8 {
   return a ^ b;
 }
 
-function subtractPolynomials(a: u8, b: u8) {
-  // The inverse of xor is xor itself
-  return a ^ b;
-}
+/**
+ * The inverse of xor is xor.
+ */
+const subtractPolynomials = addPolynomials;
 
-export function* generatePoints(origin: u8, shareHolders: u8, neededParts: u8) {
-  // TODO: ensure neededParts<=255 (if necessary?)
+/**
+ * Hides the secret behind one point per shareholder.
+ * @param secret A single byte of the secret. If the secret is larger than a
+ *               byte, call this method once per byte.
+ * @param shareHolders Number of points to generate.
+ * @param neededParts The minimal number of points that should be necessary to
+ *                    reconstruct the secret.
+ */
+export function* generatePoints(secret: u8, shareHolders: u8, neededParts: u8) {
+  if (shareHolders > MAX_VALUE)
+    throw new RangeError(
+      `Expected ${shareHolders} <= ${MAX_VALUE}. Cannot have more than ` +
+        `shareholders the size of the Gallois field`
+    );
+  if (shareHolders < neededParts)
+    throw new RangeError(
+      `Expected ${shareHolders} < ${neededParts}. Cannot have more less shareholders than needed parts`
+    );
   const coefficients = crypto.getRandomValues(new Uint8Array(neededParts - 1));
 
   for (let x = 1; x <= shareHolders; x++) {
@@ -59,45 +91,50 @@ export function* generatePoints(origin: u8, shareHolders: u8, neededParts: u8) {
     for (let t = 1; t < neededParts - 1; t++) {
       y = addPolynomials(multiplyPolynomials(x, y), coefficients[t]);
     }
-    yield { x, y: addPolynomials(multiplyPolynomials(x, y), origin) };
+    // We set the secret as the constant term.
+    yield { x, y: addPolynomials(multiplyPolynomials(x, y), secret) };
   }
 }
 
+/**
+ * @param points Points that were given to shareholders.
+ * @param neededParts If known, the amount of points necessary to reconstruct the secret.
+ * @returns The secret byte, in clear.
+ */
 export function reconstructByte(
-  points: Array<{ x: u8; y: u8 }>,
-  neededParts: u8 = null
+  points: { x: u8; y: u8 }[],
+  neededParts: u8 = points.length
 ): u8 {
-  const shareHolders = points.length;
-  neededParts = neededParts ?? shareHolders;
-  if (shareHolders < neededParts)
-    throw new Error("Not enough points to reconstruct byte");
-
-  let Σ = 0x00;
+  let Σ = 0;
   for (let j = 0; j < neededParts; j++) {
-    const pj = points[j];
-    let Π = 0x01;
-    //evaluate Lagrange polynomial for point j at x=0
+    const { x: xj, y: yj } = points[j];
+    let Π = 1;
+    // Evaluate Lagrange polynomial for point j at x0=0.
     for (let i = 0; i < neededParts; i++) {
-      const pi = points[i];
       if (j === i) continue;
+      const { x } = points[i];
       Π = multiplyPolynomials(
         Π,
-        dividePolynomials(pi.x, subtractPolynomials(pj.x, pi.x))
+        dividePolynomials(x, subtractPolynomials(xj, x))
       );
-      //Π *= (x0-xi)/(xj-xi)
+      //Π *= (x0-x)/(xj-x)
     }
-    //scale and add Lagrange polynomials together to get the value of the interpolating polynomial at x=0
-    Σ = addPolynomials(Σ, multiplyPolynomials(pj.y, Π));
+    // Scale and add Lagrange polynomials together to get the value of the
+    // interpolating polynomial at x0=0.
+    Σ = addPolynomials(Σ, multiplyPolynomials(yj, Π));
     //Σ += yj*Π
   }
   return Σ;
 }
 
 /**
- * Generate the key part `partIndex` from the `rawKey`
- * @param rawKey the array of bytes that needs to be split and shared
- * @param shareHolders the amount of people that will own some part of the key
- * @param neededParts  the amount of parts needed to reconstruct the whole key
+ * Generates one key-part per shareholder, hiding the secret. The secret cannot
+ * be guessed from shareholders, unless they can provide at least `neededParts`
+ * key-parts.
+ * @param rawKey The secret to hide.
+ * @param shareHolders Number of key-parts to generate.
+ * @param neededParts The minimal number of key-parts that should be necessary to
+ *                    reconstruct the secret.
  */
 export function splitKey(
   rawKey: ArrayBuffer,
@@ -124,21 +161,23 @@ export function splitKey(
 }
 
 /**
- * Generate the full key using the key parts
- * @param parts An array of the Uint8Array containing key parts from the shareholders
- * @yields All the bytes of the original key
+ * Generates the full key using the key parts.
+ * @param parts Key parts from the shareholders.
+ * @param neededParts If known, the amount of points necessary to reconstruct the secret.
+ * @yields Each byte of the original key, in clear.
  */
-export function* reconstructKey(parts: Uint8Array[], neededParts: u8 = null) {
-  const shareHolders = parts.length;
-  neededParts = neededParts ?? shareHolders;
-  if (shareHolders < neededParts)
+export function* reconstructKey(
+  parts: Uint8Array[],
+  neededParts: u8 = parts.length
+) {
+  if (parts.length < neededParts)
     throw new Error("Not enough parts to reconstruct key");
-  const bytes = parts[0].length - 1;
+  const bytes = parts[0].byteLength - 1;
   for (let i = 0; i < bytes; i++) {
-    let points = Array<{ x: u8; y: u8 }>(neededParts);
-    for (let j = 0; j < neededParts; j++) {
-      points[j] = { x: parts[j][0], y: parts[j][i + 1] };
-    }
-    yield reconstructByte(points, neededParts);
+    yield reconstructByte(
+      Array.from({ length: neededParts }, (_, j) => {
+        return { x: parts[j][0], y: parts[j][i + 1] };
+      })
+    );
   }
 }
