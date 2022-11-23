@@ -1,7 +1,4 @@
-type i32 = number;
 type u8 = number;
-
-const OFFSET = 3;
 
 const BITS = 8;
 const ORDER_OF_GALOIS_FIELD = 2 ** BITS;
@@ -39,14 +36,16 @@ function dividePolynomials(a: u8, b: u8) {
   // a/b = exp(log(a)-log(b))
   if (a === 0) return 0;
   if (b === 0) throw new Error("Div/0");
-  return exps[(logs[a] - logs[b] + MAX_VALUE) % MAX_VALUE];
+  return exps[(logs[a] + MAX_VALUE - logs[b]) % MAX_VALUE];
 }
 
 function addPolynomials(a: u8, b: u8) {
+  // Addition in ℤ/2ℤ is a xor. Therefore, for polynomials on ℤ/2ℤ, it is the same as a bitwise xor
   return a ^ b;
 }
 
 function subtractPolynomials(a: u8, b: u8) {
+  // The inverse of xor is xor itself
   return a ^ b;
 }
 
@@ -62,36 +61,6 @@ export function* generatePoints(origin: u8, shareHolders: u8, neededParts: u8) {
     }
     yield { x, y: addPolynomials(multiplyPolynomials(x, y), origin) };
   }
-}
-
-/**
- * Generate the key part `partIndex` from the `rawKey`
- * @param rawKey the array of bytes that needs to be split and shared
- * @param shareHolders the amount of people that will own some part of the key
- * @param neededParts  the amount of parts needed to reconstruct the whole key
- */
-export function splitKey(
-  rawKey: ArrayBuffer,
-  shareHolders: u8,
-  neededParts: u8
-): Uint8Array[] {
-  // TODO: check if shareholders>=neededParts
-  const rawDataView = new DataView(rawKey);
-
-  const points = Array.from({ length: rawKey.byteLength }, (_, i) =>
-    // Always use GF(2^8), so each chunk needs to be 8 bit long
-    Array.from(
-      generatePoints(rawDataView.getUint8(i), shareHolders, neededParts)
-    )
-  );
-  return Array.from({ length: shareHolders }, (_, i) => {
-    const part = new Uint8Array(1 + points.length);
-    part[0] = i + 1;
-    for (let j = 0; j < points.length; j++) {
-      part[j + 1] = points[j][i].y;
-    }
-    return part;
-  });
 }
 
 export function reconstructByte(
@@ -122,6 +91,36 @@ export function reconstructByte(
     //Σ += yj*Π
   }
   return Σ;
+}
+
+/**
+ * Generate the key part `partIndex` from the `rawKey`
+ * @param rawKey the array of bytes that needs to be split and shared
+ * @param shareHolders the amount of people that will own some part of the key
+ * @param neededParts  the amount of parts needed to reconstruct the whole key
+ */
+export function splitKey(
+  rawKey: ArrayBuffer,
+  shareHolders: u8,
+  neededParts: u8
+): Uint8Array[] {
+  // TODO: check if shareholders>=neededParts
+  const rawDataView = new DataView(rawKey);
+
+  const points = Array.from({ length: rawKey.byteLength }, (_, i) =>
+    // Always use GF(2^8), so each chunk needs to be 8 bit long
+    Array.from(
+      generatePoints(rawDataView.getUint8(i), shareHolders, neededParts)
+    )
+  );
+  return Array.from({ length: shareHolders }, (_, i) => {
+    const part = new Uint8Array(1 + points.length);
+    part[0] = i + 1;
+    for (let j = 0; j < points.length; j++) {
+      part[j + 1] = points[j][i].y;
+    }
+    return part;
+  });
 }
 
 /**
