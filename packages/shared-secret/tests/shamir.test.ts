@@ -8,7 +8,7 @@ const neededParts = 3;
 
 const parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
 
-it("should reconstruct keypart from enough shareholders", () => {
+it("should reconstruct single byte with enough shareholders", () => {
   let byte = key[0];
   let points = Array.from(
     shamir.generatePoints(byte, shareHolders, neededParts)
