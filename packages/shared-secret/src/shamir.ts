@@ -135,7 +135,7 @@ export function* reconstructKey(parts: Uint8Array[], neededParts: u8 = null) {
     throw new Error("Not enough parts to reconstruct key");
   const bytes = parts[0].length - 1;
   for (let i = 0; i < bytes; i++) {
-    let points = Array<{ x; y }>(neededParts);
+    let points = Array<{ x: u8; y: u8 }>(neededParts);
     for (let j = 0; j < neededParts; j++) {
       points[j] = { x: parts[j][0], y: parts[j][i + 1] };
     }

@@ -14,3 +14,4 @@ test/*.js
 **/src/**/*.js
 packages/*/test/*.js
 
+packages/shared-secret/src/shamir.ts

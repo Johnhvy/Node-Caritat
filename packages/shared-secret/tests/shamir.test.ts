@@ -2,21 +2,22 @@ import * as shamir from "../src/shamir.ts";
 import { it } from "node:test";
 import { strict as assert } from "node:assert";
 
-let key = crypto.getRandomValues(new Uint8Array(256));
-let shareHolders = 30;
-let neededParts = 3;
+const key = crypto.getRandomValues(new Uint8Array(256));
+const shareHolders = 36;
+const neededParts = 3;
+
+const parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
 
 it("should reconstruct keypart from enough shareholders", () => {
-  let part = Math.floor(Math.random() * 255);
+  let byte = key[0];
   let points = Array.from(
-    shamir.generatePoints(part, shareHolders, neededParts)
+    shamir.generatePoints(byte, shareHolders, neededParts)
   );
   let reconstructed = shamir.reconstructByte(points);
-  assert.ok(reconstructed === part);
+  assert.ok(reconstructed === byte);
 });
 
 it("should reconstruct key from enough shareholders", () => {
-  let parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
   let reconstructed = Uint8Array.from(
     shamir.reconstructKey([parts[1], parts[0], parts[5]])
   );
@@ -26,7 +27,6 @@ it("should reconstruct key from enough shareholders", () => {
 });
 
 it("should fail reconstruct key from enough shareholders", () => {
-  let parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
   let reconstructed = Uint8Array.from(
     shamir.reconstructKey([parts[1], parts[5]])
   );
@@ -38,7 +38,6 @@ it("should fail reconstruct key from enough shareholders", () => {
 });
 
 it("should fail reconstruct key with duplicate shareholders", () => {
-  let parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
   try {
     let reconstructed = Uint8Array.from(
       shamir.reconstructKey([parts[1], parts[5], parts[1]])
@@ -54,7 +53,6 @@ it("should fail reconstruct key with duplicate shareholders", () => {
 });
 
 it("should still reconstruct key with too many shareholders", () => {
-  let parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
   let reconstructed = Uint8Array.from(shamir.reconstructKey(parts));
   for (let i = 0; i < key.length; i++) {
     assert.ok(reconstructed[i] === key[i]);
@@ -62,12 +60,10 @@ it("should still reconstruct key with too many shareholders", () => {
 });
 
 it("should reconstruct key faster when specifying neededParts", () => {
-  if (shareHolders === neededParts) {
+  if (shareHolders as number === neededParts as number) {
     assert.ok(true);
     return;
   }
-
-  let parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
 
   let s1 = performance.now();
   let reconstructed1 = Uint8Array.from(
