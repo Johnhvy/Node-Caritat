@@ -3,7 +3,7 @@
  * Examples:
  * - 0b10101010 represents X^7+X^5+X^3+X, in which X can be either 0 or 1.
  * - 0b10011001 represents X^7+X^4+X^3+1, in which X can be either 0 or 1.
- * 
+ *
  * u8 coincides with a byte, which is conveninent for implementation puproses.
  */
 type u8 = number;
@@ -20,7 +20,6 @@ const PRIMITIVE = DEGREE_8_PRIMITIVE_POLYNOMIALS[0];
 
 const logs = Array(MAX_VALUE);
 const exps = Array(MAX_VALUE);
-
 
 // Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2**8)
 for (let i = 0, x = 1; i < MAX_VALUE; i++) {
@@ -87,7 +86,7 @@ export function* generatePoints(secret: u8, shareHolders: u8, neededParts: u8) {
   const coefficients = crypto.getRandomValues(new Uint8Array(neededParts - 1));
 
   for (let x = 1; x <= shareHolders; x++) {
-    // Horner method
+    // Horner method for fast polynomial evaluation: ax²+bx+c = ((0*x+a)x+b)x+c
     let y = coefficients[0];
     for (let t = 1; t < neededParts - 1; t++) {
       y = addPolynomials(multiplyPolynomials(x, y), coefficients[t]);
@@ -111,6 +110,8 @@ export function reconstructByte(
     const { x: xj, y: yj } = points[j];
     let Π = 1;
     // Evaluate Lagrange polynomial for point j at x0=0.
+    // It is the only polynomial on GF(256) whose value is 1 for x = xj,
+    // and 0 for all the other points x values
     for (let i = 0; i < neededParts; i++) {
       if (j === i) continue;
       const { x } = points[i];
