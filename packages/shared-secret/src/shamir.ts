@@ -19,15 +19,15 @@ const DEGREE_8_PRIMITIVE_POLYNOMIALS = [
 const PRIMITIVE = DEGREE_8_PRIMITIVE_POLYNOMIALS[0];
 
 const logs = Array(MAX_VALUE);
-const exps = Array(MAX_VALUE);
+const exps = Array(ORDER_OF_GALOIS_FIELD);
 
-// Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2**8)
+// Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2^8)
 for (let i = 0, x = 1; i < MAX_VALUE; i++) {
   exps[i] = x;
   logs[x] = i;
-  x *= 2; // P(X):=P(X)*X
+  x *= 2; // P(X) = P(X)*X
   if (x >= ORDER_OF_GALOIS_FIELD) {
-    // if deg(P)>=BITS
+    // if deg(P) >= BITS
     x ^= PRIMITIVE;
     x %= ORDER_OF_GALOIS_FIELD;
     // P(X) = P(X) + PRIMITIVE(X) mod X^BITS
@@ -83,6 +83,7 @@ export function* generatePoints(secret: u8, shareHolders: u8, neededParts: u8) {
     throw new RangeError(
       `Expected ${shareHolders} < ${neededParts}. Cannot have more less shareholders than needed parts`
     );
+  // Generate neededParts-1 random polynomial coefficients in GF(2^8)
   const coefficients = crypto.getRandomValues(new Uint8Array(neededParts - 1));
 
   for (let x = 1; x <= shareHolders; x++) {
@@ -97,6 +98,7 @@ export function* generatePoints(secret: u8, shareHolders: u8, neededParts: u8) {
 }
 
 /**
+ * Generate a byte from points using Lagrange interpolation at the origin
  * @param points Points that were given to shareholders.
  * @param neededParts If known, the amount of points necessary to reconstruct the secret.
  * @returns The secret byte, in clear.
@@ -110,7 +112,7 @@ export function reconstructByte(
     const { x: xj, y: yj } = points[j];
     let Π = 1;
     // Evaluate Lagrange polynomial for point j at x0=0.
-    // It is the only polynomial on GF(256) whose value is 1 for x = xj,
+    // It is the only polynomial on GF(2^8) whose value is 1 for x = xj,
     // and 0 for all the other points x values
     for (let i = 0; i < neededParts; i++) {
       if (j === i) continue;
@@ -119,12 +121,13 @@ export function reconstructByte(
         Π,
         dividePolynomials(x, subtractPolynomials(xj, x))
       );
-      //Π *= (x0-x)/(xj-x)
+      // Π *= (x0-x)/(xj-x)
+      // d(X) = (X-x)/(xj-x) is the only line passing through (xj,1) and (x,0)
     }
     // Scale and add Lagrange polynomials together to get the value of the
     // interpolating polynomial at x0=0.
     Σ = addPolynomials(Σ, multiplyPolynomials(yj, Π));
-    //Σ += yj*Π
+    // Σ += yj*Π
   }
   return Σ;
 }
@@ -143,7 +146,6 @@ export function splitKey(
   shareHolders: u8,
   neededParts: u8
 ): Uint8Array[] {
-  // TODO: check if shareholders>=neededParts
   const rawDataView = new DataView(rawKey);
 
   const points = Array.from({ length: rawKey.byteLength }, (_, i) =>
