@@ -1,10 +1,10 @@
-import { ASYMMETRIC_ALGO, SYMMETRIC_ALGO } from "./config.js";
-import deriveKeyIv from "./deriveKeyIv.js";
+import { ASYMMETRIC_ALGO } from "./config.js";
 
-import encryptData from "./rsa-aes-encrypt.js";
+import { symmetricEncrypt } from "./rsa-aes-encrypt.js";
 import crypto from "./webcrypto.js";
+const shamir = { split: Function.prototype }; // TODO: import actual Shamir secret sharing implementation.
 
-export default async function generateRSAKeyPair() {
+export async function generateRSAKeyPair() {
   const { privateKey, publicKey } = await crypto.subtle.generateKey(
     {
       ...ASYMMETRIC_ALGO,
@@ -14,38 +14,35 @@ export default async function generateRSAKeyPair() {
     true,
     ["encrypt", "decrypt"]
   );
-  const secret = await crypto.subtle.exportKey(
-    "raw",
-    await crypto.subtle.generateKey(SYMMETRIC_ALGO, true, ["encrypt"])
-  );
-  const salt = crypto.getRandomValues(new Uint8Array(SYMMETRIC_ALGO.saltSize));
-  const { iv, key } = await deriveKeyIv(secret, salt, "encrypt");
-  const encryptedPrivateKey = await crypto.subtle.encrypt(
-    { ...SYMMETRIC_ALGO, iv },
-    key,
-    await crypto.subtle.exportKey("pkcs8", privateKey)
-  );
+  const [{ saltedCiphertext: encryptedPrivateKey, secret }, rawPublicKey] =
+    await Promise.all([
+      symmetricEncrypt(await crypto.subtle.exportKey("pkcs8", privateKey)),
+      crypto.subtle.exportKey("spki", publicKey),
+    ]);
   return {
     encryptedPrivateKey,
-    publicKey: await crypto.subtle.exportKey("spki", publicKey),
-    // TODO: we want to split this secret between shareholders.
+    publicKey: rawPublicKey,
     secret,
   };
 }
 
-async function shareSecret(secretHolders: ArrayBuffer[]) {
+export async function generateAndSplitKeyPair(
+  shareHolders: ArrayBuffer[],
+  threshold: number
+) {
   const { encryptedPrivateKey, publicKey, secret } = await generateRSAKeyPair();
-  if (secretHolders.length === 1) {
+  if (threshold === 1) {
+    // We can give the secret directly to each share holder.
     return {
       encryptedPrivateKey,
       publicKey,
-      secret: [encryptData(secretHolders[0])],
+      secret: Array(shareHolders.length).fill(secret),
     };
   } else {
     return {
       encryptedPrivateKey,
       publicKey,
-      secret: shamirSecret(secretHolders),
+      secret: shamir.split(secret, shareHolders.length, threshold),
     };
   }
 }
