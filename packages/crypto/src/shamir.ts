@@ -1,3 +1,5 @@
+import crypto from "./webcrypto.js";
+
 /**
  * u8 represents an element in GF(2^8), which is a representation of a 7-degree polynomial.
  * Examples:
