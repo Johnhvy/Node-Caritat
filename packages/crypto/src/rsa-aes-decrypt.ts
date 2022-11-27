@@ -23,16 +23,17 @@ export async function symmetricDecrypt(
     saltedCiphertext = saltedCiphertext.buffer;
   }
 
-  const magicNumber = new DataView(saltedCiphertext);
+  const magicNumber = new DataView(saltedCiphertext, offset, 8);
   if (
-    magicNumber.getInt8(offset + 0) !== 83 || // 'S'
-    magicNumber.getInt8(offset + 1) !== 97 || // 'a'
-    magicNumber.getInt8(offset + 2) !== 108 || // 'l'
-    magicNumber.getInt8(offset + 3) !== 116 || // 't'
-    magicNumber.getInt8(offset + 4) !== 101 || // 'e'
-    magicNumber.getInt8(offset + 5) !== 100 || // 'd'
-    magicNumber.getInt8(offset + 6) !== 95 || // '_'
-    magicNumber.getInt8(offset + 7) !== 95 // '_'
+    magicNumber.getInt8(0) !== 0x53 || // 'S'
+    magicNumber.getInt8(1) !== 0x61 || // 'a'
+    magicNumber.getInt8(2) !== 0x6c || // 'l'
+    magicNumber.getInt8(3) !== 0x74 || // 't'
+    magicNumber.getInt8(4) !== 0x65 || // 'e'
+    magicNumber.getInt8(5) !== 0x64 || // 'd'
+    magicNumber.getInt8(6) !== 0x5f || // '_'
+    magicNumber.getInt8(7) !== 0x5f || // '_'
+    false
   ) {
     throw new Error("Invalid magic number");
   }
