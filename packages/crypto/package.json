@@ -13,6 +13,8 @@
     "./package.json": "./package.json",
     "./decrypt": "./dist/rsa-aes-decrypt.js",
     "./encrypt": "./dist/rsa-aes-encrypt.js",
+    "./generateSplitKeyPair": "./dist/generateRSAKeyPair.js",
+    "./reconstructSplitKey": "./dist/reconstructPrivateKey.js",
     "./webcrypto": "./dist/webcrypto.js"
   },
   "type": "module"
