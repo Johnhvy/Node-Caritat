@@ -20,13 +20,13 @@
     const textarea = this.elements.namedItem("ballot") as HTMLInputElement;
     registerEncrypedBallot(
       (async () => {
-        const { encryptedSecret, data } = await encryptData(
+        const { encryptedSecret, saltedCiphertext } = await encryptData(
           textEncoder.encode(textarea.value),
           await fetchedPublicKey
         );
         return JSON.stringify({
           encryptedSecret: uint8ArrayToBase64(new Uint8Array(encryptedSecret)),
-          data: uint8ArrayToBase64(data),
+          data: uint8ArrayToBase64(saltedCiphertext),
         });
       })()
     );

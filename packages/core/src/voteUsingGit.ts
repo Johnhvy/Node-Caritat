@@ -173,7 +173,7 @@ export default async function voteUsingGit({
     }
   }
   console.log("Encrypting ballot with vote public key...");
-  const { encryptedSecret, data } = await encryptData(
+  const { encryptedSecret, saltedCiphertext } = await encryptData(
     rawBallot,
     vote.publicKey
   );
@@ -190,7 +190,7 @@ export default async function voteUsingGit({
     JSON.stringify({
       author,
       encryptedSecret: Buffer.from(encryptedSecret).toString("base64"),
-      data: Buffer.from(data).toString("base64"),
+      data: Buffer.from(saltedCiphertext).toString("base64"),
     }) + "\n"
   );
 
