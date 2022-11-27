@@ -1,4 +1,4 @@
-import * as shamir from "../src/shamir.ts";
+import * as shamir from "../src/shamir.js";
 import { it } from "node:test";
 import { strict as assert } from "node:assert";
 
@@ -6,14 +6,14 @@ const key = crypto.getRandomValues(new Uint8Array(256));
 const shareHolders = 36;
 const neededParts = 3;
 
-const parts = shamir.splitKey(key.buffer, shareHolders, neededParts);
+const parts = shamir.split(key.buffer, shareHolders, neededParts);
 
 it("should reconstruct single byte with enough shareholders", () => {
-  let byte = key[0];
-  let points = Array.from(
+  const byte = key[0];
+  const points = Array.from(
     shamir.generatePoints(byte, shareHolders, neededParts)
   );
-  let reconstructed = shamir.reconstructByte(points);
+  const reconstructed = shamir.reconstructByte(points);
   assert.strictEqual(reconstructed, byte);
 });
 
@@ -37,7 +37,7 @@ it("should not give the whole key to any shareholders", () => {
 });
 
 it("should not generate keys if shareholders is greater than threshold", () => {
-  let byte = key[0];
+  const byte = key[0];
 
   assert.throws(
     () => {
@@ -51,7 +51,7 @@ it("should not generate keys if shareholders is greater than threshold", () => {
 });
 
 it("should not generate keys if less shareholders than needed parts", () => {
-  let byte = key[0];
+  const byte = key[0];
 
   assert.throws(
     () => {
@@ -65,33 +65,26 @@ it("should not generate keys if less shareholders than needed parts", () => {
 });
 
 it("should reconstruct key from enough shareholders", () => {
-  let reconstructed = Uint8Array.from(
-    shamir.reconstructKey([parts[1], parts[0], parts[5]])
-  );
+  const reconstructed = shamir.reconstruct([parts[1], parts[0], parts[5]]);
   assert.deepStrictEqual(reconstructed, key);
 });
 
 it("should fail reconstruct key from not enough shareholders", () => {
-  let reconstructed = Uint8Array.from(
-    shamir.reconstructKey([parts[1], parts[5]])
-  );
+  const reconstructed = shamir.reconstruct([parts[1], parts[5]]);
   assert.notDeepStrictEqual(reconstructed, key);
 });
 
 it("should fail reconstruct key with duplicate shareholders", () => {
-  let reconstructed;
   assert.throws(
     () => {
-      reconstructed = Uint8Array.from(
-        shamir.reconstructKey([parts[1], parts[5], parts[1]])
-      );
+      shamir.reconstruct([parts[1], parts[5], parts[1]]);
     },
     { message: "Div/0" }
   );
 });
 
 it("should still reconstruct key with too many shareholders", () => {
-  const reconstructed = Uint8Array.from(shamir.reconstructKey(parts));
+  const reconstructed = shamir.reconstruct(parts);
   assert.deepStrictEqual(reconstructed, key);
 });
 
@@ -100,13 +93,11 @@ it(
   { skip: (shareHolders as number) === (neededParts as number) },
   () => {
     const s1 = performance.now();
-    const reconstructed1 = Uint8Array.from(
-      shamir.reconstructKey(parts, neededParts)
-    );
+    const reconstructed1 = shamir.reconstruct(parts, neededParts);
     const t1 = performance.now() - s1;
 
     const s2 = performance.now();
-    const reconstructed2 = Uint8Array.from(shamir.reconstructKey(parts));
+    const reconstructed2 = shamir.reconstruct(parts);
     const t2 = performance.now() - s2;
 
     assert.deepStrictEqual(reconstructed1, key);

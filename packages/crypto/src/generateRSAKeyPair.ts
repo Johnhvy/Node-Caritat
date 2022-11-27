@@ -2,7 +2,7 @@ import { ASYMMETRIC_ALGO } from "./config.js";
 
 import { symmetricEncrypt } from "./rsa-aes-encrypt.js";
 import crypto from "./webcrypto.js";
-const shamir = { split: Function.prototype }; // TODO: import actual Shamir secret sharing implementation.
+import * as shamir from "./shamir.js";
 
 export async function generateRSAKeyPair() {
   const { privateKey, publicKey } = await crypto.subtle.generateKey(

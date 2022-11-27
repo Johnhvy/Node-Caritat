@@ -1,5 +1,5 @@
 import { symmetricDecrypt } from "./rsa-aes-decrypt.js";
-const shamir = { reconstruct: Function.prototype }; // TODO: import actual Shamir secret sharing implementation.
+import * as shamir from "./shamir.js";
 
 export async function reconstructPrivateKey(
   encryptedPrivateKey: BufferSource,

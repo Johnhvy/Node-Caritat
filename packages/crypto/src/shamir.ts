@@ -136,19 +136,25 @@ export function reconstructByte(
  * Generates one key-part per shareholder, hiding the secret. The secret cannot
  * be guessed from shareholders, unless they can provide at least `neededParts`
  * key-parts.
- * @param rawKey The secret to hide.
+ * @param data The secret to hide.
  * @param shareHolders Number of key-parts to generate.
  * @param neededParts The minimal number of key-parts that should be necessary to
  *                    reconstruct the secret.
  */
-export function splitKey(
-  rawKey: ArrayBuffer,
+export function split(
+  data: BufferSource,
   shareHolders: u8,
   neededParts: u8
 ): Uint8Array[] {
-  const rawDataView = new DataView(rawKey);
+  const isView = ArrayBuffer.isView(data);
+  const length = data.byteLength;
+  const rawDataView = new DataView(
+    isView ? data.buffer : data,
+    isView ? data.byteOffset : 0,
+    length
+  );
 
-  const points = Array.from({ length: rawKey.byteLength }, (_, i) =>
+  const points = Array.from({ length }, (_, i) =>
     // Always use GF(2^8), so each chunk needs to be 8 bit long
     Array.from(
       generatePoints(rawDataView.getUint8(i), shareHolders, neededParts)
@@ -168,20 +174,28 @@ export function splitKey(
  * Generates the full key using the key parts.
  * @param parts Key parts from the shareholders.
  * @param neededParts If known, the amount of points necessary to reconstruct the secret.
- * @yields Each byte of the original key, in clear.
+ * @returns The original secret.
  */
-export function* reconstructKey(
-  parts: Uint8Array[],
+export function reconstruct(
+  parts: BufferSource[],
   neededParts: u8 = parts.length
-) {
+): Uint8Array {
   if (parts.length < neededParts)
     throw new Error("Not enough parts to reconstruct key");
   const bytes = parts[0].byteLength - 1;
+  const result = new Uint8Array(bytes);
+  const dataViews = parts.map((part) =>
+    ArrayBuffer.isView(part)
+      ? new DataView(part.buffer, part.byteOffset, bytes + 1)
+      : new DataView(part)
+  );
   for (let i = 0; i < bytes; i++) {
-    yield reconstructByte(
+    result[i] = reconstructByte(
       Array.from({ length: neededParts }, (_, j) => {
-        return { x: parts[j][0], y: parts[j][i + 1] };
+        return { x: dataViews[j].getUint8(0), y: dataViews[j].getUint8(i + 1) };
       })
     );
   }
+
+  return result;
 }
