@@ -27,7 +27,7 @@ export async function generateRSAKeyPair() {
 }
 
 export async function generateAndSplitKeyPair(
-  shareHolders: ArrayBuffer[],
+  shareHolders: number,
   threshold: number
 ) {
   const { encryptedPrivateKey, publicKey, secret } = await generateRSAKeyPair();
@@ -36,13 +36,13 @@ export async function generateAndSplitKeyPair(
     return {
       encryptedPrivateKey,
       publicKey,
-      secret: Array(shareHolders.length).fill(secret),
+      shares: Array(shareHolders).fill(secret),
     };
   } else {
     return {
       encryptedPrivateKey,
       publicKey,
-      secret: shamir.split(secret, shareHolders.length, threshold),
+      shares: shamir.split(secret, shareHolders, threshold),
     };
   }
 }
