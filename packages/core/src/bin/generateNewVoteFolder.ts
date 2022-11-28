@@ -97,10 +97,10 @@ const { encryptedPrivateKey, publicKey, shares } =
 function toArmordedMessage(data: ArrayBuffer) {
   const str = Buffer.from(data).toString("base64");
   const lines = [];
-  for (let i = 0; i < str.length; i += 65) {
-    lines.push(str.slice(i, i + 65));
+  for (let i = 0; i < str.length; i += 64) {
+    lines.push(str.slice(i, i + 64));
   }
-  return lines.join(" ");
+  return lines.join("\n");
 }
 
 const ballot = {
@@ -112,7 +112,7 @@ const ballot = {
   allowedVoters: parsedArgs.allowedVoters,
   publicKey: `-----BEGIN PUBLIC KEY-----\n${toArmordedMessage(
     publicKey
-  )}\n-----END PUBLIC KEY-----`,
+  )}\n-----END PUBLIC KEY-----\n`,
   encryptedPrivateKey: Buffer.from(encryptedPrivateKey).toString("base64"),
   shares: await Promise.all(
     shares.map(
@@ -126,6 +126,7 @@ const ballot = {
           ]);
           gpg.on("error", reject);
           gpg.stdin.end(raw);
+          gpg.stderr.pipe(process.stderr);
           gpg.stdout
             .toArray()
             .then((chunks) => resolve(chunks.join("")), reject);
