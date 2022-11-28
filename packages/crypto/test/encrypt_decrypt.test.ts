@@ -22,7 +22,7 @@ const privateKey = fs.readFileSync(privateKeyURL);
 it("should encrypt input", async () => {
   const encryptedData = await encryptBallot(rawData, publicKey);
   assert.ok(encryptedData.encryptedSecret.byteLength > 0);
-  assert.ok(encryptedData.data.byteLength > 0);
+  assert.ok(encryptedData.saltedCiphertext.byteLength > 0);
 });
 
 it("should be able to correctly decrypt what it has encrypted", async () => {
@@ -30,7 +30,7 @@ it("should be able to correctly decrypt what it has encrypted", async () => {
 
   const decryptedData = await decryptBallot(
     encryptedData.encryptedSecret,
-    encryptedData.data,
+    encryptedData.saltedCiphertext,
     privateKey
   );
 
