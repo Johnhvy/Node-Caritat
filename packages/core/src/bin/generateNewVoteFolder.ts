@@ -27,8 +27,7 @@ const parsedArgs = parseArgs().options({
     string: true,
   },
   "list-of-shareholders": {
-    describe:
-      "Path to the list of person that needs to receive a part of the secret. The list should be in markdown format.",
+    describe: "List in markdown format of all the shareholders.",
     normalize: true,
     string: true,
   },
@@ -49,9 +48,9 @@ const parsedArgs = parseArgs().options({
     describe: "Instructions to show in the footer of the ballot.",
     string: true,
   },
-  candidates: {
+  candidate: {
     describe:
-      "Path to the list of candidates (vote options). The list should be in markdown format.",
+      "A candidate that voter can vote for. You can specify any number of candidates",
     string: true,
     array: true,
   },
@@ -107,9 +106,9 @@ function toArmordedMessage(data: ArrayBuffer) {
 const ballot = {
   subject: parsedArgs.subject,
   headerInstructions: parsedArgs["header-instructions"],
-  candidates: parsedArgs.candidates,
+  candidates: parsedArgs.candidate,
   footerInstructions: parsedArgs["footer-instructions"],
-  method: parsedArgs.method,
+  method: parsedArgs.method ?? "Condorcet",
   allowedVoters: parsedArgs["allowed-voter"],
   publicKey: `-----BEGIN PUBLIC KEY-----\n${toArmordedMessage(
     publicKey
