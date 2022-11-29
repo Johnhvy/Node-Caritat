@@ -62,10 +62,7 @@ export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
 
 export function templateBallot(
   vote_data: VoteFileFormat,
-  user: UserCredentials = {
-    username: null,
-    emailAddress: null,
-  }
+  user: UserCredentials = undefined
 ): string {
   const subject: string = vote_data.subject
     ? yaml.dump({ subject: vote_data.subject }) + "\n"
@@ -83,7 +80,7 @@ export function templateBallot(
 
   const template: BallotFileFormat = {
     preferences: [],
-    author: `${user.username} <${user.emailAddress}>`,
+    ...(user && { author: `${user.username} <${user.emailAddress}>` }),
     poolChecksum: vote_data.checksum,
   };
   template.preferences.push(
