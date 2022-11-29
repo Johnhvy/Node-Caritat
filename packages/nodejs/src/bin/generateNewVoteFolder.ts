@@ -25,7 +25,7 @@ const { values: argv } = parseArgs({
       type: "string",
       short: "s",
     },
-    candidates: {
+    candidate: {
       type: "string",
       multiple: true,
       short: "c",
@@ -95,14 +95,22 @@ if (argv["nodejs-repository-path"] == null) {
 const tscMembersList = await readReadme(readLines({ input, crlfDelay }));
 const tscMembersArray = tscMembersList
   .split("\n")
-  .map((voter) => voter.replace(/^[-*]\s?/, ""));
+  .map((voter) => voter.replace(/^[-*]\s?/, ""))
+  .filter(Boolean);
 
 input.destroy?.();
 
 function* passCLIOptions(...args) {
   for (const arg of args.filter(Object.prototype.hasOwnProperty, argv)) {
-    yield `--${arg}`;
-    yield argv[arg];
+    if (Array.isArray(argv[arg])) {
+      for (const value of argv[arg]) {
+        yield `--${arg}`;
+        yield value;
+      }
+    } else {
+      yield `--${arg}`;
+      yield argv[arg];
+    }
   }
 }
 const headerInstructions = `Please set a score to proposal according to your preferences.
@@ -120,7 +128,7 @@ spawn(
       "gpg-binary",
       "subject",
       "footer-instructions",
-      "candidates"
+      "candidate"
     ),
     "--list-of-shareholders",
     tscMembersList,
