@@ -1,0 +1,19 @@
+{
+  "name": "@aduh95/caritat-nodejs",
+  "version": "0.0.0",
+  "files": [
+    "dist/"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/stduhpf/caritat.git"
+  },
+  "dependencies": {
+    "@aduh95/caritat": "workspace:*"
+  },
+  "exports": {
+    "./package.json": "./package.json"
+  },
+  "type": "module"
+}
