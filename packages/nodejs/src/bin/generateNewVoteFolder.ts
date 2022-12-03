@@ -122,7 +122,8 @@ To abstain, keep all the propositions tied.`;
 spawn(
   execPath,
   [
-    "/Users/duhamean/Documents/caritat/packages/core/dist/bin/generateNewVoteFolder.js",
+    // TODO: fix path
+    "./packages/core/dist/bin/generateNewVoteFolder.js",
     ...passCLIOptions(
       "directory",
       "gpg-binary",
