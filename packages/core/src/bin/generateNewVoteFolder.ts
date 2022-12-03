@@ -10,8 +10,11 @@ import * as yaml from "js-yaml";
 
 // @ts-ignore
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
+import cliArgsForGit from "../utils/cliArgsForGit.js";
+import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
 const parsedArgs = parseArgs().options({
+  ...cliArgsForGit,
   directory: {
     describe: "The directory where the vote files should be created",
     demandOption: true,
@@ -59,6 +62,10 @@ const parsedArgs = parseArgs().options({
     string: true,
     array: true,
   },
+  "disable-git": {
+    describe: "Disables the use of git",
+    boolean: true,
+  },
 }).argv;
 
 if (!parsedArgs.directory) {
@@ -75,7 +82,8 @@ try {
     await fs.mkdir(directory, { recursive: true });
   } else throw err;
 }
-const yamlFile = await fs.open(path.join(directory, "vote.yml"), "wx");
+const voteFilePath = path.join(directory, "vote.yml");
+const voteFile = await fs.open(voteFilePath, "wx");
 
 const GPG_BIN = parsedArgs["gpg-binary"] ?? process.env.GPG_BIN ?? "gpg";
 
@@ -148,7 +156,19 @@ const yamlString = yaml.dump(ballot);
 
 const vote = loadYmlString<VoteFileFormat>(yamlString);
 
-await fs.writeFile(path.join(directory, "public.pem"), ballot.publicKey);
-await fs.writeFile(path.join(directory, "ballot.yml"), templateBallot(vote));
-await yamlFile.writeFile(yamlString);
-await yamlFile.close();
+const publicKeyPath = path.join(directory, "public.pem");
+const ballotPath = path.join(directory, "ballot.yml");
+
+await fs.writeFile(publicKeyPath, ballot.publicKey);
+await fs.writeFile(ballotPath, templateBallot(vote));
+await voteFile.writeFile(yamlString);
+await voteFile.close();
+
+if (!parsedArgs["disable-git"]) {
+  await runChildProcessAsync(GPG_BIN, [
+    "add",
+    publicKeyPath,
+    ballotPath,
+    voteFilePath,
+  ]);
+}
