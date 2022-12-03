@@ -135,7 +135,10 @@ const ballot = {
             gpg.stdout
               // @ts-ignore
               .toArray()
-              .then((chunks) => resolve(chunks.join("")), reject);
+              .then(
+                (chunks) => resolve(chunks.join("").replaceAll("\r\n", "\n")),
+                reject
+              );
           })
       )
     )
