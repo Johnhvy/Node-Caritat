@@ -20,8 +20,8 @@ const DEGREE_8_PRIMITIVE_POLYNOMIALS = [
 ];
 const PRIMITIVE = DEGREE_8_PRIMITIVE_POLYNOMIALS[0];
 
-const logs = Array(MAX_VALUE);
-const exps = Array(ORDER_OF_GALOIS_FIELD);
+const logs = Array(ORDER_OF_GALOIS_FIELD);
+const exps = Array(MAX_VALUE);
 
 // Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2^8)
 for (let i = 0, x = 1; i < MAX_VALUE; i++) {
