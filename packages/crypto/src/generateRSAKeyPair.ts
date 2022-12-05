@@ -16,7 +16,7 @@ export async function generateRSAKeyPair() {
   );
   const [{ saltedCiphertext: encryptedPrivateKey, secret }, rawPublicKey] =
     await Promise.all([
-      symmetricEncrypt(await crypto.subtle.exportKey("pkcs8", privateKey)),
+      crypto.subtle.exportKey("pkcs8", privateKey).then(symmetricEncrypt),
       crypto.subtle.exportKey("spki", publicKey),
     ]);
   return {
