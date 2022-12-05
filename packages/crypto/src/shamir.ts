@@ -15,29 +15,36 @@ const ORDER_OF_GALOIS_FIELD = 2 ** BITS;
 const MAX_VALUE = ORDER_OF_GALOIS_FIELD - 1;
 // https://www.partow.net/programming/polynomials/index.html#deg08
 const DEGREE_8_PRIMITIVE_POLYNOMIALS = [
-  0b11101, 0b101011, 0b1011111, 0b1100011, 0b1100101, 0b1101001, 0b11000011,
-  0b11100111,
+  0b1_0001_1101, 0b101011, 0b1011111, 0b1100011, 0b1100101, 0b1101001,
+  0b11000011, 0b11100111,
 ];
 const PRIMITIVE = DEGREE_8_PRIMITIVE_POLYNOMIALS[0];
 
 const logs = Array(ORDER_OF_GALOIS_FIELD);
-const exps = Array(MAX_VALUE);
+const exps = Array(MAX_VALUE); // The set of non-zero elements in GF(q) is an abelian group under the multiplication, of order q – 1.
 
-// Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2^8)
+// Algorithm to generate lookup tables for corresponding exponential and logarithm in GF(2^8).
+// Those lookup tables are necessary to perform polynomial divisions. It is also
+// used to speed up the multiplication operation.
 for (let i = 0, x = 1; i < MAX_VALUE; i++) {
   exps[i] = x;
   logs[x] = i;
-  x *= 2; // P(X) = P(X)*X
+  // X+0 is a generator of GF(2^8), meaning that all non-zero elements in
+  // GF(2^8) can be expressed as (X+0)^k mod 2^8.
+  x *= 0b10;
+  // x is order 7 or less, we multiply by (X+0) which is order 1, so we are
+  // guaranteed to have x of order 8 or less. To get the back into GF(2^8), we
+  // need to substract the PRIMITIVE if x>2^8.
   if (x >= ORDER_OF_GALOIS_FIELD) {
-    // if deg(P) >= BITS
+    // if deg(X) >= BITS
     x ^= PRIMITIVE;
-    x %= ORDER_OF_GALOIS_FIELD;
-    // P(X) = P(X) + PRIMITIVE(X) mod X^BITS
+    // P(X) = P(X) + PRIMITIVE(X) mod 2^8 = P(X) - PRIMITIVE mod 2^8
   }
 }
 
 /**
- * Multiply two polynomials in GF(2^8).
+ * Multiply two polynomials in GF(2^8). This is equal to
+ * (a*b)^PRIMITIVE when (a*b)≥256, else it's equal to (a*b).
  * @see https://en.wikipedia.org/wiki/Finite_field_arithmetic#Generator_based_tables
  */
 function multiplyPolynomials(a: u8, b: u8): u8 {
@@ -163,10 +170,12 @@ export function split(
     )
   );
   return Array.from({ length: shareHolders }, (_, i) => {
-    const part = new Uint8Array(1 + points.length);
-    part[0] = i + 1;
-    for (let j = 0; j < points.length; j++) {
-      part[j + 1] = points[j][i].y;
+    const part = new Uint8Array(1 + length); // The +1 here is because we need
+    //                                          to store the abscisse for each parts.
+    part[length] = i + 1; // The +1 here is because the abscisse of 0 (the
+    //                       constant term) is reserved for storing the secret.
+    for (let j = 0; j < length; j++) {
+      part[j] = points[j][i].y;
     }
     return part;
   });
@@ -194,7 +203,7 @@ export function reconstruct(
   for (let i = 0; i < bytes; i++) {
     result[i] = reconstructByte(
       Array.from({ length: neededParts }, (_, j) => {
-        return { x: dataViews[j].getUint8(0), y: dataViews[j].getUint8(i + 1) };
+        return { x: dataViews[j].getUint8(bytes), y: dataViews[j].getUint8(i) };
       })
     );
   }
