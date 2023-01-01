@@ -1,7 +1,0 @@
-{
-  "name": "caritat-shared-secret",
-  "type": "module",
-  "scripts": {
-    "test": "node tests"
-  }
-}
