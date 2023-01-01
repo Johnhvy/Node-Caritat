@@ -6,7 +6,7 @@ import crypto from "./webcrypto.js";
  * - 0b10101010 represents X^7+X^5+X^3+X, in which X can be either 0 or 1.
  * - 0b10011001 represents X^7+X^4+X^3+1, in which X can be either 0 or 1.
  *
- * u8 coincides with a byte, which is conveninent for implementation puproses.
+ * u8 coincides with a byte, which is convenient for implementation purposes.
  */
 type u8 = number;
 
