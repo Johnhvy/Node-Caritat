@@ -13,7 +13,7 @@ import * as yaml from "js-yaml";
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
-import { getEnv } from "../voteUsingGit.js";
+import { getEnv, voteAndCommit } from "../voteUsingGit.js";
 
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
@@ -84,6 +84,15 @@ const parsedArgs = parseArgs().options({
     describe: "Force the cloning of the remote repository in a temp folder",
     boolean: true,
   },
+  vote: {
+    describe: "Cast a vote just after the vote is initialized",
+    boolean: true,
+  },
+  abstain: {
+    describe:
+      "Use this flag to create a blank ballot and skip the voting if --vote is provided",
+    type: "boolean",
+  },
 }).argv;
 
 if (!parsedArgs.directory) {
@@ -91,6 +100,7 @@ if (!parsedArgs.directory) {
 }
 
 let directory = path.resolve(parsedArgs.directory);
+let subPath = parsedArgs.directory;
 
 let env, cwd: string;
 
@@ -147,6 +157,9 @@ if (!parsedArgs["disable-git"]) {
         cloneInTempFolder(GIT_BIN),
       ]);
     }
+  } else {
+    cwd = directory;
+    subPath = ".";
   }
 }
 
@@ -259,6 +272,14 @@ if (!parsedArgs["disable-git"]) {
     { spawnArgs }
   );
 
+  if (parsedArgs.vote) {
+    await voteAndCommit({
+      ...env,
+      cwd,
+      subPath,
+    });
+  }
+
   if (parsedArgs.repo) {
     await runChildProcessAsync(
       GIT_BIN,
@@ -274,4 +295,8 @@ if (!parsedArgs["disable-git"]) {
       await fs.rm(cwd, { recursive: true, force: true });
     }
   }
+} else if (parsedArgs.vote) {
+  throw new Error(
+    "Voting without git has not yet been implemented in this script, please generate the ballot manually or use git"
+  );
 }

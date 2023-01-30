@@ -85,29 +85,18 @@ export async function getEnv(parsedArgs) {
   };
 }
 
-export default async function voteUsingGit({
+export async function voteAndCommit({
   GIT_BIN,
   EDITOR,
-  repoUrl,
-  branch,
+  cwd,
   subPath,
   handle,
   username,
   emailAddress,
   abstain,
   signCommits,
-  doNotCleanTempFiles,
 }) {
-  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
   const spawnArgs = { cwd };
-
-  console.log("Cloning remote repository...");
-  await runChildProcessAsync(
-    GIT_BIN,
-    ["clone", "--branch", branch, "--no-tags", "--depth=1", repoUrl, "."],
-    { spawnArgs }
-  );
-
   const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
 
   const author = `${username} <${emailAddress}>`;
@@ -210,6 +199,42 @@ export default async function voteUsingGit({
       spawnArgs,
     }
   );
+}
+
+export default async function voteUsingGit({
+  GIT_BIN,
+  EDITOR,
+  repoUrl,
+  branch,
+  subPath,
+  handle,
+  username,
+  emailAddress,
+  abstain,
+  signCommits,
+  doNotCleanTempFiles,
+}) {
+  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
+  const spawnArgs = { cwd };
+
+  console.log("Cloning remote repository...");
+  await runChildProcessAsync(
+    GIT_BIN,
+    ["clone", "--branch", branch, "--no-tags", "--depth=1", repoUrl, "."],
+    { spawnArgs }
+  );
+
+  await voteAndCommit({
+    GIT_BIN,
+    EDITOR,
+    cwd,
+    subPath,
+    handle,
+    username,
+    emailAddress,
+    abstain,
+    signCommits,
+  });
 
   console.log("Pushing to the remote repository...");
   try {

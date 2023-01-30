@@ -51,6 +51,15 @@ const { values: argv } = parseArgs({
       type: "string",
       short: "f",
     },
+    vote: {
+      type: "boolean",
+      describe: "Register a vote just after the vote is initialized",
+    },
+    abstain: {
+      type: "boolean",
+      describe:
+        "Use this flag to create a blank ballot and skip the voting if --vote is provided",
+    },
     help: {
       type: "boolean",
       short: "h",
@@ -155,11 +164,13 @@ spawn(
     // TODO: fix path
     "./packages/core/dist/src/bin/generateNewVoteFolder.js",
     ...passCLIOptions(
+      "abstain",
       "branch",
+      "candidate",
+      "footer-instructions",
       "gpg-binary",
       "subject",
-      "footer-instructions",
-      "candidate"
+      "vote"
     ),
     "--repo",
     argv.remote ?? "git@github.com:nodejs/TSC.git",
