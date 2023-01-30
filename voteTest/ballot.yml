@@ -1,0 +1,11 @@
+# Please set a score to proposal according to your preferences.
+# You should set the highest score to your favorite option.
+# Negative scores are allowed, only the order matters.
+# You can tied two or more proposals if you have no preference.
+# To abstain, keep all the propositions tied.
+
+preferences:
+  - title: lol
+    score: 0
+poolChecksum: >-
+  UdtmMvxEusODJ+qmMXpPNlokLsFtiM/a2HNzIQBnIq814dxO0RzNEK78wt4MAAoa0WeH+of6vZT9Y8daQmm/Sw==
