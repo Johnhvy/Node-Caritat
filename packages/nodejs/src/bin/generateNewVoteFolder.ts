@@ -10,9 +10,15 @@ import { spawn } from "node:child_process";
 
 const { values: argv } = parseArgs({
   options: {
+    remote: {
+      type: "string",
+      describe:
+        "Name or URL to the remote repo. If not provided, SSH will be used.",
+    },
     directory: {
       type: "string",
       short: "d",
+      default: "votes",
     },
     "gpg-binary": {
       type: "string",
@@ -21,9 +27,20 @@ const { values: argv } = parseArgs({
       type: "string",
       short: "r",
     },
+    "tsc-repository-path": {
+      type: "string",
+      description:
+        "Path to the local nodejs/TSC repository. If not provided, it will be fetched from GitHub",
+    },
     subject: {
       type: "string",
       short: "s",
+    },
+    branch: {
+      type: "string",
+      short: "b",
+      describe: "Name of the branch and subdirectory to use for the tests",
+      demandOption: true,
     },
     candidate: {
       type: "string",
@@ -54,6 +71,11 @@ if (argv.help) {
     "\t--nodejs-repository-path (alias -r): Path to a local clone of " +
       "nodejs/node. If not provided, files will be downloaded from HTTPS."
   );
+  console.log(
+    "\t--tsc-repository-path (alias -r): Path to a local clone of " +
+      "nodejs/TSC. If not provided, it will be cloned from SSH (or HTTPS if " +
+      "an HTTPS remote is provided)."
+  );
   exit(0);
 }
 
@@ -66,9 +88,17 @@ if (argv.version) {
   exit(0);
 }
 
+if (!argv.branch) {
+  throw new Error("You must pass a branch name");
+}
+if (!argv.subject) {
+  throw new Error("You must pass a subject");
+}
+
 let input, crlfDelay;
 if (argv["nodejs-repository-path"] == null) {
   input = await new Promise((resolve, reject) => {
+    // TODO: switch to using fetch when dropping support for Node.js 16.x.
     const req = get(
       "https://raw.githubusercontent.com/nodejs/node/main/README.md",
       (res) => {
@@ -123,14 +153,22 @@ spawn(
   execPath,
   [
     // TODO: fix path
-    "./packages/core/dist/bin/generateNewVoteFolder.js",
+    "./packages/core/dist/src/bin/generateNewVoteFolder.js",
     ...passCLIOptions(
-      "directory",
+      "branch",
       "gpg-binary",
       "subject",
       "footer-instructions",
       "candidate"
     ),
+    "--repo",
+    argv.remote ?? "git@github.com:nodejs/TSC.git",
+    ...(argv["tsc-repository-path"]
+      ? [
+          "--directory",
+          join(argv["tsc-repository-path"], argv.directory, argv.branch),
+        ]
+      : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
     "--list-of-shareholders",
     tscMembersList,
     "--threshold",
