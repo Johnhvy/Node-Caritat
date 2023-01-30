@@ -35,6 +35,10 @@ const parsedArgs = parseArgs().options({
     normalize: true,
     string: true,
   },
+  ["gpg-sign"]: {
+    alias: "S",
+    describe: "GPG-sign commits.",
+  },
   method: {
     describe: "Vote method to use. Defaults to Condorcet.",
     string: true,

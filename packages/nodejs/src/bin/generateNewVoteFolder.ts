@@ -23,6 +23,11 @@ const { values: argv } = parseArgs({
     "gpg-binary": {
       type: "string",
     },
+    ["gpg-sign"]: {
+      type: "boolean",
+      short: "S",
+      describe: "GPG-sign commits.",
+    },
     "nodejs-repository-path": {
       type: "string",
       short: "r",
@@ -144,11 +149,11 @@ function* passCLIOptions(...args) {
     if (Array.isArray(argv[arg])) {
       for (const value of argv[arg]) {
         yield `--${arg}`;
-        yield value;
+        if (value !== true) yield value;
       }
     } else {
       yield `--${arg}`;
-      yield argv[arg];
+      if (argv[arg] !== true) yield argv[arg];
     }
   }
 }
@@ -169,6 +174,7 @@ spawn(
       "candidate",
       "footer-instructions",
       "gpg-binary",
+      "gpg-sign",
       "subject",
       "vote"
     ),
