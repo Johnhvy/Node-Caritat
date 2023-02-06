@@ -13,7 +13,16 @@ const { values: argv } = parseArgs({
     remote: {
       type: "string",
       describe:
-        "Name or URL to the remote repo. If not provided, SSH will be used.",
+        "Name or URL to the remote repo. If not provided, SSH pointing to --github-repo-name will be used.",
+    },
+    ["github-repo-name"]: {
+      type: "string",
+      describe: "GitHub repository, in the format owner/repo",
+      default: "nodejs/TSC",
+    },
+    "create-pull-request": {
+      type: "boolean",
+      describe: "Use GitHub API to create a Pull Request. Requires gh CLI tool",
     },
     directory: {
       type: "string",
@@ -136,11 +145,10 @@ if (argv["nodejs-repository-path"] == null) {
   crlfDelay = Infinity;
 }
 
-const tscMembersList = await readReadme(readLines({ input, crlfDelay }));
-const tscMembersArray = tscMembersList
-  .split("\n")
-  .map((voter) => voter.replace(/^[-*]\s?/, ""))
-  .filter(Boolean);
+const tscMembersArray = [];
+for await (const member of readReadme(readLines({ input, crlfDelay }))) {
+  tscMembersArray.push(member);
+}
 
 input.destroy?.();
 
@@ -179,22 +187,53 @@ spawn(
       "vote"
     ),
     "--repo",
-    argv.remote ?? "git@github.com:nodejs/TSC.git",
+    argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
     ...(argv["tsc-repository-path"]
       ? [
           "--directory",
           join(argv["tsc-repository-path"], argv.directory, argv.branch),
         ]
       : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
-    "--list-of-shareholders",
-    tscMembersList,
-    "--threshold",
+    "--gpg-key-server-url",
+    "hkps://keys.openpgp.org",
+    ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
+    "--shareholders-threshold",
     Math.ceil(tscMembersArray.length / 4),
+    ...tscMembersArray.flatMap((voter) => [
+      "--allowed-voter",
+      `${voter.name} <${voter.email}>`,
+    ]),
     "--header-instructions",
     headerInstructions,
-    ...tscMembersArray.flatMap((voter) => ["--allowed-voter", voter]),
   ],
   {
     stdio: "inherit",
   }
-).on("exit", (code) => exit(code));
+).on("exit", (code) => {
+  if (code !== 0 || !argv["create-pull-request"]) exit(code);
+
+  spawn(
+    "gh",
+    [
+      "api",
+      `repos/${argv["github-repo-name"]}/pulls`,
+      "-F",
+      "base=main",
+      "-F",
+      "head",
+      argv.branch,
+      "-F",
+      "title",
+      argv.subject,
+      "-F",
+      "body",
+      `The following users are invited to participate in this vote:
+
+${tscMembersArray.map(({ handle }) => `- @${handle}`).join("\n")}
+
+Vote instructions will follow.`,
+      "--jq '.number'",
+    ],
+    { stdio: "inherit" }
+  ).on("exit", exit);
+});

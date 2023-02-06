@@ -59,6 +59,21 @@ and create the JSON file containing your encrypted ballot using GitHub web UI.
 
 ### Setup a vote using Caritat
 
+#### Node.js script
+
+```sh
+npx --package=@aduh95/caritat generateNewVoteFolder \
+ --repo "<repo-url>" --branch "<new-vote-branch-name>" \
+ --directory "<relative-path-to-new-vote-folder>" \
+ --subject "Vote subject" \
+ --candidate "Candidate 1" --candidate "etc." \
+ --allowed-voter "voter@example.com" --allowed-voter "etc@example.com" \
+ --shareholder "shareholder@example.com" --shareholder "etc@example.com" \
+ --shareholders-threshold 2
+```
+
+#### Shell script / `git`-less setup
+
 Use the `sh/generateNewVoteFolder.sh` script.
 
 ```sh

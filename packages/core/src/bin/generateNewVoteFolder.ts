@@ -24,6 +24,11 @@ const parsedArgs = parseArgs().options({
     demandOption: false,
     string: true,
   },
+  base: {
+    type: "string",
+    describe: "Name of the base branch",
+    default: "main",
+  },
   directory: {
     describe:
       "The directory where the vote files should be created. If an absolute path is given, the local git repo will be used unless git was disabled",
@@ -39,16 +44,26 @@ const parsedArgs = parseArgs().options({
     alias: "S",
     describe: "GPG-sign commits.",
   },
+  ["gpg-key-server-url"]: {
+    describe:
+      "If supplied, indicates where to find the public keys for share holders if they are not available locally",
+  },
+  ["gpg-trust-model"]: {
+    describe:
+      "Set what trust model GnuPG should follow. See GPG documentation for more information.",
+    default: "always",
+  },
   method: {
     describe: "Vote method to use. Defaults to Condorcet.",
     string: true,
   },
-  "list-of-shareholders": {
-    describe: "List in markdown format of all the shareholders.",
-    normalize: true,
+  shareholder: {
+    describe:
+      "A shareholder, for who a key part will be generated and PGP-encrypted. You can specify any number of shareholders.",
     string: true,
+    array: true,
   },
-  threshold: {
+  ["shareholders-threshold"]: {
     describe:
       "Minimal number of shareholders required to reconstruct the vote private key. Defaults to 1.",
     string: true,
@@ -118,6 +133,8 @@ async function cloneInTempFolder(GIT_BIN) {
     [
       "clone",
       "--single-branch",
+      "--branch",
+      parsedArgs.base,
       "--no-tags",
       "--depth=1",
       parsedArgs.repo,
@@ -173,20 +190,13 @@ const voteFile = await fs.open(voteFilePath, "wx");
 
 const GPG_BIN = parsedArgs["gpg-binary"] ?? process.env.GPG_BIN ?? "gpg";
 
-const shareHolders = [];
-const mdListItem = /^\s?[-*]\s?([^<]+) <([^>]+)>\s*$/;
-for await (const line of parsedArgs["list-of-shareholders"].split("\n")) {
-  if (line === "") continue;
-
-  const match = mdListItem.exec(line);
-  if (match === null) {
-    throw new Error("Malformed markdown input");
-  }
-  shareHolders.push({ name: match[1], email: match[2] });
-}
+const shareHolders = parsedArgs["shareholder"];
 
 const { encryptedPrivateKey, publicKey, shares } =
-  await generateAndSplitKeyPair(shareHolders.length, parsedArgs.threshold);
+  await generateAndSplitKeyPair(
+    shareHolders.length,
+    Number(parsedArgs["shareholders-threshold"])
+  );
 
 function toArmordedMessage(data: ArrayBuffer) {
   const str = Buffer.from(data).toString("base64");
@@ -216,12 +226,14 @@ const ballot = {
             const gpg = spawn(GPG_BIN, [
               "--encrypt",
               "--armor",
-              "--auto-key-locate",
-              "hkps://keys.openpgp.org",
+              ...(parsedArgs["gpg-key-server-url"]
+                ? ["--auto-key-locate", parsedArgs["gpg-key-server-url"]]
+                : []),
               "--trust-model",
-              "always",
-              "-r",
-              shareHolders[i].email,
+              parsedArgs["gpg-trust-model"],
+              "--no-encrypt-to",
+              "--recipient",
+              shareHolders[i],
             ]);
             gpg.on("error", reject);
             gpg.stdin.end(raw);
