@@ -67,34 +67,44 @@ sh/generateNewVoteFolder.sh <path-to-dir>
 
 This will generate three files that will be used to let participants vote. You
 can then commit those files and push this to a new branch (optionally open the
-vote pull request).
-If you are participating to that vote yourself, you should cast your vote right away
-using one of the methods described above.
+vote pull request). If you are participating to that vote yourself, you should
+cast your vote right away using one of the methods described above.
 
 ## FAQ
 
 ### Who do I need to trust?
 
 - As a voter, you need to trust the instigator for:
-  - not leaking the private key before the vote closes.
-  - not basing their vote in function of what other has voted (the instigator
-    should always vote first).
+  - using a reliable hardware and software to generate the private key and
+    encrypt it, and to not store it anywhere.
+  - not leaking the private key before the vote closes if they have kept the
+    private key (which they should not do).
+  - not basing their vote in function of what other has voted (having the
+    instigator always vote first helps alleviate this issue).
+- As a voter, you need to trust the panel of secret holders for:
+  - not reconstitue the private key before the vote closes.
+  - not leaking the private key before the vote closes (if they have
+    reconstructed the private key, which they should not do).
+  - not basing their vote in function of what other has voted (if they have
+    reconstructed the private key, which they should not do).
 - As a voter or the instigator, you need to trust the git commits are genuine.
-  Enforcing GPG signing commits can help with that.
+  Enforcing the use of PGP signatures on vote commits can help with that.
 
 ### Can a participant tamper with the votes?
 
 When using git, a participant could force push the branch and remove or modify
-ballots from other participants. Adding protection on vote where the vote is
-happening can help prevent this.
+ballots from other participants. Adding protection on the branch on which the
+vote is happening can help prevent this.
 
 ### When voting using this tool, are my choices public?
 
 Ballots are encrypted using a public key generated for the vote, only someone in
-possession for the private key (the vote instigator) is theoretically able to
-decipher the ballot. Unless the vote needs to stay private, a recommended
-practice is to publish the vote private key, effectively making everyone's
-choices public.
+possession for the private key is theoretically able to decipher the ballot.
+Typically, no one should be in possession of the full private key (although
+there is no way of ensuring that, see "Who do I need to trust?" section) until
+the vote closes. Unless the vote needs to stay private, a recommended practice
+is to publish the vote private key, effectively making everyone's choices
+public.
 
 Making the non-encrypted ballot available publicly is a great way to ensure the
 election was not rigged. Everyone can check that the ballot counted as their has
@@ -114,7 +124,7 @@ trusted).
 
 ### How are the votes authenticated?
 
-Voters can sign their commit using GPG. When doing the counting, the system uses
+Voters can sign their commit using PGP. When doing the counting, the system uses
 the git commit metadata to attribute a ballot to a voter. If a voter casts
 several ballots, the system only counts the most recent one.
 
@@ -122,3 +132,10 @@ several ballots, the system only counts the most recent one.
 
 The vote ballots cannot be deciphered, the process needs to start again (unless
 you have a quantum computer at home).
+
+### Could this tool used for any elections?
+
+The license makes no restrictions on how this tool should be used, but keep in
+mind that, as any electronic voting system, it can only be trusted as long as
+the unanonymized vote ballots are made public as soon as the vote closed, which
+may or may not be OK depending on the type of election you are using this for.
