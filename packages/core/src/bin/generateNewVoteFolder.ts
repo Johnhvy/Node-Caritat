@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
+import { spawn } from "node:child_process";
+import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { spawn } from "node:child_process";
+import { stdin, stdout } from "node:process";
 import parseArgs from "../utils/parseArgs.js";
 import { loadYmlString, templateBallot, VoteFileFormat } from "../parser.js";
 
@@ -250,17 +252,39 @@ const ballot = {
     )
   ).filter(String),
 };
-const yamlString = yaml.dump(ballot);
-
-const vote = loadYmlString<VoteFileFormat>(yamlString);
+let yamlString = yaml.dump(ballot);
+await voteFile.writeFile(yamlString);
+await voteFile.close();
 
 const publicKeyPath = path.join(directory, "public.pem");
 const ballotPath = path.join(directory, "ballot.yml");
+let ballotContent;
+while (true) {
+  const vote = loadYmlString<VoteFileFormat>(yamlString);
+
+  ballotContent = templateBallot(vote);
+
+  console.log("Here's how a ballot will look like:\n\n");
+  console.log(ballotContent);
+  stdout.write("\nIs it ready to commit? [Y/n] ");
+  stdin.resume();
+  let chars = await once(stdin, "data");
+  stdin.pause();
+  if (
+    chars[0][0] === 0x6e || // n
+    chars[0][0] === 0x4e // N
+  ) {
+    console.log("Vote template file is ready for edit.");
+    await runChildProcessAsync(
+      env?.EDITOR ?? (os.platform() === "win32" ? "notepad" : "vi"),
+      [voteFilePath]
+    );
+    yamlString = await fs.readFile(voteFilePath, "utf-8");
+  } else break;
+}
 
 await fs.writeFile(publicKeyPath, ballot.publicKey);
-await fs.writeFile(ballotPath, templateBallot(vote));
-await voteFile.writeFile(yamlString);
-await voteFile.close();
+await fs.writeFile(ballotPath, ballotContent);
 
 if (!parsedArgs["disable-git"]) {
   const { GIT_BIN, signCommits, username, emailAddress, doNotCleanTempFiles } =
