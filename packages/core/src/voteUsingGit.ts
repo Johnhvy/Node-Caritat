@@ -81,7 +81,7 @@ export async function getEnv(parsedArgs) {
     emailAddress,
     abstain: parsedArgs.abstain,
     signCommits: parsedArgs["gpg-sign"] === true,
-    doNotCleanTempFiles: parsedArgs.hasOwnProperty("do-not-clean"),
+    doNotCleanTempFiles: parsedArgs["do-not-clean"],
   };
 }
 
