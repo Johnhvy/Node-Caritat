@@ -25,6 +25,8 @@ import type VoteResult from "./votingMethods/VoteResult.js";
 //    git config --global core.autocrlf false
 //  then reset to the current values
 
+// TODO Add an option to pass shared key parts
+
 // TODO add GPG argument.
 export const cliArgs = {
   ...cliArgsForGit,
@@ -130,6 +132,7 @@ export default async function countFromGit({
   if (!privateKey) {
     const encryptedKeyFile = path.join(cwd, "privateKey.enc");
     await fs.writeFile(encryptedKeyFile, vote.voteFileData.encryptedPrivateKey);
+    // TODO this should be handled by WebCrypto because encryptedPrivateKey was encrypted with WebCrypto
     privateKey = await runChildProcessAsync("gpg", ["-d", encryptedKeyFile], {
       captureStdout: true,
       spawnArgs,
