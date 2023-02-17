@@ -43,6 +43,7 @@ const { values: argv } = parseArgs({
     },
     "tsc-repository-path": {
       type: "string",
+      short: "R",
       description:
         "Path to the local nodejs/TSC repository. If not provided, it will be fetched from GitHub",
     },
@@ -74,6 +75,10 @@ const { values: argv } = parseArgs({
       describe:
         "Use this flag to create a blank ballot and skip the voting if --vote is provided",
     },
+    "do-not-clean": {
+      type: "boolean",
+      describe: "Use this flag to keep temp files on the local FS",
+    },
     help: {
       type: "boolean",
       short: "h",
@@ -86,6 +91,7 @@ const { values: argv } = parseArgs({
 });
 
 if (argv.help) {
+  // TODO parse args subjects
   console.log("Options:");
   console.log(
     "\t--directory (alias -d): Path where to create the new directory."
@@ -95,10 +101,11 @@ if (argv.help) {
       "nodejs/node. If not provided, files will be downloaded from HTTPS."
   );
   console.log(
-    "\t--tsc-repository-path (alias -r): Path to a local clone of " +
+    "\t--tsc-repository-path (alias -R): Path to a local clone of " +
       "nodejs/TSC. If not provided, it will be cloned from SSH (or HTTPS if " +
       "an HTTPS remote is provided)."
   );
+  console.log("\t--subject (alias -s): Subject of vote.");
   exit(0);
 }
 
@@ -184,7 +191,8 @@ spawn(
       "gpg-binary",
       "gpg-sign",
       "subject",
-      "vote"
+      "vote",
+      "do-not-clean"
     ),
     "--repo",
     argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
@@ -198,7 +206,8 @@ spawn(
     "hkps://keys.openpgp.org",
     ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
     "--shareholders-threshold",
-    Math.ceil(tscMembersArray.length / 4),
+    2,
+    //Math.ceil(tscMembersArray.length / 4),
     ...tscMembersArray.flatMap((voter) => [
       "--allowed-voter",
       `${voter.name} <${voter.email}>`,
