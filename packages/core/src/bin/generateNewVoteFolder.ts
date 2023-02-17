@@ -238,7 +238,7 @@ const ballot = {
               shareHolders[i],
             ]);
             gpg.on("error", reject);
-            gpg.stdin.end(raw);
+            gpg.stdin.end(new Uint8Array(raw));
             gpg.stderr.pipe(process.stderr);
             gpg.stdout
               // @ts-ignore
