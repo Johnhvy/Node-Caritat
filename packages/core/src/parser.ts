@@ -9,6 +9,7 @@ export interface VoteFileFormat {
   method: VoteMethod;
   publicKey: string;
   encryptedPrivateKey: string;
+  shares: string[];
   subject?: string;
   headerInstructions?: string;
   footerInstructions?: string;
