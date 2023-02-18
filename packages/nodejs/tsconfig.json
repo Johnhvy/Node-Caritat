@@ -5,7 +5,8 @@
     "outDir": "./dist",
     "moduleResolution": "node",
     "watch": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "rootDir": "src"
   },
   "include": ["./src/**/*.ts"]
 }

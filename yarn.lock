@@ -40,6 +40,7 @@ __metadata:
     decryptBallot: dist/bin/decryptBallot.js
     encryptBallot: dist/bin/encryptBallot.js
     extractEncryptedPrivateKey: dist/bin/extractEncryptedPrivateKey.js
+    generateNewVoteFolder: dist/bin/generateNewVoteFolder.js
     voteOnGitHub: dist/bin/voteOnGitHub.js
     voteUsingGit: dist/bin/voteUsingGit.js
   languageName: unknown
