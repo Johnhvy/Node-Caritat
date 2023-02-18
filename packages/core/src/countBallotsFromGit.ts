@@ -146,13 +146,13 @@ export default async function countFromGit({
   if (!privateKey) {
     if (secret) {
       privateKey = await symmetricDecrypt(
-        vote.voteFileData.encryptedPrivateKey,
+        Buffer.from(vote.voteFileData.encryptedPrivateKey),
         Buffer.from(secret)
       );
     } else {
       privateKey = await reconstructSplitKey(
-        vote.voteFileData.encryptedPrivateKey,
-        keyParts
+        Buffer.from(vote.voteFileData.encryptedPrivateKey),
+        keyParts?.map(Buffer.from)
       );
     }
   }
