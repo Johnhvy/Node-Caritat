@@ -182,7 +182,7 @@ spawn(
   execPath,
   [
     // TODO: fix path
-    "./packages/core/dist/src/bin/generateNewVoteFolder.js",
+    "./packages/core/dist/bin/generateNewVoteFolder.js",
     ...passCLIOptions(
       "abstain",
       "branch",
