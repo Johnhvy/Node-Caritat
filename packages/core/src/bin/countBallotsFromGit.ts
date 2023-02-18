@@ -13,7 +13,7 @@ const parsedArgs = parseArgs().options({
   },
 }).argv;
 
-const { repo: repoUrl, branch, path: subPath } = parsedArgs;
+const { repo: repoUrl, branch, path: subPath, secret } = parsedArgs;
 
 const privateKey =
   parsedArgs.key === "-"
@@ -26,6 +26,8 @@ const { result, privateKey: _privateKey } = await countFromGit({
   branch,
   subPath,
   privateKey,
+  secret,
+  keyParts: parsedArgs["key-part"],
   firstCommitSha: parsedArgs.fromCommit,
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: null,

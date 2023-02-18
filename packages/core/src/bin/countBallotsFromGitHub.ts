@@ -189,6 +189,8 @@ const { result: summary, privateKey: _privateKey } = await countFromGit({
   branch,
   subPath,
   privateKey,
+  secret: parsedArgs.secret,
+  keyParts: parsedArgs["key-part"],
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: parsedArgs.commitJsonSummary

@@ -11,6 +11,10 @@ import cliArgsForGit from "./utils/cliArgsForGit.js";
 
 // @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";
+// @ts-ignore
+import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
+// @ts-ignore
+import { symmetricDecrypt } from "@aduh95/caritat-crypto/decrypt";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";
@@ -25,8 +29,6 @@ import type VoteResult from "./votingMethods/VoteResult.js";
 //    git config --global core.autocrlf false
 //  then reset to the current values
 
-// TODO Add an option to pass shared key parts
-
 // TODO add GPG argument.
 export const cliArgs = {
   ...cliArgsForGit,
@@ -37,6 +39,18 @@ export const cliArgs = {
     demandOption: false,
     normalize: true,
     type: "string",
+  },
+  secret: {
+    describe:
+      "The secret used to encrypt the private key. If not provided, it will be reconstructed using the --key-part arguments.",
+    demandOption: false,
+    type: "string",
+  },
+  ["key-part"]: {
+    alias: "h",
+    describe:
+      "A part of the secret. You should provide as many key-part as necessary to reconstitute the secret.",
+    array: true,
   },
   mailmap: {
     describe: "Path to the mailmap file",
@@ -90,6 +104,8 @@ export default async function countFromGit({
   branch,
   subPath,
   privateKey,
+  secret,
+  keyParts,
   firstCommitSha,
   mailmap,
   commitJsonSummary,
@@ -130,13 +146,17 @@ export default async function countFromGit({
   vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
 
   if (!privateKey) {
-    const encryptedKeyFile = path.join(cwd, "privateKey.enc");
-    await fs.writeFile(encryptedKeyFile, vote.voteFileData.encryptedPrivateKey);
-    // TODO this should be handled by WebCrypto because encryptedPrivateKey was encrypted with WebCrypto
-    privateKey = await runChildProcessAsync("gpg", ["-d", encryptedKeyFile], {
-      captureStdout: true,
-      spawnArgs,
-    });
+    if (secret) {
+      privateKey = await symmetricDecrypt(
+        Buffer.from(secret),
+        vote.voteFileData.encryptedPrivateKey
+      );
+    } else {
+      privateKey = await reconstructSplitKey(
+        vote.voteFileData.encryptedPrivateKey,
+        keyParts
+      );
+    }
   }
 
   if (mailmap != null) {
