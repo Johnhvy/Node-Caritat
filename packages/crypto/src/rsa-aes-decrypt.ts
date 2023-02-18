@@ -5,16 +5,16 @@ import importRsaKey from "./importRsaKey.js";
 import { subtle } from "./webcrypto.js";
 
 export async function asymmetricDecrypt(
-  privateKeyASCII: BufferSource,
-  ciphertext: BufferSource
+  ciphertext: BufferSource,
+  privateKeyASCII: BufferSource
 ) {
   const privateKey = await importRsaKey(privateKeyASCII, true);
   return subtle.decrypt(ASYMMETRIC_ALGO, privateKey, ciphertext);
 }
 
 export async function symmetricDecrypt(
-  secret: BufferSource,
-  saltedCiphertext: BufferSource
+  saltedCiphertext: BufferSource,
+  secret: BufferSource
 ) {
   let offset = 0;
   const { byteLength } = saltedCiphertext;
@@ -47,8 +47,8 @@ export async function symmetricDecrypt(
 }
 
 export default async function decryptData(
-  encryptedSecret: BufferSource,
   saltedCiphertext: BufferSource,
+  encryptedSecret: BufferSource,
   privateKeyASCII: BufferSource
 ): Promise<ArrayBuffer> {
   const secret = await asymmetricDecrypt(privateKeyASCII, encryptedSecret);

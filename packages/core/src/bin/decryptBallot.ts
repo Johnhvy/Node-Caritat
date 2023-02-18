@@ -33,8 +33,8 @@ console.log(
   Buffer.from(
     new Uint8Array(
       await decryptData(
-        Buffer.from(encryptedSecret, "base64"),
         Buffer.from(data, "base64"),
+        Buffer.from(encryptedSecret, "base64"),
         fs.readFileSync(privateKeyPath)
       )
     )

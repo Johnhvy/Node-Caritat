@@ -25,10 +25,10 @@ it("should be able to decipher an encrypted message", async () => {
     publicKey
   );
 
-  const privateKey = await symmetricDecrypt(secret, encryptedPrivateKey);
+  const privateKey = await symmetricDecrypt(encryptedPrivateKey, secret);
   const result = await decryptData(
-    encryptedSecret,
     saltedCiphertext,
+    encryptedSecret,
     privateKey
   );
 

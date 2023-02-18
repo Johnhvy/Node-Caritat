@@ -7,9 +7,9 @@ export async function reconstructPrivateKey(
   threshold?: number
 ) {
   if ((threshold ?? shares.length) === 1) {
-    return symmetricDecrypt(shares[0], encryptedPrivateKey);
+    return symmetricDecrypt(encryptedPrivateKey, shares[0]);
   } else {
     const secret = shamir.reconstruct(shares, threshold);
-    return symmetricDecrypt(secret, encryptedPrivateKey);
+    return symmetricDecrypt(encryptedPrivateKey, secret);
   }
 }

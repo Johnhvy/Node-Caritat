@@ -25,8 +25,8 @@ it("should handle no secret splitting", async () => {
     1
   );
   const result = await decryptData(
-    encryptedSecret,
     saltedCiphertext,
+    encryptedSecret,
     privateKey
   );
 
@@ -51,8 +51,8 @@ it("should handle no secret splitting when only one share is given", async () =>
     shares.slice(1)
   );
   const result = await decryptData(
-    encryptedSecret,
     saltedCiphertext,
+    encryptedSecret,
     privateKey
   );
 
@@ -95,8 +95,8 @@ it("should handle splitting", async () => {
     }
   }
   const result = await decryptData(
-    encryptedSecret,
     saltedCiphertext,
+    encryptedSecret,
     privateKey
   );
 

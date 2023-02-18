@@ -29,8 +29,8 @@ it("should be able to correctly decrypt what it has encrypted", async () => {
   const encryptedData = await encryptBallot(rawData, publicKey);
 
   const decryptedData = await decryptBallot(
-    encryptedData.encryptedSecret,
     encryptedData.saltedCiphertext,
+    encryptedData.encryptedSecret,
     privateKey
   );
 

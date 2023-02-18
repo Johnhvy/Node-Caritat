@@ -10,11 +10,9 @@ import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
 import cliArgsForGit from "./utils/cliArgsForGit.js";
 
 // @ts-ignore
-import decryptData from "@aduh95/caritat-crypto/decrypt";
+import decryptData, { symmetricDecrypt } from "@aduh95/caritat-crypto/decrypt";
 // @ts-ignore
 import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
-// @ts-ignore
-import { symmetricDecrypt } from "@aduh95/caritat-crypto/decrypt";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";
@@ -148,8 +146,8 @@ export default async function countFromGit({
   if (!privateKey) {
     if (secret) {
       privateKey = await symmetricDecrypt(
-        Buffer.from(secret),
-        vote.voteFileData.encryptedPrivateKey
+        vote.voteFileData.encryptedPrivateKey,
+        Buffer.from(secret)
       );
     } else {
       privateKey = await reconstructSplitKey(
@@ -197,8 +195,8 @@ export default async function countFromGit({
               );
             }
             return decryptData(
-              Buffer.from(encryptedSecret, "base64"),
               Buffer.from(data, "base64"),
+              Buffer.from(encryptedSecret, "base64"),
               privateKey
             );
           })
