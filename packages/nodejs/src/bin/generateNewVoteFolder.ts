@@ -95,10 +95,12 @@ const { values: argv } = parseArgs({
 
 if (argv.help) {
   // TODO parse args subjects
-  console.log("Options:");
+  console.log("Mandatory flags:");
   console.log(
-    "\t--directory (alias -d): Path where to create the new directory."
+    "\t--branch (alias -b): A name for the vote to take place. It will also be used for naming the subfolder."
   );
+  console.log("\t--subject (alias -s): Subject of vote.");
+  console.log("Node.js specific options:");
   console.log(
     "\t--nodejs-repository-path (alias -r): Path to a local clone of " +
       "nodejs/node. If not provided, files will be downloaded from HTTPS."
@@ -108,7 +110,14 @@ if (argv.help) {
       "nodejs/TSC. If not provided, it will be cloned from SSH (or HTTPS if " +
       "an HTTPS remote is provided)."
   );
-  console.log("\t--subject (alias -s): Subject of vote.");
+  console.log(
+    "\t--directory (alias -d): Path relative to the git repo root folder where votes are stored. Default to votes."
+  );
+  console.log(
+    "\t--github-repo-name: GitHub repository, in the format owner/repo. Default is nodejs/TSC."
+  );
+  console.log("\t--remote: Default is git@github.com:nodejs/TSC.git.");
+  await generateNewVoteFolder(["--help"]);
   exit(0);
 }
 
