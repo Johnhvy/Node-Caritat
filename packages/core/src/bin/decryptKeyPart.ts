@@ -1,6 +1,6 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { argv, env, stdin } from "node:process";
+import { argv, env, stdin, stdout } from "node:process";
 
 import * as yaml from "js-yaml";
 import type { VoteFileFormat } from "../parser.js";
@@ -10,7 +10,7 @@ let yamlString: string;
 if (argv[2] === "-h" || argv[2] === "--help") {
   console.log("Usage:");
   console.log("decryptKeyPath < path/to/vote.yml");
-  console.log("curl -L http://example.com/vote.yml | decryptKeyPath");
+  console.log("curl -L http://example.com/vote.yml | decryptKeyPath | base64");
   console.log(
     "decryptKeyPath https://github.com/owner/repo/pull/1 # requires gh CLI tool"
   );
@@ -68,11 +68,10 @@ const out = await Promise.any(
       once(cp, "error").then((er) => Promise.reject(er)),
     ]);
     if (code !== 0) throw new Error("failed", { cause: code });
-    return Buffer.concat(await stdout).toString("base64");
+    return Buffer.concat(await stdout);
   })
 );
 ac.abort();
-console.log(out);
 
 if (argv[3] === "--post-comment") {
   await runChildProcessAsync(env.GH_BIN || "gh", [
@@ -81,7 +80,10 @@ if (argv[3] === "--post-comment") {
     argv[2],
     "-b",
     `I would like to close this vote, and for this effect, I'm revealing my ` +
-      `key part:\n\n${"```"}\n-----BEGIN SHAMIR KEY PART-----\n${out}\n` +
-      `-----END SHAMIR KEY PART-----\n${"```"}\n`,
+      `key part:\n\n${"```"}\n-----BEGIN SHAMIR KEY PART-----\n${out.toString(
+        "base64"
+      )}\n-----END SHAMIR KEY PART-----\n${"```"}\n`,
   ]);
+} else {
+  stdout.write(out);
 }
