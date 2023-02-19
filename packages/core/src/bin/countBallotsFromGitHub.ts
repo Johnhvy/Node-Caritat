@@ -46,6 +46,12 @@ const parsedArgs = parseArgs()
       normalize: true,
       type: "string",
     },
+    ["key-part"]: {
+      ...cliArgs["key-part"],
+      describe:
+        cliArgs["key-part"].describe +
+        " If not provided, it will be extracted from the PR comments.",
+    },
   })
   .command(
     "$0 <pr-url>",
@@ -183,6 +189,27 @@ console.warn("All relevant information has been retrieved:", {
   startDate,
 });
 
+async function getKeyPartsFromComments() {
+  const shamirKeyPartComment =
+    /\n-----BEGIN SHAMIR KEY PART-----\n([a-zA-Z0-9+/\s]+={0,2})\n-----END SHAMIR KEY PART-----\n/;
+  const { comments } = JSON.parse(
+    await runChildProcessAsync(
+      parsedArgs["gh-binary"] as string,
+      ["pr", "view", parsedArgs.prUrl, "--json", "comments"],
+      { captureStdout: true }
+    )
+  );
+
+  const results = [];
+  for (const { body } of comments) {
+    const match = shamirKeyPartComment.exec(body);
+    if (match) {
+      results.push(Buffer.from(match[1], "base64"));
+    }
+  }
+  return results;
+}
+
 const { result: summary, privateKey: _privateKey } = await countFromGit({
   ...(await getEnv(parsedArgs)),
   repoUrl,
@@ -190,7 +217,7 @@ const { result: summary, privateKey: _privateKey } = await countFromGit({
   subPath,
   privateKey,
   secret: parsedArgs.secret,
-  keyParts: parsedArgs["key-part"],
+  keyParts: parsedArgs["key-part"] ?? (await getKeyPartsFromComments()),
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: parsedArgs.commitJsonSummary
