@@ -1,12 +1,15 @@
-import { parseArgs } from "node:util";
-import { execPath, exit } from "node:process";
-import { get } from "node:https";
+import { spawn } from "node:child_process";
 import { open, readFile } from "node:fs/promises";
+import { get } from "node:https";
 import { join, resolve } from "node:path";
+import { execPath, exit } from "node:process";
 import { createInterface as readLines } from "node:readline";
+import { parseArgs } from "node:util";
+
+// @ts-ignore
+import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 
 import readReadme from "../extractInfoFromReadme.js";
-import { spawn } from "node:child_process";
 
 const { values: argv } = parseArgs({
   options: {
@@ -172,55 +175,47 @@ function* passCLIOptions(...args) {
     }
   }
 }
+const shareholderThreshold = Math.ceil(tscMembersArray.length / 4);
 const headerInstructions = `Please set a score to proposal according to your preferences.
 You should set the highest score to your favorite option.
 Negative scores are allowed, only the order matters.
 You can tied two or more proposals if you have no preference.
 To abstain, keep all the propositions tied.`;
 
-spawn(
-  execPath,
-  [
-    // TODO: fix path
-    "./packages/core/dist/bin/generateNewVoteFolder.js",
-    ...passCLIOptions(
-      "abstain",
-      "branch",
-      "candidate",
-      "footer-instructions",
-      "gpg-binary",
-      "gpg-sign",
-      "subject",
-      "vote",
-      "do-not-clean"
-    ),
-    "--repo",
-    argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
-    ...(argv["tsc-repository-path"]
-      ? [
-          "--directory",
-          join(argv["tsc-repository-path"], argv.directory, argv.branch),
-        ]
-      : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
-    "--gpg-key-server-url",
-    "hkps://keys.openpgp.org",
-    ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
-    "--shareholders-threshold",
-    2,
-    //Math.ceil(tscMembersArray.length / 4),
-    ...tscMembersArray.flatMap((voter) => [
-      "--allowed-voter",
-      `${voter.name} <${voter.email}>`,
-    ]),
-    "--header-instructions",
-    headerInstructions,
-  ],
-  {
-    stdio: "inherit",
-  }
-).on("exit", (code) => {
-  if (code !== 0 || !argv["create-pull-request"]) exit(code);
+await generateNewVoteFolder([
+  ...passCLIOptions(
+    "abstain",
+    "branch",
+    "candidate",
+    "footer-instructions",
+    "gpg-binary",
+    "gpg-sign",
+    "subject",
+    "vote",
+    "do-not-clean"
+  ),
+  "--repo",
+  argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
+  ...(argv["tsc-repository-path"]
+    ? [
+        "--directory",
+        join(argv["tsc-repository-path"], argv.directory, argv.branch),
+      ]
+    : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
+  "--gpg-key-server-url",
+  "hkps://keys.openpgp.org",
+  ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
+  "--shareholders-threshold",
+  shareholderThreshold,
+  ...tscMembersArray.flatMap((voter) => [
+    "--allowed-voter",
+    `${voter.name} <${voter.email}>`,
+  ]),
+  "--header-instructions",
+  headerInstructions,
+]);
 
+if (argv["create-pull-request"]) {
   spawn(
     "gh",
     [
@@ -240,9 +235,11 @@ spawn(
 
 ${tscMembersArray.map(({ handle }) => `- @${handle}`).join("\n")}
 
+To close the vote, a minimum of ${shareholderThreshold} key parts would need to be revealed.
+
 Vote instructions will follow.`,
       "--jq '.number'",
     ],
     { stdio: "inherit" }
   ).on("exit", exit);
-});
+}

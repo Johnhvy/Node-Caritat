@@ -15,6 +15,7 @@
     "yargs": "^17.3.1"
   },
   "exports": {
+    "./generateNewVoteFolder": "./dist/generateNewVoteFolder.js",
     "./package.json": "./package.json"
   },
   "bin": {
