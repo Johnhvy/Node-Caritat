@@ -247,7 +247,8 @@ ${tscMembersArray.map(({ handle }) => `- @${handle}`).join("\n")}
 To close the vote, a minimum of ${shareholderThreshold} key parts would need to be revealed.
 
 Vote instructions will follow.`,
-      "--jq '.number'",
+      "--jq",
+      ".number",
     ],
     { stdio: "inherit" }
   ).on("exit", exit);
