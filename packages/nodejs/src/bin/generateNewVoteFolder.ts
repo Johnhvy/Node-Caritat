@@ -233,20 +233,17 @@ if (argv["create-pull-request"]) {
       "-F",
       "base=main",
       "-F",
-      "head",
-      argv.branch,
+      `head=${JSON.stringify(argv.branch)}`,
       "-F",
-      "title",
-      argv.subject,
+      `title=${JSON.stringify(argv.subject)}`,
       "-F",
-      "body",
-      `The following users are invited to participate in this vote:
+      `body=${JSON.stringify(`The following users are invited to participate in this vote:
 
 ${tscMembersArray.map(({ handle }) => `- @${handle}`).join("\n")}
 
 To close the vote, a minimum of ${shareholderThreshold} key parts would need to be revealed.
 
-Vote instructions will follow.`,
+Vote instructions will follow.`)}`,
       "--jq",
       ".number",
     ],
