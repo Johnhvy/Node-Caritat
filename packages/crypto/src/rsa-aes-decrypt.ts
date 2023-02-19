@@ -35,7 +35,8 @@ export async function symmetricDecrypt(
     magicNumber.getInt8(7) !== 0x5f || // '_'
     false
   ) {
-    throw new Error("Invalid magic number");
+    
+    throw new Error("Invalid magic number",{cause:magicNumber});
   }
 
   const salt = saltedCiphertext.slice(offset + 8, offset + 16);
