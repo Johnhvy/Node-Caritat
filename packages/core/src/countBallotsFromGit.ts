@@ -10,7 +10,7 @@ import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
 import cliArgsForGit from "./utils/cliArgsForGit.js";
 
 // @ts-ignore
-import decryptData, { symmetricDecrypt } from "@aduh95/caritat-crypto/decrypt";
+import decryptData from "@aduh95/caritat-crypto/decrypt";
 // @ts-ignore
 import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
 import type { VoteCommit } from "./vote.js";
@@ -38,16 +38,10 @@ export const cliArgs = {
     normalize: true,
     type: "string",
   },
-  secret: {
-    describe:
-      "The secret used to encrypt the private key. If not provided, it will be reconstructed using the --key-part arguments.",
-    demandOption: false,
-    type: "string",
-  },
   ["key-part"]: {
     alias: "h",
     describe:
-      "A part of the secret. You should provide as many key-part as necessary to reconstitute the secret.",
+      "A part of the secret, or the whole secret (if only one key part is supplied). You should provide as many key-part as necessary to reconstitute the secret.",
     array: true,
   },
   mailmap: {
@@ -102,7 +96,6 @@ export default async function countFromGit({
   branch,
   subPath,
   privateKey,
-  secret,
   keyParts,
   firstCommitSha,
   mailmap,
@@ -144,17 +137,10 @@ export default async function countFromGit({
   vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
 
   if (!privateKey) {
-    if (secret) {
-      privateKey = await symmetricDecrypt(
-        Buffer.from(vote.voteFileData.encryptedPrivateKey, "base64"),
-        Buffer.from(secret)
-      );
-    } else {
-      privateKey = await reconstructSplitKey(
-        Buffer.from(vote.voteFileData.encryptedPrivateKey, "base64"),
-        keyParts?.map(Buffer.from)
-      );
-    }
+    privateKey = await reconstructSplitKey(
+      Buffer.from(vote.voteFileData.encryptedPrivateKey, "base64"),
+      keyParts?.map(Buffer.from)
+    );
   }
 
   if (mailmap != null) {
