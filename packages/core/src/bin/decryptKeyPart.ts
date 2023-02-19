@@ -1,10 +1,15 @@
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { argv, env, stdin, stdout } from "node:process";
+import { argv, env, exit, stdin, stdout } from "node:process";
 
 import * as yaml from "js-yaml";
 import type { VoteFileFormat } from "../parser.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
+
+if (argv.length > 2 && argv[3] !== "--post-comment") {
+  console.warn("Unknown flag:", argv[3]);
+  argv[2] = "-h"; // print help message
+}
 
 let yamlString: string;
 if (argv[2] === "-h" || argv[2] === "--help") {
@@ -20,6 +25,7 @@ if (argv[2] === "-h" || argv[2] === "--help") {
   console.log(
     "Upon success, this tool will output to stdout a base64 representation of the decrypted key part."
   );
+  exit(0);
 } else if (argv[2]) {
   //github.com/stduhpf/pleaseignore/raw/15f8e6ae5d2c417d7bc68ec1ea6db35d00cc263c/voteTest/nodejstest/vote.yml
   const gh_PR_URL =
