@@ -6,9 +6,9 @@ import { subtle } from "./webcrypto.js";
 
 export async function asymmetricDecrypt(
   ciphertext: BufferSource,
-  privateKeyASCII: BufferSource
+  privateKeyRaw: BufferSource
 ) {
-  const privateKey = await importRsaKey(privateKeyASCII, true);
+  const privateKey = await importRsaKey(privateKeyRaw, true);
   return subtle.decrypt(ASYMMETRIC_ALGO, privateKey, ciphertext);
 }
 
@@ -35,8 +35,7 @@ export async function symmetricDecrypt(
     magicNumber.getInt8(7) !== 0x5f || // '_'
     false
   ) {
-    
-    throw new Error("Invalid magic number",{cause:magicNumber});
+    throw new Error("Invalid magic number", { cause: magicNumber });
   }
 
   const salt = saltedCiphertext.slice(offset + 8, offset + 16);
@@ -50,8 +49,8 @@ export async function symmetricDecrypt(
 export default async function decryptData(
   saltedCiphertext: BufferSource,
   encryptedSecret: BufferSource,
-  privateKeyASCII: BufferSource
+  privateKeyRaw: BufferSource
 ): Promise<ArrayBuffer> {
-  const secret = await asymmetricDecrypt(privateKeyASCII, encryptedSecret);
-  return symmetricDecrypt(secret, saltedCiphertext);
+  const secret = await asymmetricDecrypt(encryptedSecret, privateKeyRaw);
+  return symmetricDecrypt(saltedCiphertext, secret);
 }
