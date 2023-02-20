@@ -59,7 +59,9 @@ async function openSummaryFile(root) {
       const filepath = path.join(root, "votes", `${date}-${i}.json`);
       const fd = await fs.open(filepath, "wx");
       return { fd, filepath };
-    } catch {}
+    } catch (err) {
+      if (err.code !== "EEXIST") throw err;
+    }
   }
 
   throw new Error("Could not create summary file");
