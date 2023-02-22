@@ -10,6 +10,7 @@ import { parseArgs } from "node:util";
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 
 import readReadme from "../extractInfoFromReadme.js";
+import { once } from "node:events";
 
 const { values: argv } = parseArgs({
   options: {
@@ -225,7 +226,7 @@ await generateNewVoteFolder([
 ]);
 
 if (argv["create-pull-request"]) {
-  spawn(
+  const cp = spawn(
     "gh",
     [
       "api",
@@ -239,7 +240,9 @@ if (argv["create-pull-request"]) {
       "-F",
       `body=The following users are invited to participate in this vote:
 
-${tscMembersArray.map(({ handle }) => `- @${handle}`).join("\n")}
+${tscMembersArray
+  .map(({ name, handle }) => `- ${name} @${handle} (TSC)`)
+  .join("\n")}
 
 To close the vote, a minimum of ${shareholderThreshold} key parts would need to be revealed.
 
@@ -247,6 +250,34 @@ Vote instructions will follow.`,
       "--jq",
       ".url",
     ],
-    { stdio: "inherit" }
-  ).on("exit", exit);
+    { stdio: ["inherit", "pipe", "inherit"] }
+  );
+  // @ts-ignore toArray does exist!
+  const out = cp.stdout.toArray();
+  const [code] = await once(cp, "exit");
+  if (code !== 0) exit(code);
+
+  const prUrl = Buffer.concat(await out).toString();
+
+  {
+    const cp = spawn(
+      "gh",
+      [
+        "pr",
+        "edit",
+        prUrl,
+        "--body",
+        `
+TODO
+        `,
+        "--silent",
+      ],
+      { stdio: "inherit" }
+    );
+
+    const [code] = await once(cp, "exit");
+    if (code !== 0) exit(code);
+  }
+
+  console.log("PR created", prUrl);
 }
