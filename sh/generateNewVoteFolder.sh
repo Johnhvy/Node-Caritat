@@ -9,10 +9,21 @@ mkdir -p "$outDir"
 
 [ -z "$OPENSSL_BIN" ] && OPENSSL_BIN=openssl
 [ -z "$GPG_BIN" ] && GPG_BIN=gpg
+[ -z "$NODE_BIN" ] && NODE_BIN=node
 
 [ -f "$outDir/vote.yml" ] && echo "$outDir/vote.yml already exist, aborting" && exit 1
 
-cat > "$outDir/vote.yml" << EOF
+# generate private key
+private="$("$OPENSSL_BIN" genpkey -algorithm RSA)"
+
+# generate aes secret
+secret=$("$OPENSSL_BIN" rand 32)
+
+# derive public key from private key
+printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout > "$outDir/public.pem"
+
+{
+  cat << EOF
 subject: TODO
 
 headerInstructions: TODO or remove this line if you do not need it
@@ -28,18 +39,17 @@ allowedVoters:
 
 EOF
 
-private="$("$OPENSSL_BIN" genpkey -algorithm RSA -outform PEM)"
-
-printf "%s" "$private" | "$OPENSSL_BIN" rsa -outform PEM -pubout > "$outDir/public.pem"
-
-{
   echo "publicKey: |"
   awk '{ print "  " $0 }' "$outDir/public.pem"
 
-  echo "encryptedPrivateKey: |"
-  printf "%s" "$private" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "  " $0 }'
-} >> "$outDir/vote.yml"
+  echo "encryptedPrivateKey: >-"
+  printf "%s" "$private" | "$OPENSSL_BIN" enc -aes-256-cbc -salt -iter 100000 -pass "pass:$secret" -pbkdf2 -base64 -A | awk '{ print "  " $0 }'
+
+  echo 'shares:'
+  echo '  - |'
+  printf "%s" "$secret" | "$GPG_BIN" --encrypt --default-recipient-self --armor | awk '{ print "    " $0 }'
+} > "$outDir/vote.yml"
 
 $EDITOR "$outDir/vote.yml"
 
-node "$__dirname/../packages/core/dist/bin/generateBallot.js" -f "$outDir/vote.yml" > "$outDir/ballot.yml"
+"$NODE_BIN" "$__dirname/../packages/core/dist/bin/generateBallot.js" -f "$outDir/vote.yml" > "$outDir/ballot.yml"

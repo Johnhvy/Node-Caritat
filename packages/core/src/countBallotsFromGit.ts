@@ -41,7 +41,7 @@ export const cliArgs = {
   ["key-part"]: {
     alias: "h",
     describe:
-      "A part of the secret, or the whole secret (if only one key part is supplied). You should provide as many key-part as necessary to reconstitute the secret.",
+      "A part of the secret, or the whole secret (if only one key part is supplied), encoded in base64. You should provide as many key-part as necessary to reconstitute the secret.",
     array: true,
   },
   mailmap: {
@@ -141,7 +141,9 @@ export default async function countFromGit({
   if (!privateKey) {
     privateKey = await reconstructSplitKey(
       Buffer.from(vote.voteFileData.encryptedPrivateKey, "base64"),
-      keyParts?.map(Buffer.from)
+      keyParts?.map((part: string | BufferSource) =>
+        typeof part === "string" ? Buffer.from(part, "base64") : part
+      )
     );
   }
 

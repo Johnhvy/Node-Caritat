@@ -74,6 +74,7 @@ npx --package=@aduh95/caritat generateNewVoteFolder \
 
 #### Shell script / `git`-less setup
 
+Requires `openssl` (LibreSSL CLI is not compatible), `gpg`, and `node`.
 Use the `sh/generateNewVoteFolder.sh` script.
 
 ```sh
