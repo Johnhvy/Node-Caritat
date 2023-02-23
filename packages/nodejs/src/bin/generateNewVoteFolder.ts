@@ -184,7 +184,7 @@ function* passCLIOptions(...args) {
     }
   }
 }
-const shareholderThreshold = Math.ceil(tscMembersArray.length / 4);
+const shareholderThreshold = 2; // Math.ceil(tscMembersArray.length / 4);
 const headerInstructions = `Please set a score to proposal according to your preferences.
 You should set the highest score to your favorite option.
 Negative scores are allowed, only the order matters.

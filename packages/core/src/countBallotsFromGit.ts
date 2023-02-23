@@ -7,7 +7,6 @@ import { env } from "process";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
-import cliArgsForGit from "./utils/cliArgsForGit.js";
 
 // @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";
@@ -27,29 +26,7 @@ import type VoteResult from "./votingMethods/VoteResult.js";
 //    git config --global core.autocrlf false
 //  then reset to the current values
 
-// TODO add GPG argument.
-export const cliArgs = {
-  ...cliArgsForGit,
-  key: {
-    alias: "k",
-    describe:
-      "Path to the private key file (use - to read from stdin). If not provided, the private key will be extracted from the vote.yml file.",
-    demandOption: false,
-    normalize: true,
-    type: "string",
-  },
-  ["key-part"]: {
-    alias: "h",
-    describe:
-      "A part of the secret, or the whole secret (if only one key part is supplied). You should provide as many key-part as necessary to reconstitute the secret.",
-    array: true,
-  },
-  mailmap: {
-    describe: "Path to the mailmap file",
-    normalize: true,
-    type: "string",
-  },
-};
+
 
 async function openSummaryFile(root) {
   const date = new Date().toISOString().slice(0, 10);
@@ -65,16 +42,7 @@ async function openSummaryFile(root) {
   throw new Error("Could not create summary file");
 }
 
-export async function getEnv(parsedArgs: Record<string, unknown>) {
-  const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
-  const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
-  return {
-    GIT_BIN,
-    cwd,
-    doNotCleanTempFiles: parsedArgs["do-not-clean"],
-  };
-}
 
 async function readFileAtRevision(
   GIT_BIN: string,
