@@ -2,10 +2,10 @@ import { spawn } from "node:child_process";
 import { open, readFile } from "node:fs/promises";
 import { get } from "node:https";
 import { join, resolve } from "node:path";
-import { execPath, exit } from "node:process";
+import { exit } from "node:process";
 import { createInterface as readLines } from "node:readline";
 import { parseArgs } from "node:util";
-
+ 
 // @ts-ignore
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 

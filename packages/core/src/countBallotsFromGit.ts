@@ -2,12 +2,10 @@
 
 import fs from "fs/promises";
 import path from "path";
-import os from "os";
-import { env } from "process";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
-
+ 
 // @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";
 // @ts-ignore

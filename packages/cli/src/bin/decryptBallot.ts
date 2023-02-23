@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "fs";
-
+ 
 import parseArgs from "../utils/parseArgs.js";
 // @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";

@@ -1,10 +1,13 @@
 #!/usr/bin/env node
 
 import parseArgs from "../utils/parseArgs.js";
-import countFromGit, { cliArgs, getEnv } from "../countBallotsFromGit.js";
-import fs from "fs/promises";
+// @ts-ignore
+import countFromGit from "@aduh95/caritat/countBallotsFromGit";
+import fs from "node:fs/promises";
 import readStdIn from "../utils/readStdin.js";
 
+import { cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
+ 
 const parsedArgs = parseArgs().options({
   ...(cliArgs as any),
   fromCommit: {

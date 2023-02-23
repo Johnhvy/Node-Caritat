@@ -1,8 +1,10 @@
 #!/usr/bin/env node
-
+ 
 import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
-import countFromGit, { cliArgs, getEnv } from "../countBallotsFromGit.js";
+// @ts-ignore
+import countFromGit from "@aduh95/caritat/countBallotsFromGit";
+import {cliArgs,getEnv} from "../utils/countBallotsGitEnv.js";
 import readStdIn from "../utils/readStdin.js";
 import fs from "fs/promises";
 

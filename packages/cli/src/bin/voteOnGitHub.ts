@@ -2,8 +2,10 @@
 
 import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
-import voteUsingGit, { cliArgs, getEnv } from "../voteUsingGit.js";
-
+// @ts-ignore
+import voteUsingGit from "@aduh95/caritat/voteUsingGit";
+import { cliArgs, getEnv } from "../utils/voteGitEnv.js";
+ 
 const parsedArgs = parseArgs()
   .options({
     ...(cliArgs as any),
