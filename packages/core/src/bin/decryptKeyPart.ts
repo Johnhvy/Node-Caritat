@@ -6,7 +6,7 @@ import * as yaml from "js-yaml";
 import type { VoteFileFormat } from "../parser.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
-if (argv.length > 2 && argv[3] !== "--post-comment") {
+if (argv.length > 3 && argv[3] !== "--post-comment") {
   console.warn("Unknown flag:", argv[3]);
   argv[2] = "-h"; // print help message
 }
@@ -14,7 +14,7 @@ if (argv.length > 2 && argv[3] !== "--post-comment") {
 let yamlString: string;
 if (argv[2] === "-h" || argv[2] === "--help") {
   console.log("Usage:");
-  console.log("decryptKeyPath < path/to/vote.yml");
+  console.log("decryptKeyPath --armor < path/to/vote.yml");
   console.log("curl -L http://example.com/vote.yml | decryptKeyPath | base64");
   console.log(
     "decryptKeyPath https://github.com/owner/repo/pull/1 # requires gh CLI tool"
@@ -26,7 +26,7 @@ if (argv[2] === "-h" || argv[2] === "--help") {
     "Upon success, this tool will output to stdout a base64 representation of the decrypted key part."
   );
   exit(0);
-} else if (argv[2]) {
+} else if (argv[2] && argv[2] !== "--armor") {
   //github.com/stduhpf/pleaseignore/raw/15f8e6ae5d2c417d7bc68ec1ea6db35d00cc263c/voteTest/nodejstest/vote.yml
   const gh_PR_URL =
     /^https?:\/\/github.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/.exec(argv[2]);
@@ -90,6 +90,10 @@ if (argv[3] === "--post-comment") {
         "base64"
       )}\n-----END SHAMIR KEY PART-----\n${"```"}\n`,
   ]);
+} else if (argv[2] === "--armor") {
+  console.log("-----BEGIN SHAMIR KEY PART-----");
+  console.log(out.toString("base64"));
+  console.log("-----END SHAMIR KEY PART-----");
 } else {
   stdout.write(out);
 }

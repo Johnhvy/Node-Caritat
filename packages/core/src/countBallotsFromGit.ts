@@ -27,7 +27,6 @@ import type VoteResult from "./votingMethods/VoteResult.js";
 //  then reset to the current values
 
 
-
 async function openSummaryFile(root) {
   const date = new Date().toISOString().slice(0, 10);
   for (let i = 0; i < Number.MAX_SAFE_INTEGER; i++) {
@@ -36,7 +35,9 @@ async function openSummaryFile(root) {
       const filepath = path.join(root, "votes", `${date}-${i}.json`);
       const fd = await fs.open(filepath, "wx");
       return { fd, filepath };
-    } catch {}
+    } catch (err) {
+      if (err.code !== "EEXIST") throw err;
+    }
   }
 
   throw new Error("Could not create summary file");
@@ -107,7 +108,9 @@ export default async function countFromGit({
   if (!privateKey) {
     privateKey = await reconstructSplitKey(
       Buffer.from(vote.voteFileData.encryptedPrivateKey, "base64"),
-      keyParts?.map(Buffer.from)
+      keyParts?.map((part: string | BufferSource) =>
+        typeof part === "string" ? Buffer.from(part, "base64") : part
+      )
     );
   }
 
