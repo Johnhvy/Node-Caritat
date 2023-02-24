@@ -1,6 +1,6 @@
 import { ASYMMETRIC_ALGO } from "./config.js";
 
-import { symmetricEncrypt } from "./rsa-aes-encrypt.js";
+import { symmetricEncrypt } from "./encrypt.js";
 import crypto from "./webcrypto.js";
 import * as shamir from "./shamir.js";
 
