@@ -7,7 +7,12 @@
     "moduleResolution": "node",
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "rootDir": "src"
+    "rootDir": "..",
+    "baseUrl": "..",
+    "paths": {
+      "@aduh95/caritat/*": ["./core/src/*"],
+      "@aduh95/caritat-crypto/*": ["./crypto/src/*"]
+    }
   },
   "include": ["./src/**/*.ts"]
 }

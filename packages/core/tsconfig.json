@@ -7,7 +7,7 @@
     "moduleResolution": "node",
     "declaration": true,
     "allowSyntheticDefaultImports": true,
-    "rootDir": "./src"
+    "rootDir": ".."
   },
   "include": ["./src/**/*.ts"]
 }
