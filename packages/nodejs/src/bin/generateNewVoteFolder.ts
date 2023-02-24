@@ -5,7 +5,7 @@ import { join, resolve } from "node:path";
 import { exit } from "node:process";
 import { createInterface as readLines } from "node:readline";
 import { parseArgs } from "node:util";
- 
+
 // @ts-ignore
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 
@@ -118,7 +118,7 @@ if (argv.help) {
     "\t--github-repo-name: GitHub repository, in the format owner/repo. Default is nodejs/TSC."
   );
   console.log("\t--remote: Default is git@github.com:nodejs/TSC.git.");
-  await generateNewVoteFolder(["--help"]);
+  await generateNewVoteFolder(["--help"], null);
   exit(0);
 }
 
@@ -192,38 +192,43 @@ Negative scores are allowed, only the order matters.
 You can tied two or more proposals if you have no preference.
 To abstain, keep all the propositions tied.`;
 
-await generateNewVoteFolder([
-  ...passCLIOptions(
-    "abstain",
-    "branch",
-    "candidate",
-    "footer-instructions",
-    "gpg-binary",
-    "gpg-sign",
-    "subject",
-    "vote",
-    "do-not-clean"
-  ),
-  "--repo",
-  argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
-  ...(argv["tsc-repository-path"]
-    ? [
-        "--directory",
-        join(argv["tsc-repository-path"], argv.directory, argv.branch),
-      ]
-    : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
-  "--gpg-key-server-url",
-  "hkps://keys.openpgp.org",
-  ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
-  "--shareholders-threshold",
-  shareholderThreshold,
-  ...tscMembersArray.flatMap((voter) => [
-    "--allowed-voter",
-    `${voter.name} <${voter.email}>`,
-  ]),
-  "--header-instructions",
-  headerInstructions,
-]);
+// TODO : clean this 
+
+await generateNewVoteFolder(
+  [
+    ...passCLIOptions(
+      "abstain",
+      "branch",
+      "candidate",
+      "footer-instructions",
+      "gpg-binary",
+      "gpg-sign",
+      "subject",
+      "vote",
+      "do-not-clean"
+    ),
+    "--repo",
+    argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
+    ...(argv["tsc-repository-path"]
+      ? [
+          "--directory",
+          join(argv["tsc-repository-path"], argv.directory, argv.branch),
+        ]
+      : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
+    "--gpg-key-server-url",
+    "hkps://keys.openpgp.org",
+    ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
+    "--shareholders-threshold",
+    shareholderThreshold,
+    ...tscMembersArray.flatMap((voter) => [
+      "--allowed-voter",
+      `${voter.name} <${voter.email}>`,
+    ]),
+    "--header-instructions",
+    headerInstructions,
+  ],
+  {"GIT-BIN" : "git"}
+);
 
 if (argv["create-pull-request"]) {
   const cp = spawn(
