@@ -1,4 +1,4 @@
-import * as shamir from "../src/shamir.js";
+import * as shamir from "@aduh95/caritat-crypto/shamir.js";
 import { it } from "node:test";
 import { strict as assert } from "node:assert";
 

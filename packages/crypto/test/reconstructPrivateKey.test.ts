@@ -1,10 +1,10 @@
 import assert from "node:assert";
 import { it } from "node:test";
 
-import { generateAndSplitKeyPair } from "../src/generateRSAKeyPair.js";
-import { reconstructPrivateKey } from "../src/reconstructPrivateKey.js";
-import decryptData from "../src/rsa-aes-decrypt.js";
-import encryptData from "../src/rsa-aes-encrypt.js";
+import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair.js";
+import reconstructPrivateKey from "@aduh95/caritat-crypto/reconstructSplitKey.js";
+import decryptData from "@aduh95/caritat-crypto/decrypt.js";
+import encryptData from "@aduh95/caritat-crypto/encrypt.js";
 
 it("should handle no secret splitting", async () => {
   const { shares, encryptedPrivateKey, publicKey } =

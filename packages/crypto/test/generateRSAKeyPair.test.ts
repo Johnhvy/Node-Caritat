@@ -1,9 +1,11 @@
 import assert from "node:assert";
 import { it } from "node:test";
 
-import { generateRSAKeyPair } from "../src/generateRSAKeyPair.js";
-import encryptData from "../src/rsa-aes-encrypt.js";
-import decryptData, { symmetricDecrypt } from "../src/rsa-aes-decrypt.js";
+import { generateRSAKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair.js";
+import encryptData from "@aduh95/caritat-crypto/encrypt.js";
+import decryptData, {
+  symmetricDecrypt,
+} from "@aduh95/caritat-crypto/decrypt.js";
 
 it("should generate a key pair alongside a secret", async () => {
   const obj = await generateRSAKeyPair();
