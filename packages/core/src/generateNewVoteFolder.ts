@@ -15,11 +15,11 @@ import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKey
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import { voteAndCommit } from "./voteUsingGit.js";
 
-export default async function generateNewVoteFolder(parsedArgs) {
+export default async function generateNewVoteFolder(parsedArgs, env = null) {
   let directory = path.resolve(parsedArgs.directory);
   let subPath = parsedArgs.directory;
 
-  let env, cwd: string;
+  let cwd: string;
 
   async function cloneInTempFolder(GIT_BIN) {
     cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
