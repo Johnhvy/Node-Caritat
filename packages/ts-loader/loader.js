@@ -1,8 +1,31 @@
+import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { transform } from "sucrase";
 
+const ROOT_DIR = new URL("../../", import.meta.url);
+const {
+  compilerOptions: { paths, baseUrl },
+} = JSON.parse(await readFile(new URL("./tsconfig.json", ROOT_DIR), "utf-8"));
+
+const BASE_URL = new URL(baseUrl, ROOT_DIR);
+const localPackagesURLs = Object.fromEntries(
+  Object.entries(paths).map(([pkg, path]) => [
+    pkg.slice(0, -1),
+    new URL(path, BASE_URL),
+  ])
+);
+
+const localPackagePattern = /^@aduh95\/caritat(?:-[^/]+)?\//;
+
 export async function resolve(urlStr, context, next) {
+  const localMatch = localPackagePattern.exec(urlStr);
+  if (localMatch != null && localMatch[0] in localPackagesURLs) {
+    urlStr = new URL(
+      urlStr.slice(localMatch[0].length),
+      localPackagesURLs[localMatch[0]]
+    ).href;
+  }
   try {
     return await next(urlStr, context);
   } catch (err) {

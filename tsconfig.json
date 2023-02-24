@@ -8,12 +8,12 @@
     "outDir": "./packages/dist",
     "moduleResolution": "node",
     "watch": true,
-    "rootDir": "./packages",
-    "baseUrl": "./packages",
+    "rootDir": "./packages/",
+    "baseUrl": "./packages/",
     "paths": {
       "@aduh95/caritat/*": ["./core/src/*"],
       "@aduh95/caritat-crypto/*": ["./crypto/src/*"]
     }
   },
-  "include": ["./packages/*/src/**/*.ts"]
+  "include": ["./packages/**/*.ts"]
 }
