@@ -13,10 +13,12 @@
     "@aduh95/caritat-crypto": "workspace:*",
     "js-yaml": "^4.1.0"
   },
+  "types": "./dist/index.d.ts", 
   "exports": {
     "./generateNewVoteFolder": "./dist/generateNewVoteFolder.js",
     "./countBallotsFromGit": "./dist/countBallotsFromGit.js",
     "./voteUsingGit": "./dist/voteUsingGit.js",
+    "./parser": "./dist/parser.js",
     "./package.json": "./package.json"
   },
   "type": "module"
