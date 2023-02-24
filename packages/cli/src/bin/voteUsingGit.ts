@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import parseArgs from "../utils/parseArgs.js";
-// @ts-ignore
 import voteUsingGit from "@aduh95/caritat/voteUsingGit";
 import { cliArgs, getEnv } from "../utils/voteGitEnv.js";
 

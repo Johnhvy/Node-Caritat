@@ -1,9 +1,8 @@
 #!/usr/bin/env node
 
 import parseArgs from "../utils/parseArgs.js";
-// @ts-ignore
-import { loadYmlFile, templateBallot, VoteFileFormat } from "@aduh95/caritat";
- 
+import {  loadYmlFile,  templateBallot,  VoteFileFormat,} from "@aduh95/caritat/parser"
+
 const parsedArgs = parseArgs().options({
   file: {
     alias: "f",

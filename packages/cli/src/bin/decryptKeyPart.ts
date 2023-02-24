@@ -3,10 +3,9 @@ import { once } from "node:events";
 import { argv, env, exit, stdin, stdout } from "node:process";
 
 import * as yaml from "js-yaml";
-// @ts-ignore
-import type { VoteFileFormat } from "@aduh95/caritat";
+import { VoteFileFormat } from "@aduh95/caritat/parser";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
- 
+
 if (argv.length > 2 && argv[3] !== "--post-comment") {
   console.warn("Unknown flag:", argv[3]);
   argv[2] = "-h"; // print help message
