@@ -1,4 +1,3 @@
-// @ts-ignore
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";

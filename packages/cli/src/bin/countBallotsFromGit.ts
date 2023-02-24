@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import parseArgs from "../utils/parseArgs.js";
-// @ts-ignore
 import countFromGit from "@aduh95/caritat/countBallotsFromGit";
 import fs from "node:fs/promises";
 import readStdIn from "../utils/readStdin.js";

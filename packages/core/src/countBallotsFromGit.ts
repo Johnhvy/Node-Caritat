@@ -6,9 +6,7 @@ import path from "path";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
  
-// @ts-ignore
 import decryptData from "@aduh95/caritat-crypto/decrypt";
-// @ts-ignore
 import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";

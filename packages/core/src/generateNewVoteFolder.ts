@@ -10,7 +10,6 @@ import { loadYmlString, templateBallot, VoteFileFormat } from "./parser.js";
  
 import * as yaml from "js-yaml";
 
-// @ts-ignore
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import { voteAndCommit } from "./voteUsingGit.js";

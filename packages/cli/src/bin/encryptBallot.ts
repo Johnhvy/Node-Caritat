@@ -3,7 +3,6 @@
 import * as fs from "fs";
  
 import parseArgs from "../utils/parseArgs.js";
-// @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 
 const parsedArgs = parseArgs().options({

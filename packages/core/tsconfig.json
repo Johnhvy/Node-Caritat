@@ -1,13 +1,9 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "composite": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "outDir": "./dist",
-    "moduleResolution": "node",
-    "declaration": true,
-    "allowSyntheticDefaultImports": true,
-    "rootDir": ".."
+      "outDir": "./", 
   },
-  "include": ["./src/**/*.ts"]
+  "files": [
+      "./**/*.ts"
+  ]
 }

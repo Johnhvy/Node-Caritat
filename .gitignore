@@ -7,7 +7,7 @@
 /coverage/
 
 node_modules/
-packages/*/dist/
+dist/
 packages/core/README.md
 
 test/*.js
@@ -15,3 +15,5 @@ test/*.js
 packages/*/test/*.js
 
 .vscode/
+
+tsconfig.tsbuildinfo

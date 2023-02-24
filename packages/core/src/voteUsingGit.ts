@@ -7,7 +7,6 @@ import { webcrypto as crypto } from "crypto";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
  
-// @ts-ignore
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 import {
   BallotFileFormat,

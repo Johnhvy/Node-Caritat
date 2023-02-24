@@ -27,7 +27,6 @@ if (argv[2] === "-h" || argv[2] === "--help") {
   );
   exit(0);
 } else if (argv[2] && argv[2] !== "--armor") {
-  //github.com/stduhpf/pleaseignore/raw/15f8e6ae5d2c417d7bc68ec1ea6db35d00cc263c/voteTest/nodejstest/vote.yml
   const gh_PR_URL =
     /^https?:\/\/github.com\/([^/]+)\/([^/]+)\/pull\/(\d+)/.exec(argv[2]);
   if (gh_PR_URL == null) throw new Error("Invalid PR URL format");

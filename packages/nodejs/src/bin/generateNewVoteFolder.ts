@@ -6,7 +6,6 @@ import { exit } from "node:process";
 import { createInterface as readLines } from "node:readline";
 import { parseArgs } from "node:util";
 
-// @ts-ignore
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 
 import readReadme from "../extractInfoFromReadme.js";
