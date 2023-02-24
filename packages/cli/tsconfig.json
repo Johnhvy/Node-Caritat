@@ -14,5 +14,5 @@
       "@aduh95/caritat-crypto/*": ["./crypto/src/*"]
     }
   },
-  "include": ["./src/**/*.ts"]
+  "include": ["../**/src/**/*.ts"]
 }
