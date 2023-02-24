@@ -11,10 +11,10 @@
   },
   "exports": {
     "./package.json": "./package.json",
-    "./decrypt": "./dist/rsa-aes-decrypt.js",
-    "./encrypt": "./dist/rsa-aes-encrypt.js",
-    "./generateSplitKeyPair": "./dist/generateRSAKeyPair.js",
-    "./reconstructSplitKey": "./dist/reconstructPrivateKey.js",
+    "./decrypt": "./dist/decrypt.js",
+    "./encrypt": "./dist/encrypt.js",
+    "./generateSplitKeyPair": "./dist/generateSplitKeyPair.js",
+    "./reconstructSplitKey": "./dist/reconstructSplitKey.js",
     "./webcrypto": "./dist/webcrypto.js"
   },
   "type": "module"
