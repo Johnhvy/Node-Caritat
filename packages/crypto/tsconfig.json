@@ -10,10 +10,6 @@
     "watch": true,
     "rootDir": "src",
     "baseUrl": ".",
-    "paths": {
-      "@aduh95/caritat-crypto/*": ["../crypto/src/*"]
-    }
   },
   "include": ["./src/**/*.ts"],
-  "references": [{ "path": "../crypto" }]
 }

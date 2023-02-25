@@ -5,15 +5,8 @@
     "composite": true,
     "target": "ESNext",
     "module": "ESNext",
-    "outDir": "./packages/dist",
     "moduleResolution": "node",
-    "watch": true,
-    "rootDir": "./packages/",
-    "baseUrl": "./packages/",
-    "paths": {
-      "@aduh95/caritat/*": ["./core/src/*"],
-      "@aduh95/caritat-crypto/*": ["./crypto/src/*"]
-    }
+    "watch": true
   },
-  "include": ["./packages/**/*.ts"]
+  "references": [{ "path": "./packages/cli" }, { "path": "./packages/nodejs" }]
 }

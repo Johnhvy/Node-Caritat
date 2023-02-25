@@ -1,28 +1,33 @@
-import { readFile } from "node:fs/promises";
+import { readFile, opendir, open } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 
 import { transform } from "sucrase";
 
-const ROOT_DIR = new URL("../../", import.meta.url);
-const {
-  compilerOptions: { paths, baseUrl },
-} = JSON.parse(await readFile(new URL("./tsconfig.json", ROOT_DIR), "utf-8"));
+const ROOT_DIR = new URL("../../packages/", import.meta.url);
+const packagesDir = await opendir(ROOT_DIR);
+const localPackagesURLs = Object.create(null);
+for await (const fsEntry of packagesDir) {
+  if (fsEntry.isDirectory()) {
+    const localPackagePackageJsonURL = new URL(
+      `./${fsEntry.name}/package.json`,
+      ROOT_DIR
+    );
+    try {
+      const { name } = JSON.parse(
+        await readFile(localPackagePackageJsonURL, "utf-8")
+      );
+      localPackagesURLs[name] = new URL("./src/", localPackagePackageJsonURL);
+    } catch {}
+  }
+}
 
-const BASE_URL = new URL(baseUrl, ROOT_DIR);
-const localPackagesURLs = Object.fromEntries(
-  Object.entries(paths).map(([pkg, path]) => [
-    pkg.slice(0, -1),
-    new URL(path, BASE_URL),
-  ])
-);
-
-const localPackagePattern = /^@aduh95\/caritat(?:-[^/]+)?\//;
+const localPackagePattern = /^@aduh95\/caritat(?:-[^/]+)?/;
 
 export async function resolve(urlStr, context, next) {
   const localMatch = localPackagePattern.exec(urlStr);
   if (localMatch != null && localMatch[0] in localPackagesURLs) {
     urlStr = new URL(
-      urlStr.slice(localMatch[0].length),
+      urlStr.slice(localMatch[0].length + 1),
       localPackagesURLs[localMatch[0]]
     ).href;
   }
