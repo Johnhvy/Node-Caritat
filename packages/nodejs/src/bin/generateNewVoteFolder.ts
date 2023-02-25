@@ -210,10 +210,10 @@ await generateNewVoteFolder(
     argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
     ...(argv["tsc-repository-path"]
       ? [
-          "--directory",
+          "--path",
           join(argv["tsc-repository-path"], argv.directory, argv.branch),
         ]
-      : ["--force-clone", "--directory", join(argv.directory, argv.branch)]),
+      : ["--force-clone", "--path", join(argv.directory, argv.branch)]),
     "--gpg-key-server-url",
     "hkps://keys.openpgp.org",
     ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),

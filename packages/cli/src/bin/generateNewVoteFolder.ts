@@ -2,7 +2,7 @@ import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
 import cliArgsForGit from "../utils/cliArgsForGit.js";
 import { getEnv } from "../utils/voteGitEnv.js";
- 
+
 const parsedArgs = parseArgs().options({
   ...cliArgsForGit,
   repo: {
@@ -16,12 +16,6 @@ const parsedArgs = parseArgs().options({
     type: "string",
     describe: "Name of the base branch",
     default: "main",
-  },
-  directory: {
-    describe:
-      "The directory where the vote files should be created. If an absolute path is given, the local git repo will be used unless git was disabled",
-    demandOption: true,
-    alias: "d",
   },
   "gpg-binary": {
     describe: "Path to the gpg binary (when not provided, looks in the $PATH)",

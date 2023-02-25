@@ -7,7 +7,7 @@ import path from "node:path";
 import os from "node:os";
 import { stdin, stdout } from "node:process";
 import { loadYmlString, templateBallot, VoteFileFormat } from "./parser.js";
- 
+
 import * as yaml from "js-yaml";
 
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
@@ -15,7 +15,7 @@ import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import { voteAndCommit } from "./voteUsingGit.js";
 
 export default async function generateNewVoteFolder(parsedArgs, env = null) {
-  let directory = path.resolve(parsedArgs.directory);
+  let directory = path.resolve(parsedArgs.path);
   let subPath = parsedArgs.directory;
 
   let cwd: string;
@@ -40,7 +40,7 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
       { spawnArgs }
     );
 
-    directory = path.join(cwd, parsedArgs.directory);
+    directory = path.join(cwd, parsedArgs.path);
   }
   async function createFolder(directory: string) {
     try {
@@ -59,7 +59,7 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
 
     if (parsedArgs["force-clone"]) {
       await cloneInTempFolder(GIT_BIN);
-    } else if (!path.isAbsolute(parsedArgs.directory)) {
+    } else if (!path.isAbsolute(parsedArgs.path)) {
       await createFolder(directory); // We need to create the folder so the next command doesn't fail.
       try {
         const spawnArgs = { cwd: directory };
