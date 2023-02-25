@@ -13,23 +13,24 @@ for await (const fsEntry of packagesDir) {
       ROOT_DIR
     );
     try {
-      const { name } = JSON.parse(
+      const { name, exports } = JSON.parse(
         await readFile(localPackagePackageJsonURL, "utf-8")
       );
-      localPackagesURLs[name] = new URL("./src/", localPackagePackageJsonURL);
+      if (name && exports) {
+        for (const [exportedPath, url] of Object.entries(exports)) {
+          localPackagesURLs[exportedPath.replace(".", () => name)] = new URL(
+            url.replace(/\/dist\/(.+)\.js$/, "/src/$1.ts"),
+            localPackagePackageJsonURL
+          ).href;
+        }
+      }
     } catch {}
   }
 }
 
-const localPackagePattern = /^@aduh95\/caritat(?:-[^/]+)?/;
-
 export async function resolve(urlStr, context, next) {
-  const localMatch = localPackagePattern.exec(urlStr);
-  if (localMatch != null && localMatch[0] in localPackagesURLs) {
-    urlStr = new URL(
-      urlStr.slice(localMatch[0].length + 1),
-      localPackagesURLs[localMatch[0]]
-    ).href;
+  if (urlStr in localPackagesURLs) {
+    urlStr = localPackagesURLs[urlStr];
   }
   try {
     return await next(urlStr, context);
