@@ -12,15 +12,36 @@ import * as yaml from "js-yaml";
 
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
-import { voteAndCommit } from "./voteUsingGit.js";
+import type { VoteMethod } from "./vote.js";
 
-export default async function generateNewVoteFolder(parsedArgs, env = null) {
+export default async function generateNewVoteFolder(
+  parsedArgs: {
+    path: string;
+    base: string;
+    repo: string;
+    shareholders: string[];
+    subject: string;
+    candidates: string[];
+    method: VoteMethod;
+    branch: string;
+    shareholdersThreshold: string | number;
+    allowedVoters: string[];
+    gpgBinary?: string;
+    disable_git?: boolean;
+    forceClone?: boolean;
+    headerInstructions?: string;
+    footerInstructions?: string;
+    "gpg-key-server-url"?: string;
+    "gpg-trust-model"?: string;
+    "git-commit-message"?: string;
+  },
+  env = null
+) {
   let directory = path.resolve(parsedArgs.path);
-  let subPath = parsedArgs.directory;
 
   let cwd: string;
 
-  async function cloneInTempFolder(GIT_BIN) {
+  async function cloneInTempFolder(GIT_BIN:string) {
     cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
     const spawnArgs = { cwd };
 
@@ -54,10 +75,10 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
     }
   }
 
-  if (!parsedArgs["disable-git"]) {
+  if (!parsedArgs.disable_git) {
     const { GIT_BIN } = env;
 
-    if (parsedArgs["force-clone"]) {
+    if (parsedArgs.forceClone) {
       await cloneInTempFolder(GIT_BIN);
     } else if (!path.isAbsolute(parsedArgs.path)) {
       await createFolder(directory); // We need to create the folder so the next command doesn't fail.
@@ -76,7 +97,6 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
       }
     } else {
       cwd = directory;
-      subPath = ".";
     }
   }
 
@@ -84,14 +104,14 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
   const voteFilePath = path.join(directory, "vote.yml");
   const voteFile = await fs.open(voteFilePath, "wx");
 
-  const GPG_BIN = parsedArgs["gpg-binary"] ?? process.env.GPG_BIN ?? "gpg";
+  const GPG_BIN = parsedArgs.gpgBinary ?? process.env.GPG_BIN ?? "gpg";
 
-  const shareHolders = parsedArgs["shareholder"];
+  const shareHolders = parsedArgs.shareholders;
 
   const { encryptedPrivateKey, publicKey, shares } =
     await generateAndSplitKeyPair(
       shareHolders.length,
-      Number(parsedArgs["shareholders-threshold"])
+      Number(parsedArgs.shareholdersThreshold)
     );
 
   function toArmordedMessage(data: ArrayBuffer) {
@@ -105,11 +125,11 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
 
   const ballot = {
     subject: parsedArgs.subject,
-    headerInstructions: parsedArgs["header-instructions"],
-    candidates: parsedArgs.candidate,
-    footerInstructions: parsedArgs["footer-instructions"],
+    headerInstructions: parsedArgs.headerInstructions,
+    candidates: parsedArgs.candidates,
+    footerInstructions: parsedArgs.footerInstructions,
     method: parsedArgs.method ?? "Condorcet",
-    allowedVoters: parsedArgs["allowed-voter"],
+    allowedVoters: parsedArgs.allowedVoters,
     publicKey: `-----BEGIN PUBLIC KEY-----\n${toArmordedMessage(
       publicKey
     )}\n-----END PUBLIC KEY-----\n`,
@@ -180,7 +200,7 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
   await fs.writeFile(publicKeyPath, ballot.publicKey);
   await fs.writeFile(ballotPath, ballotContent);
 
-  if (!parsedArgs["disable-git"]) {
+  if (!parsedArgs.disable_git) {
     const {
       GIT_BIN,
       signCommits,
@@ -211,14 +231,6 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
       { spawnArgs }
     );
 
-    if (parsedArgs.vote) {
-      await voteAndCommit({
-        ...env,
-        cwd,
-        subPath,
-      });
-    }
-
     if (parsedArgs.repo) {
       await runChildProcessAsync(
         GIT_BIN,
@@ -237,9 +249,5 @@ export default async function generateNewVoteFolder(parsedArgs, env = null) {
         await fs.rm(cwd, { recursive: true, force: true });
       }
     }
-  } else if (parsedArgs.vote) {
-    throw new Error(
-      "Voting without git has not yet been implemented in this script, please generate the ballot manually or use git"
-    );
-  }
+  } 
 }
