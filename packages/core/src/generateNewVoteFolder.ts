@@ -5,43 +5,68 @@ import { once } from "node:events";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
-import { stdin, stdout } from "node:process";
-import { loadYmlString, templateBallot, VoteFileFormat } from "./parser.js";
+import { env, stdin, stdout } from "node:process";
 
 import * as yaml from "js-yaml";
 
 import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
+import { loadYmlString, templateBallot, VoteFileFormat } from "./parser.js";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import type { VoteMethod } from "./vote.js";
 
-export default async function generateNewVoteFolder(
-  parsedArgs: {
-    path: string;
-    base: string;
+interface Options {
+  subject: string;
+  headerInstructions?: string;
+  candidates: string[];
+  footerInstructions?: string;
+
+  /** Defaults to "Condorcet" */
+  method?: VoteMethod;
+  /** Use whatever string is accepted by gpg for its --recipient flag. */
+  shareholders: string[];
+  shareholdersThreshold: number;
+  /** It should match the git commit author. */
+  allowedVoters: string[];
+
+  /**
+   * If gitOptions is supplied, it's the subpath relative to the root og the git
+   * repository. If no git options is supplied, it's a path in the local FS
+   * where to create the vote folder.
+   */
+  path: string;
+  gpgOptions: {
+    binaryPath?: string;
+    keyServerURL?: string;
+    /** Consider using `always` to blindly trust the key server. */
+    trustModel: string;
+  };
+
+  gitOptions?: {
+    binaryPath?: string;
+    doNotCleanTempFiles?: boolean;
+
+    /** URL to the git repository. It can be anything accepted by git clone. */
     repo: string;
-    shareholders: string[];
-    subject: string;
-    candidates: string[];
-    method: VoteMethod;
+    /** Branch where the vote commit(s) will be pushed */
     branch: string;
-    shareholdersThreshold: string | number;
-    allowedVoters: string[];
-    gpgBinary?: string;
-    disable_git?: boolean;
+
+    /** Name of the base branch (e.g. `main`) */
+    baseBranch: string;
+
     forceClone?: boolean;
-    headerInstructions?: string;
-    footerInstructions?: string;
-    "gpg-key-server-url"?: string;
-    "gpg-trust-model"?: string;
-    "git-commit-message"?: string;
-  },
-  env = null
-) {
-  let directory = path.resolve(parsedArgs.path);
+    commitMessage?: string;
+    commitAuthor?: string;
+    gpgSign?: boolean | string;
+  };
+}
+
+export default async function generateNewVoteFolder(options: Options) {
+  let directory = path.resolve(options.path);
+  const { gitOptions } = options;
 
   let cwd: string;
 
-  async function cloneInTempFolder(GIT_BIN:string) {
+  async function cloneInTempFolder(GIT_BIN: string) {
     cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
     const spawnArgs = { cwd };
 
@@ -52,16 +77,16 @@ export default async function generateNewVoteFolder(
         "clone",
         "--single-branch",
         "--branch",
-        parsedArgs.base,
+        gitOptions.baseBranch,
         "--no-tags",
         "--depth=1",
-        parsedArgs.repo,
+        gitOptions.repo,
         ".",
       ],
       { spawnArgs }
     );
 
-    directory = path.join(cwd, parsedArgs.path);
+    directory = path.join(cwd, options.path);
   }
   async function createFolder(directory: string) {
     try {
@@ -75,12 +100,12 @@ export default async function generateNewVoteFolder(
     }
   }
 
-  if (!parsedArgs.disable_git) {
-    const { GIT_BIN } = env;
+  if (gitOptions) {
+    const GIT_BIN = gitOptions.binaryPath ?? env.GIT_BIN ?? "git";
 
-    if (parsedArgs.forceClone) {
+    if (gitOptions.forceClone) {
       await cloneInTempFolder(GIT_BIN);
-    } else if (!path.isAbsolute(parsedArgs.path)) {
+    } else if (!path.isAbsolute(options.path)) {
       await createFolder(directory); // We need to create the folder so the next command doesn't fail.
       try {
         const spawnArgs = { cwd: directory };
@@ -104,14 +129,14 @@ export default async function generateNewVoteFolder(
   const voteFilePath = path.join(directory, "vote.yml");
   const voteFile = await fs.open(voteFilePath, "wx");
 
-  const GPG_BIN = parsedArgs.gpgBinary ?? process.env.GPG_BIN ?? "gpg";
+  const GPG_BIN = options.gpgOptions.binaryPath ?? env.GPG_BIN ?? "gpg";
 
-  const shareHolders = parsedArgs.shareholders;
+  const shareHolders = options.shareholders;
 
   const { encryptedPrivateKey, publicKey, shares } =
     await generateAndSplitKeyPair(
       shareHolders.length,
-      Number(parsedArgs.shareholdersThreshold)
+      Number(options.shareholdersThreshold)
     );
 
   function toArmordedMessage(data: ArrayBuffer) {
@@ -124,12 +149,12 @@ export default async function generateNewVoteFolder(
   }
 
   const ballot = {
-    subject: parsedArgs.subject,
-    headerInstructions: parsedArgs.headerInstructions,
-    candidates: parsedArgs.candidates,
-    footerInstructions: parsedArgs.footerInstructions,
-    method: parsedArgs.method ?? "Condorcet",
-    allowedVoters: parsedArgs.allowedVoters,
+    subject: options.subject,
+    headerInstructions: options.headerInstructions,
+    candidates: options.candidates,
+    footerInstructions: options.footerInstructions,
+    method: options.method ?? "Condorcet",
+    allowedVoters: options.allowedVoters,
     publicKey: `-----BEGIN PUBLIC KEY-----\n${toArmordedMessage(
       publicKey
     )}\n-----END PUBLIC KEY-----\n`,
@@ -139,21 +164,24 @@ export default async function generateNewVoteFolder(
         shares.map(
           (raw, i) =>
             new Promise((resolve, reject) => {
-              const gpg = spawn(GPG_BIN, [
-                "--encrypt",
-                "--armor",
-                ...(parsedArgs["gpg-key-server-url"]
-                  ? ["--auto-key-locate", parsedArgs["gpg-key-server-url"]]
-                  : []),
-                "--trust-model",
-                parsedArgs["gpg-trust-model"],
-                "--no-encrypt-to",
-                "--recipient",
-                shareHolders[i],
-              ]);
+              const gpg = spawn(
+                GPG_BIN,
+                [
+                  "--encrypt",
+                  "--armor",
+                  ...(options.gpgOptions.keyServerURL
+                    ? ["--auto-key-locate", options.gpgOptions.keyServerURL]
+                    : []),
+                  "--trust-model",
+                  options.gpgOptions.trustModel,
+                  "--no-encrypt-to",
+                  "--recipient",
+                  shareHolders[i],
+                ],
+                { stdio: ["pipe", "pipe", "inherit"] }
+              );
               gpg.on("error", reject);
               gpg.stdin.end(new Uint8Array(raw));
-              gpg.stderr.pipe(process.stderr);
               gpg.stdout
                 // @ts-ignore
                 .toArray()
@@ -200,15 +228,21 @@ export default async function generateNewVoteFolder(
   await fs.writeFile(publicKeyPath, ballot.publicKey);
   await fs.writeFile(ballotPath, ballotContent);
 
-  if (!parsedArgs.disable_git) {
+  if (gitOptions) {
     const {
-      GIT_BIN,
-      signCommits,
-      username,
-      emailAddress,
+      binaryPath,
+
+      repo,
+      branch,
+
+      gpgSign,
+      commitAuthor,
+      commitMessage,
       doNotCleanTempFiles,
-    } = env;
+    } = gitOptions;
     const spawnArgs = { cwd: directory };
+
+    const GIT_BIN = binaryPath ?? process.env.GIT_BIN ?? "git";
 
     await runChildProcessAsync(
       GIT_BIN,
@@ -216,27 +250,26 @@ export default async function generateNewVoteFolder(
       { spawnArgs }
     );
 
-    const author = `${username} <${emailAddress}>`;
     await runChildProcessAsync(
       GIT_BIN,
       [
         "commit",
-        ...(signCommits ? ["-S"] : []),
-        `--author`,
-        author,
+        ...(gpgSign === true
+          ? ["-S"]
+          : typeof gpgSign === "string"
+          ? ["-S", gpgSign]
+          : []),
+        ...(commitAuthor ? ["--author", commitAuthor] : []),
         "-m",
-        parsedArgs["git-commit-message"] ??
-          `Initiate vote for "${parsedArgs.subject}"`,
+        commitMessage ?? `Initiate vote for "${options.subject}"`,
       ],
       { spawnArgs }
     );
 
-    if (parsedArgs.repo) {
-      await runChildProcessAsync(
-        GIT_BIN,
-        ["push", parsedArgs.repo, `HEAD:${parsedArgs.branch}`],
-        { spawnArgs }
-      );
+    if (repo) {
+      await runChildProcessAsync(GIT_BIN, ["push", repo, `HEAD:${branch}`], {
+        spawnArgs,
+      });
     }
 
     if (cwd != null) {
@@ -249,5 +282,5 @@ export default async function generateNewVoteFolder(
         await fs.rm(cwd, { recursive: true, force: true });
       }
     }
-  } 
+  }
 }

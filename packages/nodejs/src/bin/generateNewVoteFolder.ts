@@ -178,37 +178,36 @@ Negative scores are allowed, only the order matters.
 You can tied two or more proposals if you have no preference.
 To abstain, keep all the propositions tied.`;
 
-// TODO : clean this
-
-await generateNewVoteFolder(
-  {
-    branch: argv.branch,
-    candidates: argv.candidate,
-    headerInstructions: headerInstructions,
-    footerInstructions: argv["footer-instructions"],
-    gpgBinary: argv["gpg-binary"],
-    subject: argv.subject,
-    repo: argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
-    "gpg-key-server-url": "hkps://keys.openpgp.org",
-    shareholdersThreshold: shareholderThreshold,
-    shareholders: tscMembersArray.flatMap(({ email }) => [
-      "--shareholder",
-      email,
-    ]),
-    allowedVoters: tscMembersArray.flatMap((voter) => [
-      "--allowed-voter",
-      `${voter.name} <${voter.email}>`,
-    ]),
-    base: "main",
-    method: "Condorcet",
-    ...(argv["tsc-repository-path"]
-      ? {
-          path: join(argv["tsc-repository-path"], argv.directory, argv.branch),
-        }
-      : { forceClone: true, path: join(argv.directory, argv.branch) }),
+await generateNewVoteFolder({
+  candidates: argv.candidate,
+  headerInstructions: headerInstructions,
+  footerInstructions: argv["footer-instructions"],
+  subject: argv.subject,
+  gpgOptions: {
+    binaryPath: argv["gpg-binary"],
+    trustModel: "always",
+    keyServerURL: "hkps://keys.openpgp.org",
   },
-  { "GIT-BIN": "git" }
-);
+  gitOptions: {
+    repo: argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
+    branch: argv.branch,
+    baseBranch: "main",
+    forceClone: !argv["tsc-repository-path"],
+  },
+  shareholdersThreshold: shareholderThreshold,
+  shareholders: tscMembersArray.flatMap(({ email }) => [
+    "--shareholder",
+    email,
+  ]),
+  allowedVoters: tscMembersArray.flatMap((voter) => [
+    "--allowed-voter",
+    `${voter.name} <${voter.email}>`,
+  ]),
+  method: "Condorcet",
+  path: argv["tsc-repository-path"]
+    ? join(argv["tsc-repository-path"], argv.directory, argv.branch)
+    : join(argv.directory, argv.branch),
+});
 
 if (argv["create-pull-request"]) {
   const cp = spawn(

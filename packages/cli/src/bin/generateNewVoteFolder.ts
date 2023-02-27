@@ -1,39 +1,42 @@
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
-import cliArgsForGit from "../utils/cliArgsForGit.js";
-import { getEnv } from "../utils/voteGitEnv.js";
+import { getEnv, cliArgs } from "../utils/voteGitEnv.js";
 
-const parsedArgs = parseArgs().options({
-  ...cliArgsForGit,
+const parsedArgs = await parseArgs().options({
+  ...cliArgs,
+  handle: undefined,
+  editor: undefined,
+
   repo: {
-    alias: "r",
+    ...cliArgs.repo,
     describe:
       "URL of the repository or name of the remote where to push the init commit",
     demandOption: false,
-    string: true,
+  },
+  branch: {
+    ...cliArgs.branch,
+    default: undefined,
   },
   base: {
-    type: "string",
-    describe: "Name of the base branch",
-    default: "main",
+    describe: "git branch name",
+    default: "main" as const,
+    string: true as const,
   },
   "gpg-binary": {
     describe: "Path to the gpg binary (when not provided, looks in the $PATH)",
     normalize: true,
     string: true,
   },
-  ["gpg-sign"]: {
-    alias: "S",
-    describe: "GPG-sign commits.",
-  },
   ["gpg-key-server-url"]: {
     describe:
       "If supplied, indicates where to find the public keys for share holders if they are not available locally",
+    string: true,
   },
   ["gpg-trust-model"]: {
     describe:
       "Set what trust model GnuPG should follow. See GPG documentation for more information.",
     default: "always",
+    string: true,
   },
   method: {
     describe: "Vote method to use. Defaults to Condorcet.",
@@ -48,7 +51,7 @@ const parsedArgs = parseArgs().options({
   ["shareholders-threshold"]: {
     describe:
       "Minimal number of shareholders required to reconstruct the vote private key. Defaults to 1.",
-    string: true,
+    number: true,
   },
   subject: {
     describe: "Subject for the vote.",
@@ -85,19 +88,47 @@ const parsedArgs = parseArgs().options({
     describe: "Force the cloning of the remote repository in a temp folder",
     boolean: true,
   },
-  vote: {
-    describe: "Cast a vote just after the vote is initialized",
-    boolean: true,
-  },
-  abstain: {
-    describe:
-      "Use this flag to create a blank ballot and skip the voting if --vote is provided",
-    type: "boolean",
-  },
 }).argv;
 
-let env;
-if (!parsedArgs["disable-git"]) {
-  env = await getEnv(parsedArgs);
+async function getCommitAuthor() {
+  if (
+    (parsedArgs.username && !parsedArgs.email) ||
+    (!parsedArgs.username && parsedArgs.email)
+  ) {
+    const { emailAddress, username } = await getEnv(parsedArgs);
+    return `${username} <${emailAddress}>`;
+  }
+  if (parsedArgs.username && parsedArgs.email) {
+    const { emailAddress, username } = parsedArgs;
+    return `${username} <${emailAddress}>`;
+  }
 }
-await generateNewVoteFolder(parsedArgs, env);
+
+await generateNewVoteFolder({
+  allowedVoters: parsedArgs["allowed-voter"],
+  candidates: parsedArgs.candidate,
+  gpgOptions: {
+    binaryPath: parsedArgs["gpg-binary"],
+    keyServerURL: parsedArgs["gpg-key-server-url"],
+    trustModel: parsedArgs["gpg-trust-model"],
+  },
+  path: parsedArgs.path,
+  shareholders: parsedArgs.shareholder,
+  shareholdersThreshold: parsedArgs["shareholders-threshold"],
+  subject: parsedArgs.subject,
+  footerInstructions: parsedArgs["footer-instructions"],
+  headerInstructions: parsedArgs["header-instructions"],
+  method: parsedArgs.method as any,
+  gitOptions: parsedArgs["disable-git"]
+    ? undefined
+    : {
+        repo: parsedArgs.repo,
+        branch: parsedArgs.branch,
+        baseBranch: parsedArgs.base,
+        commitMessage: parsedArgs["git-commit-message"],
+        gpgSign: parsedArgs["gpg-sign"] as any,
+        forceClone: parsedArgs["force-clone"],
+        doNotCleanTempFiles: parsedArgs["do-not-clean"],
+        commitAuthor: await getCommitAuthor(),
+      },
+});
