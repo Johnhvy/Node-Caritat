@@ -8,5 +8,6 @@
     "moduleResolution": "node",
     "watch": true
   },
-  "references": [{ "path": "./packages/cli" }, { "path": "./packages/nodejs" }]
+  "references": [{ "path": "./packages/cli" }, { "path": "./packages/nodejs" }],
+  "exclude": ["**/*.test.ts"]
 }

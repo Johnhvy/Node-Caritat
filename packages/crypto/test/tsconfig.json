@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+      "allowSyntheticDefaultImports": true,
+      "noEmit": true,
+      "composite": true,
+      "target": "ESNext",
+      "module": "ESNext",
+      "outDir": "./dist",
+      "moduleResolution": "node",
+      "watch": true,
+      "rootDir": "../..",
+      "baseUrl": "..",
+      "paths": {
+        "@aduh95/caritat/*": ["../core/src/*"],
+        "@aduh95/caritat-crypto/*": ["../crypto/src/*"]
+      }
+    },
+    "include": ["./*.ts"],
+    "references": [{ "path": "../../.." }]
+  }
+  
