@@ -171,19 +171,6 @@ for await (const member of readReadme(readLines({ input, crlfDelay }))) {
 
 input.destroy?.();
 
-function* passCLIOptions(...args) {
-  for (const arg of args.filter(Object.prototype.hasOwnProperty, argv)) {
-    if (Array.isArray(argv[arg])) {
-      for (const value of argv[arg]) {
-        yield `--${arg}`;
-        if (value !== true) yield value;
-      }
-    } else {
-      yield `--${arg}`;
-      if (argv[arg] !== true) yield argv[arg];
-    }
-  }
-}
 const shareholderThreshold = 2; // Math.ceil(tscMembersArray.length / 4);
 const headerInstructions = `Please set a score to proposal according to your preferences.
 You should set the highest score to your favorite option.
@@ -191,42 +178,36 @@ Negative scores are allowed, only the order matters.
 You can tied two or more proposals if you have no preference.
 To abstain, keep all the propositions tied.`;
 
-// TODO : clean this 
+// TODO : clean this
 
 await generateNewVoteFolder(
-  [
-    ...passCLIOptions(
-      "abstain",
-      "branch",
-      "candidate",
-      "footer-instructions",
-      "gpg-binary",
-      "gpg-sign",
-      "subject",
-      "vote",
-      "do-not-clean"
-    ),
-    "--repo",
-    argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
-    ...(argv["tsc-repository-path"]
-      ? [
-          "--path",
-          join(argv["tsc-repository-path"], argv.directory, argv.branch),
-        ]
-      : ["--force-clone", "--path", join(argv.directory, argv.branch)]),
-    "--gpg-key-server-url",
-    "hkps://keys.openpgp.org",
-    ...tscMembersArray.flatMap(({ email }) => ["--shareholder", email]),
-    "--shareholders-threshold",
-    shareholderThreshold,
-    ...tscMembersArray.flatMap((voter) => [
+  {
+    branch: argv.branch,
+    candidates: argv.candidate,
+    headerInstructions: headerInstructions,
+    footerInstructions: argv["footer-instructions"],
+    gpgBinary: argv["gpg-binary"],
+    subject: argv.subject,
+    repo: argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
+    "gpg-key-server-url": "hkps://keys.openpgp.org",
+    shareholdersThreshold: shareholderThreshold,
+    shareholders: tscMembersArray.flatMap(({ email }) => [
+      "--shareholder",
+      email,
+    ]),
+    allowedVoters: tscMembersArray.flatMap((voter) => [
       "--allowed-voter",
       `${voter.name} <${voter.email}>`,
     ]),
-    "--header-instructions",
-    headerInstructions,
-  ],
-  {"GIT-BIN" : "git"}
+    base: "main",
+    method: "Condorcet",
+    ...(argv["tsc-repository-path"]
+      ? {
+          path: join(argv["tsc-repository-path"], argv.directory, argv.branch),
+        }
+      : { forceClone: true, path: join(argv.directory, argv.branch) }),
+  },
+  { "GIT-BIN": "git" }
 );
 
 if (argv["create-pull-request"]) {
