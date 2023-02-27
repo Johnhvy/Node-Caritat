@@ -10,6 +10,7 @@ __metadata:
   resolution: "@aduh95/caritat-cli@workspace:packages/cli"
   dependencies:
     "@aduh95/caritat": "workspace:*"
+    "@types/yargs": ^17.0.22
     yargs: ^17.3.1
   bin:
     countBallotsFromGit: dist/bin/countBallotsFromGit.js
@@ -211,6 +212,22 @@ __metadata:
   dependencies:
     "@types/node": "*"
   checksum: 19eb71acc4b0d7db2170732a51ad18a34007021f42069652a5be8a3e3a448a470d2f970b9e85f734d1896bf3a25e48fb5132b4a989c101eb5df21cc171d426c5
+  languageName: node
+  linkType: hard
+
+"@types/yargs-parser@npm:*":
+  version: 21.0.0
+  resolution: "@types/yargs-parser@npm:21.0.0"
+  checksum: b2f4c8d12ac18a567440379909127cf2cec393daffb73f246d0a25df36ea983b93b7e9e824251f959e9f928cbc7c1aab6728d0a0ff15d6145f66cec2be67d9a2
+  languageName: node
+  linkType: hard
+
+"@types/yargs@npm:^17.0.22":
+  version: 17.0.22
+  resolution: "@types/yargs@npm:17.0.22"
+  dependencies:
+    "@types/yargs-parser": "*"
+  checksum: 0773523fda71bafdc52f13f5970039e535a353665a60ba9261149a5c9c2b908242e6e77fbb7a8c06931ec78ce889d64d09673c68ba23eb5f5742d5385d0d1982
   languageName: node
   linkType: hard
 

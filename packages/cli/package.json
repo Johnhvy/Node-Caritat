@@ -26,5 +26,8 @@
     "voteOnGitHub": "dist/bin/voteOnGitHub.js",
     "voteUsingGit": "dist/bin/voteUsingGit.js"
   },
-  "type": "module"
+  "type": "module",
+  "devDependencies": {
+    "@types/yargs": "^17.0.22"
+  }
 }

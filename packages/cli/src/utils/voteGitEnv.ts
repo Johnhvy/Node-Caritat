@@ -9,29 +9,31 @@ export const cliArgs = {
     describe:
       "Path to the preferred text editor (when not provided, looks for $VISUAL, $EDITOR, git core.editor and finally fallbacks to vi (or notepad on Windows))",
     normalize: true,
-    type: "string",
+    string: true,
   },
   handle: {
     describe: "GitHub handle (optional)",
-    type: "string",
+    string: true,
   },
   username: {
     describe: "Name of the voter (when not provided, look into git config)",
     alias: "u",
-    type: "string",
+    string: true,
   },
   email: {
     describe:
       "Email address of the voter (when not provided, look into the git config)",
-    type: "string",
+    string: true,
   },
   abstain: {
     describe: "Use this flag to create a blank ballot and skip the voting",
-    type: "boolean",
+    boolean: true,
   },
   ["gpg-sign"]: {
     alias: "S",
     describe: "GPG-sign commits.",
+    string: true,
+    boolean: true,
   },
 };
 
