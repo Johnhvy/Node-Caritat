@@ -1,13 +1,8 @@
 {
   "compilerOptions": {
-    "allowSyntheticDefaultImports": true,
-    "declaration": true,
-    "composite": true,
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
-    "watch": true
+    "allowSyntheticDefaultImports": true
   },
+  "files": [],
   "references": [{ "path": "./packages/cli" }, { "path": "./packages/nodejs" }],
   "exclude": ["**/*.test.ts"]
 }
