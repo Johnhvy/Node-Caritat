@@ -1,3 +1,10 @@
+export interface gitArgsType {
+  repo: string;
+  branch: string;
+  path: string;
+  "git-binary"?: string;
+  "do-not-clean": boolean;
+}
 export default {
   repo: {
     alias: "r",

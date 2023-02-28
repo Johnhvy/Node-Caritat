@@ -1,6 +1,24 @@
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
-import { getEnv, cliArgs } from "../utils/voteGitEnv.js";
+import {cliArgsType, getEnv, cliArgs } from "../utils/voteGitEnv.js";
+
+interface argsType extends cliArgsType {
+  base: string;
+  "gpg-binary"?: string;
+  "gpg-key-server-url"?: string;
+  "gpg-trust-model":string;
+  method?:string;
+  shareholder?:string[];
+  "shareholders-threshold"?:number;
+  subject?:string;
+  "header-instructions"?:string;
+  "footer-instructions"?:string;
+  candidate?:string[];
+  "allowed-voter"?:string[];
+  "git-commit-message"?:string;
+  "disable-git"?:boolean;
+  "force-clone"?:boolean;
+}
 
 const parsedArgs = await parseArgs().options({
   ...cliArgs,
@@ -88,7 +106,7 @@ const parsedArgs = await parseArgs().options({
     describe: "Force the cloning of the remote repository in a temp folder",
     boolean: true,
   },
-}).argv;
+}).argv as any as argsType;
 
 async function getCommitAuthor() {
   if (
@@ -99,7 +117,7 @@ async function getCommitAuthor() {
     return `${username} <${emailAddress}>`;
   }
   if (parsedArgs.username && parsedArgs.email) {
-    const { emailAddress, username } = parsedArgs;
+    const { email:emailAddress, username } = parsedArgs;
     return `${username} <${emailAddress}>`;
   }
 }

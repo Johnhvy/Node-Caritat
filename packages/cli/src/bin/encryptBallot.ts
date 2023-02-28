@@ -1,9 +1,14 @@
 #!/usr/bin/env node
 
 import * as fs from "fs";
- 
+
 import parseArgs from "../utils/parseArgs.js";
 import encryptData from "@aduh95/caritat-crypto/encrypt";
+
+interface argsType {
+  file?: string;
+  key?: string;
+}
 
 const parsedArgs = parseArgs().options({
   file: {
@@ -18,7 +23,7 @@ const parsedArgs = parseArgs().options({
     normalize: true,
     type: "string",
   },
-}).argv;
+}).argv as any as argsType;
 
 const { file: filePath, key: publicKeyPath } = parsedArgs;
 

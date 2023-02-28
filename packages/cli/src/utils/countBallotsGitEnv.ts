@@ -1,9 +1,14 @@
-import cliArgsForGit from "./cliArgsForGit.js";
+import cliArgsForGit, { gitArgsType } from "./cliArgsForGit.js";
 import { env } from "node:process";
 import os from "node:os";
 import fs from "node:fs/promises";
 import path from "node:path";
 
+export interface cliArgsType extends gitArgsType {
+  key?: string;
+  "key-part": string[];
+  mailmap: string;
+}
 // TODO add GPG argument.
 export const cliArgs = {
   ...cliArgsForGit,
@@ -28,7 +33,7 @@ export const cliArgs = {
   },
 };
 
-export async function getEnv(parsedArgs: Record<string, unknown>) {
+export async function getEnv(parsedArgs: cliArgsType) {
   const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));

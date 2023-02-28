@@ -4,8 +4,15 @@ import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
 import voteUsingGit from "@aduh95/caritat/voteUsingGit";
-import { cliArgs, getEnv } from "../utils/voteGitEnv.js";
- 
+import { cliArgs, cliArgsType, getEnv } from "../utils/voteGitEnv.js";
+
+interface argsType extends cliArgsType {
+  protocol?: string;
+  login?: string;
+  "gh-binary": string;
+  "pr-url": string;
+}
+
 const parsedArgs = parseArgs()
   .options({
     ...(cliArgs as any),
@@ -45,10 +52,10 @@ const parsedArgs = parseArgs()
         describe: "URL to the GitHub pull request",
       });
     }
-  ).argv;
+  ).argv as any as argsType;
 
 const prUrlInfo = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)$/.exec(
-  parsedArgs.prUrl as any
+  parsedArgs["pr-url"]
 );
 
 if (prUrlInfo == null) {

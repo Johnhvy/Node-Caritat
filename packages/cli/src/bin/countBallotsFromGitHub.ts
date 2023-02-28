@@ -1,11 +1,20 @@
 #!/usr/bin/env node
- 
+
 import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import countFromGit from "@aduh95/caritat/countBallotsFromGit";
-import {cliArgs,getEnv} from "../utils/countBallotsGitEnv.js";
+import { cliArgsType, cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
 import readStdIn from "../utils/readStdin.js";
 import fs from "fs/promises";
+
+interface argsType extends cliArgsType {
+  protocol?: string;
+  login?: string;
+  "gh-binary": string;
+  "post-comment": boolean;
+  "commit-json-summary":boolean;
+  "pr-url": string;
+}
 
 const parsedArgs = parseArgs()
   .options({
@@ -64,7 +73,7 @@ const parsedArgs = parseArgs()
         describe: "URL to the GitHub pull request",
       });
     }
-  ).argv;
+  ).argv as any as argsType;
 
 const privateKey =
   parsedArgs.key === "-"
@@ -72,7 +81,7 @@ const privateKey =
     : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
 const prUrlInfo = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)$/.exec(
-  parsedArgs.prUrl as any
+  parsedArgs["pr-url"]
 );
 
 if (prUrlInfo == null) {
@@ -196,7 +205,7 @@ async function getKeyPartsFromComments() {
   const { comments } = JSON.parse(
     await runChildProcessAsync(
       parsedArgs["gh-binary"] as string,
-      ["pr", "view", parsedArgs.prUrl, "--json", "comments"],
+      ["pr", "view", parsedArgs["pr-url"], "--json", "comments"],
       { captureStdout: true }
     )
   );
@@ -220,18 +229,18 @@ const { result: summary, privateKey: _privateKey } = await countFromGit({
   keyParts: parsedArgs["key-part"] ?? (await getKeyPartsFromComments()),
   firstCommitSha: sha,
   mailmap: parsedArgs.mailmap,
-  commitJsonSummary: parsedArgs.commitJsonSummary
+  commitJsonSummary: parsedArgs["commit-json-summary"]
     ? {
-        refs: [parsedArgs.prUrl],
+        refs: [parsedArgs["pr-url"]],
       }
     : null,
 });
 
-if (parsedArgs.postComment) {
+if (parsedArgs["post-comment"]) {
   await runChildProcessAsync(parsedArgs["gh-binary"] as string, [
     "pr",
     "comment",
-    parsedArgs.prUrl,
+    parsedArgs["pr-url"],
     "-b",
     summary.generateSummary(_privateKey.toString()),
   ]);

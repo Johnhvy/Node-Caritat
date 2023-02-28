@@ -117,7 +117,8 @@ if (argv.help) {
     "\t--github-repo-name: GitHub repository, in the format owner/repo. Default is nodejs/TSC."
   );
   console.log("\t--remote: Default is git@github.com:nodejs/TSC.git.");
-  await generateNewVoteFolder(["--help"], null);
+  // TODO: investigate what was meant by this:
+  // await generateNewVoteFolder(["--help"]);
   exit(0);
 }
 

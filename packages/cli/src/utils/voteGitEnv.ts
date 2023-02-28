@@ -1,7 +1,16 @@
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import { env } from "node:process";
 import os from "node:os";
-import cliArgsForGit from "../utils/cliArgsForGit.js";
+import cliArgsForGit, { gitArgsType } from "../utils/cliArgsForGit.js";
+
+export interface cliArgsType extends gitArgsType {
+  editor?: string;
+  handle?: string;
+  username?: string;
+  email?: string;
+  abstain?: boolean;
+  "gpg-sign"?: string | boolean;
+}
 
 export const cliArgs = {
   ...cliArgsForGit,
@@ -37,7 +46,7 @@ export const cliArgs = {
   },
 };
 
-export async function getEnv(parsedArgs) {
+export async function getEnv(parsedArgs: cliArgsType) {
   const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
   const [EDITOR, username, emailAddress] = await Promise.all([
