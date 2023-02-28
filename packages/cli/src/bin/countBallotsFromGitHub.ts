@@ -12,7 +12,7 @@ interface argsType extends cliArgsType {
   login?: string;
   "gh-binary": string;
   "post-comment": boolean;
-  "commit-json-summary":boolean;
+  "commit-json-summary": boolean;
   "pr-url": string;
 }
 
