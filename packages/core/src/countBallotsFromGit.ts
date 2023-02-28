@@ -5,7 +5,7 @@ import path from "path";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
- 
+
 import decryptData from "@aduh95/caritat-crypto/decrypt";
 import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
 import type { VoteCommit } from "./vote.js";
@@ -21,7 +21,6 @@ import type VoteResult from "./votingMethods/VoteResult.js";
 //    git config --global core.eol lf
 //    git config --global core.autocrlf false
 //  then reset to the current values
-
 
 async function openSummaryFile(root) {
   const date = new Date().toISOString().slice(0, 10);
@@ -39,8 +38,6 @@ async function openSummaryFile(root) {
   throw new Error("Could not create summary file");
 }
 
-
-
 async function readFileAtRevision(
   GIT_BIN: string,
   revision: string,
@@ -52,6 +49,20 @@ async function readFileAtRevision(
     ["--no-pager", "show", `${revision}:${filePath}`],
     { captureStdout: true, spawnArgs }
   );
+}
+
+interface countFromGitArgs {
+  GIT_BIN: string;
+  cwd: string;
+  repoUrl: string;
+  branch: string;
+  subPath: string;
+  privateKey: ArrayBuffer;
+  keyParts: string[];
+  firstCommitSha: string;
+  mailmap: string;
+  commitJsonSummary: { refs: string[] } | null;
+  doNotCleanTempFiles: boolean;
 }
 
 export default async function countFromGit({
@@ -66,7 +77,7 @@ export default async function countFromGit({
   mailmap,
   commitJsonSummary,
   doNotCleanTempFiles,
-}): Promise<{ result: VoteResult; privateKey: Buffer }> {
+}: countFromGitArgs): Promise<{ result: VoteResult; privateKey: ArrayBuffer }> {
   const spawnArgs = { cwd };
 
   console.error("Cloning remote repository...");
