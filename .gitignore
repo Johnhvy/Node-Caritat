@@ -12,6 +12,7 @@ packages/core/README.md
 
 test/*.js
 **/src/**/*.js
+**/src/**/*.d.ts
 packages/*/test/*.js
 
 .vscode/
