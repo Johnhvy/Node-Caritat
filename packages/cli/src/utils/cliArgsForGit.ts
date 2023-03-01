@@ -1,4 +1,4 @@
-export interface gitArgsType {
+export interface GitCliArgsType {
   repo: string;
   branch: string;
   path: string;

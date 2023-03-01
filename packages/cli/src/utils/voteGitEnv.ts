@@ -1,16 +1,7 @@
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import { env } from "node:process";
 import os from "node:os";
-import cliArgsForGit, { gitArgsType } from "../utils/cliArgsForGit.js";
-
-export interface cliArgsType extends gitArgsType {
-  editor?: string;
-  handle?: string;
-  username?: string;
-  email?: string;
-  abstain?: boolean;
-  "gpg-sign"?: string | boolean;
-}
+import cliArgsForGit, { GitCliArgsType } from "../utils/cliArgsForGit.js";
 
 export const cliArgs = {
   ...cliArgsForGit,
@@ -18,35 +9,37 @@ export const cliArgs = {
     describe:
       "Path to the preferred text editor (when not provided, looks for $VISUAL, $EDITOR, git core.editor and finally fallbacks to vi (or notepad on Windows))",
     normalize: true,
-    string: true,
+    string: true as const,
   },
   handle: {
     describe: "GitHub handle (optional)",
-    string: true,
+    string: true as const,
   },
   username: {
     describe: "Name of the voter (when not provided, look into git config)",
     alias: "u",
-    string: true,
+    string: true as const,
   },
   email: {
     describe:
       "Email address of the voter (when not provided, look into the git config)",
-    string: true,
+    string: true as const,
   },
   abstain: {
     describe: "Use this flag to create a blank ballot and skip the voting",
-    boolean: true,
+    boolean: true as const,
   },
   ["gpg-sign"]: {
     alias: "S",
     describe: "GPG-sign commits.",
-    string: true,
-    boolean: true,
+    string: true as const,
+    boolean: true as const,
   },
 };
 
-export async function getEnv(parsedArgs: cliArgsType) {
+export async function getEnv(
+  parsedArgs: GitCliArgsType & { abstain?: boolean }
+) {
   const GIT_BIN = (parsedArgs["git-binary"] ?? env.GIT ?? "git") as string;
 
   const [EDITOR, username, emailAddress] = await Promise.all([

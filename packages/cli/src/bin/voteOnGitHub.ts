@@ -4,24 +4,17 @@ import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
 import voteUsingGit from "@aduh95/caritat/voteUsingGit";
-import { cliArgs, cliArgsType, getEnv } from "../utils/voteGitEnv.js";
+import { cliArgs, getEnv } from "../utils/voteGitEnv.js";
 
-interface argsType extends cliArgsType {
-  protocol?: string;
-  login?: string;
-  "gh-binary": string;
-  "pr-url": string;
-}
-
-const parsedArgs = parseArgs()
+const parsedArgs = await parseArgs()
   .options({
-    ...(cliArgs as any),
+    ...cliArgs,
 
     // Disable CLI flags that are provided in the PR-url.
-    repo: { hidden: true },
-    branch: { hidden: true },
-    path: { hidden: true },
-    handle: { hidden: true },
+    repo: { hidden: true, string: true as const },
+    branch: { hidden: true, string: true as const },
+    path: { hidden: true, string: true as const },
+    handle: { hidden: true, string: true as const },
 
     protocol: {
       describe:
@@ -52,10 +45,10 @@ const parsedArgs = parseArgs()
         describe: "URL to the GitHub pull request",
       });
     }
-  ).argv as any as argsType;
+  ).argv;
 
 const prUrlInfo = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)$/.exec(
-  parsedArgs["pr-url"]
+  (parsedArgs as typeof parsedArgs & { "pr-url"?: string })["pr-url"]
 );
 
 if (prUrlInfo == null) {
