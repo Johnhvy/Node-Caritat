@@ -5,27 +5,20 @@ import countFromGit from "@aduh95/caritat/countBallotsFromGit";
 import fs from "node:fs/promises";
 import readStdIn from "../utils/readStdin.js";
 
-import { cliArgsType, cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
-import yargs from "yargs";
+import { cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
 
-interface argsType extends cliArgsType {
-  fromCommit?: string;
-  summarize?:"json"|"md";
-}
-
-
-const parsedArgs = parseArgs().options({
-  ...(cliArgs as any),
+const parsedArgs = await parseArgs().options({
+  ...cliArgs,
   fromCommit: {
     describe: "sha of the commit initiating the vote",
-    type: "string",
+    string: true,
   },
-  summarize:{
-      describe: "Format of the vote summary (default is no summary)",
-      choices:["json","md"],
-      type:"string"
-  }
-}).argv as any as argsType;
+  summarize: {
+    describe: "Format of the vote summary (default is no summary)",
+    choices: ["json", "md"],
+    string: true,
+  },
+}).argv;
 
 const { repo: repoUrl, branch, path: subPath } = parsedArgs;
 

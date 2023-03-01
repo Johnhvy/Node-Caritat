@@ -18,18 +18,18 @@ export const cliArgs = {
       "Path to the private key file (use - to read from stdin). If not provided, the private key will be extracted from the vote.yml file.",
     demandOption: false,
     normalize: true,
-    type: "string",
+    string: true as const,
   },
   ["key-part"]: {
     alias: "h",
     describe:
       "A part of the secret, or the whole secret (if only one key part is supplied), encoded in base64. You should provide as many key-part as necessary to reconstitute the secret.",
-    array: true,
+    array: true as const,
   },
   mailmap: {
     describe: "Path to the mailmap file",
     normalize: true,
-    type: "string",
+    string: true as const,
   },
 };
 

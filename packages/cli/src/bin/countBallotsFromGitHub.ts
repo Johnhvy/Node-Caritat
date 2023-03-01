@@ -3,40 +3,31 @@
 import parseArgs from "../utils/parseArgs.js";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 import countFromGit from "@aduh95/caritat/countBallotsFromGit";
-import { cliArgsType, cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
+import { cliArgs, getEnv } from "../utils/countBallotsGitEnv.js";
 import readStdIn from "../utils/readStdin.js";
 import fs from "fs/promises";
 
-interface argsType extends cliArgsType {
-  protocol?: string;
-  login?: string;
-  "gh-binary": string;
-  "post-comment": boolean;
-  "commit-json-summary": boolean;
-  "pr-url": string;
-}
-
-const parsedArgs = parseArgs()
+const parsedArgs = await parseArgs()
   .options({
-    ...(cliArgs as any),
+    ...cliArgs,
 
     // Disable CLI flags that are provided in the PR-url.
-    repo: { hidden: true },
-    branch: { hidden: true },
-    path: { hidden: true },
-    handle: { hidden: true },
+    repo: { hidden: true } as never,
+    branch: { hidden: true } as never,
+    path: { hidden: true } as never,
+    handle: { hidden: true } as never,
 
     protocol: {
       describe:
         "the protocol to use to pull the remote repository, either SSH or " +
         "HTTP (defaults to SSH if a public SSH key is found for the current " +
         "user, otherwise default to HTTP)",
-      type: "string",
+      string: true,
     },
     login: {
       describe:
         "GitHub handle (if not provided, will be fetched using GitHub CLI)",
-      type: "string",
+      string: true,
     },
     "post-comment": {
       describe:
@@ -54,7 +45,7 @@ const parsedArgs = parseArgs()
       describe: "Path to the GitHub CLI executable",
       default: "gh",
       normalize: true,
-      type: "string",
+      string: true,
     },
     ["key-part"]: {
       ...cliArgs["key-part"],
@@ -73,15 +64,15 @@ const parsedArgs = parseArgs()
         describe: "URL to the GitHub pull request",
       });
     }
-  ).argv as any as argsType;
+  ).argv;
 
 const privateKey =
   parsedArgs.key === "-"
     ? await readStdIn(false)
-    : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
+    : parsedArgs.key && (await fs.readFile(parsedArgs.key));
 
 const prUrlInfo = /^https:\/\/github\.com\/([^/]+)\/([^/]+)\/pull\/(\d+)$/.exec(
-  parsedArgs["pr-url"]
+  parsedArgs["pr-url"] as string
 );
 
 if (prUrlInfo == null) {
@@ -122,7 +113,7 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
 console.warn("Getting info from GitHub API...");
 const { data } = JSON.parse(
   await runChildProcessAsync(
-    parsedArgs["gh-binary"] as string,
+    parsedArgs["gh-binary"],
     [
       "api",
       "graphql",
@@ -156,7 +147,7 @@ if (merged || closed) {
 
 console.warn(`Locating vote.yml on commit ${sha}...`);
 const files = await runChildProcessAsync(
-  parsedArgs["gh-binary"] as string,
+  parsedArgs["gh-binary"],
   [
     "api",
     `/repos/${owner}/${repo}/commits/${sha}`,
@@ -231,13 +222,13 @@ const { result: summary, privateKey: _privateKey } = await countFromGit({
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: parsedArgs["commit-json-summary"]
     ? {
-        refs: [parsedArgs["pr-url"]],
+        refs: [parsedArgs["pr-url"] as string],
       }
     : null,
 });
 
 if (parsedArgs["post-comment"]) {
-  await runChildProcessAsync(parsedArgs["gh-binary"] as string, [
+  await runChildProcessAsync(parsedArgs["gh-binary"], [
     "pr",
     "comment",
     parsedArgs["pr-url"],
