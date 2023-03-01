@@ -5,12 +5,7 @@ import * as fs from "fs";
 import parseArgs from "../utils/parseArgs.js";
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 
-interface argsType {
-  file?: string;
-  key?: string;
-}
-
-const parsedArgs = parseArgs().options({
+const parsedArgs = await parseArgs().options({
   file: {
     alias: "f",
     describe: "Path to the file to encrypt",
@@ -23,7 +18,7 @@ const parsedArgs = parseArgs().options({
     normalize: true,
     type: "string",
   },
-}).argv as any as argsType;
+}).argv;
 
 const { file: filePath, key: publicKeyPath } = parsedArgs;
 

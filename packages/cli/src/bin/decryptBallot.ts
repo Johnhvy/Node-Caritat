@@ -5,12 +5,7 @@ import fs from "fs";
 import parseArgs from "../utils/parseArgs.js";
 import decryptData from "@aduh95/caritat-crypto/decrypt";
 
-interface argsType {
-  data: string;
-  key: string;
-}
-
-const parsedArgs = parseArgs().options({
+const parsedArgs = await parseArgs().options({
   data: {
     describe: "Path to JSON file containing the encrypted ballot",
     alias: "d",
@@ -25,7 +20,7 @@ const parsedArgs = parseArgs().options({
     normalize: true,
     type: "string",
   },
-}).argv as any as argsType;
+}).argv;
 
 const { data: filePath, key: privateKeyPath } = parsedArgs;
 

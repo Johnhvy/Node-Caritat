@@ -7,13 +7,7 @@ import {
   VoteFileFormat,
 } from "@aduh95/caritat/parser";
 
-interface argsType {
-  file: string;
-  username?: string;
-  email?: string;
-}
-
-const parsedArgs = parseArgs().options({
+const parsedArgs = await parseArgs().options({
   file: {
     alias: "f",
     describe: "Path to YAML file describing the vote options",
@@ -31,7 +25,7 @@ const parsedArgs = parseArgs().options({
     describe: "Email address of the voter (optional)",
     type: "string",
   },
-}).argv as any as argsType;
+}).argv;
 
 const { file, username, email: emailAddress } = parsedArgs;
 
