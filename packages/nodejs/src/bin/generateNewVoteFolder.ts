@@ -27,6 +27,10 @@ const { values: argv } = parseArgs({
       type: "boolean",
       describe: "Use GitHub API to create a Pull Request. Requires gh CLI tool",
     },
+    "pr-intro": {
+      type: "string",
+      describe: "Add an intro in markdown format for the PR body",
+    },
     directory: {
       type: "string",
       short: "d",
@@ -179,6 +183,8 @@ Negative scores are allowed, only the order matters.
 You can tied two or more proposals if you have no preference.
 To abstain, keep all the propositions tied.`;
 
+const keyServerURL = "hkps://keys.openpgp.org";
+
 await generateNewVoteFolder({
   candidates: argv.candidate,
   headerInstructions: headerInstructions,
@@ -187,7 +193,7 @@ await generateNewVoteFolder({
   gpgOptions: {
     binaryPath: argv["gpg-binary"],
     trustModel: "always",
-    keyServerURL: "hkps://keys.openpgp.org",
+    keyServerURL,
   },
   gitOptions: {
     repo: argv.remote ?? `git@github.com:${argv["github-repo-name"]}.git`,
@@ -223,7 +229,9 @@ if (argv["create-pull-request"]) {
       "-F",
       `title=${argv.subject}`,
       "-F",
-      `body=The following users are invited to participate in this vote:
+      `body=${argv["pr-intro"] ?? ""}
+
+The following users are invited to participate in this vote:
 
 ${tscMembersArray
   .map(({ name, handle }) => `- ${name} @${handle} (TSC)`)
@@ -252,8 +260,19 @@ Vote instructions will follow.`,
         "edit",
         prUrl,
         "--body",
-        `
-TODO
+        `${argv["pr-intro"] ?? ""}
+
+Vote instructions:
+
+- on the CLI: <code>git node vote ${prUrl}</code>
+- on the web: <https://stduhpf.github.io/caritat/#${encodeURIComponent(prUrl)}>
+
+To close the vote, at least ${shareholderThreshold} secret holder(s)[^1] must
+run the following command: <code>git node land vote --close ${prUrl}</code>
+
+[1]: secret holders are folks who have access to the private key associated with
+a public key on <${keyServerURL}> that references an email address listed on the
+TSC voting member list at the time of the opening of the vote.
         `,
         "--silent",
       ],
