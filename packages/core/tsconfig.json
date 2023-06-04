@@ -7,8 +7,7 @@
     "module": "ESNext",
     "outDir": "./dist",
     "moduleResolution": "node",
-    "watch": true,
-    "rootDir": "src",
+    "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
       "@aduh95/caritat-crypto/*": ["../crypto/src/*"]
