@@ -1,6 +1,9 @@
+import { once } from "node:events";
+import { stdin, stdout } from "node:process";
+
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
-import {getEnv, cliArgs } from "../utils/voteGitEnv.js";
+import { getEnv, cliArgs } from "../utils/voteGitEnv.js";
 
 const parsedArgs = await parseArgs().options({
   ...cliArgs,
@@ -99,12 +102,27 @@ async function getCommitAuthor() {
     return `${username} <${emailAddress}>`;
   }
   if (parsedArgs.username && parsedArgs.email) {
-    const { email:emailAddress, username } = parsedArgs;
+    const { email: emailAddress, username } = parsedArgs;
     return `${username} <${emailAddress}>`;
   }
 }
 
 await generateNewVoteFolder({
+  async askForConfirmation(ballotContent) {
+    console.log("Here's how a ballot will look like:\n\n");
+    console.log(ballotContent);
+    stdout.write("\nIs it ready to commit? [Y/n] ");
+    stdin.resume();
+    let chars = await once(stdin, "data");
+    stdin.pause();
+    if (
+      chars[0][0] === 0x6e || // n
+      chars[0][0] === 0x4e // N
+    ) {
+      console.log("Vote template file is ready for edit.");
+      return true;
+    } else return false;
+  },
   allowedVoters: parsedArgs["allowed-voter"],
   candidates: parsedArgs.candidate,
   gpgOptions: {
