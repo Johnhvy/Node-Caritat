@@ -81,6 +81,7 @@ export default async function countFromGit({
 }: countFromGitArgs): Promise<{ result: VoteResult; privateKey: ArrayBuffer }> {
   const spawnArgs = { cwd };
 
+  let hasCreatedTempFiles = false;
   if (!existsSync(path.join(cwd, ".git"))) {
     console.error("Cloning remote repository...");
     await runChildProcessAsync(
@@ -96,6 +97,7 @@ export default async function countFromGit({
       ],
       { spawnArgs }
     );
+    hasCreatedTempFiles = true;
   }
 
   const hasVoteFilesBeenTampered = await runChildProcessAsync(
@@ -277,9 +279,9 @@ export default async function countFromGit({
     }
   }
 
-  if (doNotCleanTempFiles) {
+  if (hasCreatedTempFiles && doNotCleanTempFiles) {
     console.info("The temp folder was not removed from the file system", cwd);
-  } else {
+  } else if (hasCreatedTempFiles) {
     await fs.rm(cwd, { recursive: true, force: true });
   }
 
