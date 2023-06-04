@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import fs from "fs/promises";
+import { existsSync } from "fs";
 import path from "path";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
@@ -80,12 +81,22 @@ export default async function countFromGit({
 }: countFromGitArgs): Promise<{ result: VoteResult; privateKey: ArrayBuffer }> {
   const spawnArgs = { cwd };
 
-  console.error("Cloning remote repository...");
-  await runChildProcessAsync(
-    GIT_BIN,
-    ["clone", "--branch", branch, "--no-tags", "--single-branch", repoUrl, "."],
-    { spawnArgs }
-  );
+  if (!existsSync(path.join(cwd, ".git"))) {
+    console.error("Cloning remote repository...");
+    await runChildProcessAsync(
+      GIT_BIN,
+      [
+        "clone",
+        "--branch",
+        branch,
+        "--no-tags",
+        "--single-branch",
+        repoUrl,
+        ".",
+      ],
+      { spawnArgs }
+    );
+  }
 
   const hasVoteFilesBeenTampered = await runChildProcessAsync(
     GIT_BIN,
