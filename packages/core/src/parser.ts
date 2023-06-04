@@ -87,7 +87,7 @@ export function templateBallot(
   template.preferences.push(
     ...candidates.map((title) => ({ title, score: 0 }))
   );
-  return subject + header + yaml.dump(template) + footer;
+  return subject + header + yaml.dump(template) + footer + "\n";
 }
 
 export function checkBallot(
