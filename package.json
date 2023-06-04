@@ -11,7 +11,7 @@
     "@types/js-yaml": "^4.0.5",
     "@types/minimist": "^1.2.2",
     "@types/node": "^18.0.0",
-    "typescript": "^4.5.4"
+    "typescript": "^5.0.0"
   },
   "imports": {
     "#ts-loader": "./packages/ts-loader/loader.js"
