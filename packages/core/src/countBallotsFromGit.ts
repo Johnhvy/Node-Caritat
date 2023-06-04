@@ -133,7 +133,12 @@ export default async function countFromGit({
   }
 
   if (mailmap != null) {
-    await fs.cp(mailmap, path.join(cwd, ".mailmap"));
+    const target = path.join(cwd, ".mailmap");
+    if (existsSync(target)) {
+      await fs.appendFile(target, await fs.readFile(mailmap));
+    } else {
+      await fs.cp(mailmap, target);
+    }
   }
 
   const gitLog = streamChildProcessStdout(
