@@ -1,5 +1,5 @@
 import type { Actor, Ballot, VoteCandidate, VoteCommit } from "../vote";
-import type { CandidateScores } from "../votingMethods/votingMethodImplementation";
+import type { CandidateScores } from "../votingMethods/VotingMethodImplementation";
 import cleanMarkdown from "../utils/cleanMarkdown.js";
 
 function displayWinners(winners: VoteCandidate[]) {

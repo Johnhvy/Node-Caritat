@@ -1,7 +1,7 @@
 import type ElectionSummary from "../summary/electionSummary";
 import type { Actor, Ballot, VoteCandidate } from "../vote";
 import VoteResult from "./VoteResult.js";
-import type { CandidateScores } from "./votingMethodImplementation";
+import type { CandidateScores } from "./VotingMethodImplementation";
 
 export default class SingleRoundResult extends VoteResult {
   #result: CandidateScores;

@@ -7,7 +7,7 @@ import {
   VoteFileFormat,
 } from "./parser.js";
 import type { PathOrFileDescriptor } from "fs";
-import { CandidateScores } from "./votingMethods/votingMethodImplementation.js";
+import type { CandidateScores } from "./votingMethods/VotingMethodImplementation.js";
 import VoteResult from "./votingMethods/VoteResult.js";
 import CondorcetResult from "./votingMethods/CondorcetResult.js";
 import SingleRoundResult from "./votingMethods/SingleRoundResult.js";
