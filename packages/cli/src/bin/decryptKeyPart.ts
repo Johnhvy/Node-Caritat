@@ -3,7 +3,7 @@ import { once } from "node:events";
 import { argv, env, exit, stdin, stdout } from "node:process";
 
 import * as yaml from "js-yaml";
-import { VoteFileFormat } from "@aduh95/caritat/parser";
+import type { VoteFileFormat } from "@aduh95/caritat/parser";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
 if (argv.length > 2 && argv[3] !== "--post-comment") {
