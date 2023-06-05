@@ -218,7 +218,7 @@ const { result: summary, privateKey: _privateKey } = await countFromGit({
   subPath,
   privateKey,
   keyParts: parsedArgs["key-part"] ?? (await getKeyPartsFromComments()),
-  firstCommitSha: sha,
+  firstCommitRef: sha,
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: parsedArgs["commit-json-summary"]
     ? {

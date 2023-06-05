@@ -7,16 +7,16 @@ import Vote, { VoteCommit } from "./vote.js";
 
 interface checkCommitArgs {
   GIT_BIN?: string;
-  cwd: string;
+  cwd?: string;
   subPath: string;
-  commitSha: string;
+  commitRef?: string;
 }
 
 export default async function reasonToDiscardCommit({
   GIT_BIN = "git",
-  cwd,
+  cwd = ".",
   subPath,
-  commitSha,
+  commitRef = "HEAD",
 }: checkCommitArgs) {
   const spawnArgs = { cwd };
 
@@ -27,7 +27,7 @@ export default async function reasonToDiscardCommit({
     [
       "--no-pager",
       "show",
-      `${commitSha}`,
+      `${commitRef}`,
       "-1",
       "--format=///%H %G? %aN <%aE>",
       "--name-only",

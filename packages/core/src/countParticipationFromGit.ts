@@ -6,18 +6,18 @@ import Vote, { VoteCommit } from "./vote.js";
 
 interface checkCommitArgs {
   GIT_BIN?: string;
-  cwd: string;
+  cwd?: string;
   subPath: string;
-  firstCommitSha: string;
-  lastCommitSha?: string;
+  firstCommitRef: string;
+  lastCommitRef?: string;
 }
 
 export default async function countParticipation({
   GIT_BIN = "git",
-  cwd,
+  cwd = ".",
   subPath,
-  firstCommitSha,
-  lastCommitSha = "HEAD",
+  firstCommitRef,
+  lastCommitRef = "HEAD",
 }: checkCommitArgs) {
   const spawnArgs = { cwd };
 
@@ -28,7 +28,7 @@ export default async function countParticipation({
     [
       "--no-pager",
       "log",
-      `${firstCommitSha}..${lastCommitSha}`,
+      `${firstCommitRef}..${lastCommitRef}`,
       "--format=///%H %G? %aN <%aE>",
       "--name-only",
     ],

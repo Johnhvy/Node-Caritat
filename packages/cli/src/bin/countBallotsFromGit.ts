@@ -34,7 +34,7 @@ const { result, privateKey: _privateKey } = await countFromGit({
   subPath,
   privateKey,
   keyParts: parsedArgs["key-part"],
-  firstCommitSha: parsedArgs.fromCommit,
+  firstCommitRef: parsedArgs.fromCommit,
   mailmap: parsedArgs.mailmap,
   commitJsonSummary: null,
 });
