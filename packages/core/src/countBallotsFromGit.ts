@@ -54,9 +54,9 @@ async function readFileAtRevision(
 }
 
 interface countFromGitArgs {
-  GIT_BIN: string;
+  GIT_BIN?: string;
   cwd: string;
-  repoUrl: string;
+  repoURL: string;
   branch: string;
   subPath: string;
   privateKey: ArrayBuffer;
@@ -64,14 +64,14 @@ interface countFromGitArgs {
   firstCommitSha: string;
   mailmap: string;
   commitJsonSummary: { refs: string[] } | null;
-  gpgSign: boolean | string;
+  gpgSign?: boolean | string;
   doNotCleanTempFiles: boolean;
 }
 
 export default async function countFromGit({
-  GIT_BIN,
+  GIT_BIN = "git",
   cwd,
-  repoUrl,
+  repoURL,
   branch,
   subPath,
   privateKey,
@@ -95,7 +95,7 @@ export default async function countFromGit({
         branch,
         "--no-tags",
         "--single-branch",
-        repoUrl,
+        repoURL,
         ".",
       ],
       { spawnArgs }
@@ -252,14 +252,14 @@ export default async function countFromGit({
 
     console.log("Pushing to the remote repository...");
     try {
-      await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
         spawnArgs,
       });
     } catch {
       console.log(
         "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
       );
-      await runChildProcessAsync(GIT_BIN, ["fetch", repoUrl, branch], {
+      await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
         spawnArgs,
       });
       await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
@@ -274,7 +274,7 @@ export default async function countFromGit({
       );
 
       console.log("Pushing to the remote repository...");
-      await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
         spawnArgs,
       });
     }

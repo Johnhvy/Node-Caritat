@@ -20,7 +20,7 @@ const parsedArgs = await parseArgs().options({
   },
 }).argv;
 
-const { repo: repoUrl, branch, path: subPath } = parsedArgs;
+const { repo: repoURL, branch, path: subPath } = parsedArgs;
 
 const privateKey =
   parsedArgs.key === "-"
@@ -29,7 +29,7 @@ const privateKey =
 
 const { result, privateKey: _privateKey } = await countFromGit({
   ...(await getEnv(parsedArgs)),
-  repoUrl,
+  repoURL,
   branch,
   subPath,
   privateKey,

@@ -172,18 +172,18 @@ const handle = parsedArgs.login || data.viewer.login;
 const protocol =
   parsedArgs.protocol ?? (data.viewer.publicKeys.totalCount ? "ssh" : "http");
 
-function getHTTPRepoUrl(repoUrl: string, login: string) {
-  const url = new URL(repoUrl + ".git");
+function getHTTPRepoURL(repoURL: string, login: string) {
+  const url = new URL(repoURL + ".git");
   url.username = login;
   return url.toString();
 }
-const repoUrl =
+const repoURL =
   protocol === "ssh"
     ? data.repository.sshUrl
-    : getHTTPRepoUrl(data.repository.url, handle);
+    : getHTTPRepoURL(data.repository.url, handle);
 
 console.warn("All relevant information has been retrieved:", {
-  repoUrl,
+  repoURL,
   branch,
   subPath,
   sha,
@@ -213,7 +213,7 @@ async function getKeyPartsFromComments() {
 
 const { result: summary, privateKey: _privateKey } = await countFromGit({
   ...(await getEnv(parsedArgs)),
-  repoUrl,
+  repoURL,
   branch,
   subPath,
   privateKey,
