@@ -62,6 +62,7 @@ interface countFromGitArgs {
   privateKey: ArrayBuffer;
   keyParts: string[];
   firstCommitRef: string;
+  lastCommitRef?: string;
   mailmap: string;
   commitJsonSummary: { refs: string[] } | null;
   gpgSign?: boolean | string;
@@ -77,6 +78,7 @@ export default async function countFromGit({
   privateKey,
   keyParts,
   firstCommitRef,
+  lastCommitRef = "HEAD",
   mailmap,
   commitJsonSummary,
   gpgSign,
@@ -109,7 +111,7 @@ export default async function countFromGit({
       "--no-pager",
       "log",
       "--format=%%",
-      `${firstCommitRef}..HEAD`,
+      `${firstCommitRef}..${lastCommitRef}`,
       "--",
       path.join(subPath, "vote.yml"),
       path.join(subPath, "ballot.yml"),
