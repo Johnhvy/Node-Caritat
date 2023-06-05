@@ -1,3 +1,4 @@
+import { readFile } from "fs/promises";
 import path from "path";
 
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
@@ -16,7 +17,6 @@ export default async function reasonToDiscardCommit({
   GIT_BIN = "git",
   cwd,
   subPath,
-
   commitSha,
 }: checkCommitArgs) {
   const spawnArgs = { cwd };
@@ -49,5 +49,19 @@ export default async function reasonToDiscardCommit({
     }
   }
   const reason = vote.reasonToDiscardCommit(currentCommit);
+  if (reason == null) {
+    let data;
+    try {
+      data = JSON.parse(await readFile(currentCommit.files[0], "utf-8"));
+    } catch (e) {
+      return "invalid vote file: " + e.message;
+    }
+    if (!data?.encryptedSecret || typeof data.encryptedSecret !== "string") {
+      return "Missing or invalid encryptedSecret key";
+    }
+    if (!data?.data || typeof data.data !== "string") {
+      return "Missing or invalid data key";
+    }
+  }
   return reason;
 }
