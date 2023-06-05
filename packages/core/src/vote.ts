@@ -169,6 +169,10 @@ export default class Vote {
     return null;
   }
 
+  public addFakeBallot(author: string): void {
+    this.addBallot({ voter: { id: author }, preferences: new Map() });
+  }
+
   public addBallotFromBufferSource(data: BufferSource, author?: string): void {
     this.addBallotFile(
       parseYml<BallotFileFormat>(this.textDecoder.decode(data)),

@@ -20,6 +20,7 @@
     "./voteUsingGit": "./dist/voteUsingGit.js",
     "./parser": "./dist/parser.js",
     "./checkCommitValidity": "./dist/checkCommitValidity.js",
+    "./countParticipationFromGit": "./dist/countParticipationFromGit.js",
     "./package.json": "./package.json"
   },
   "type": "module"
