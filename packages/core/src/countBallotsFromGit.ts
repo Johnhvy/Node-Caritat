@@ -13,6 +13,7 @@ import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";
 import type VoteResult from "./votingMethods/VoteResult.js";
+import { getGPGSignGitFlag } from "./utils/gpgSign.js";
 
 // TODO To avoid lf/crlf issues:
 //  get the current values
@@ -63,6 +64,7 @@ interface countFromGitArgs {
   firstCommitSha: string;
   mailmap: string;
   commitJsonSummary: { refs: string[] } | null;
+  gpgSign: boolean | string;
   doNotCleanTempFiles: boolean;
 }
 
@@ -77,6 +79,7 @@ export default async function countFromGit({
   firstCommitSha,
   mailmap,
   commitJsonSummary,
+  gpgSign,
   doNotCleanTempFiles,
 }: countFromGitArgs): Promise<{ result: VoteResult; privateKey: ArrayBuffer }> {
   const spawnArgs = { cwd };
@@ -217,8 +220,6 @@ export default async function countFromGit({
   const result = vote.count({ discardedCommits });
 
   if (commitJsonSummary != null) {
-    const signCommits = true; // TODO: make this configurable.
-
     const { fd, filepath } = await openSummaryFile(cwd);
     try {
       await fd.writeFile(
@@ -240,7 +241,7 @@ export default async function countFromGit({
       GIT_BIN,
       [
         "commit",
-        ...(signCommits ? ["-S"] : []),
+        ...getGPGSignGitFlag(gpgSign),
         "-m",
         `close vote and aggregate results`,
       ],
@@ -266,7 +267,7 @@ export default async function countFromGit({
       });
       await runChildProcessAsync(
         GIT_BIN,
-        ["rebase", "FETCH_HEAD", ...(signCommits ? ["-S"] : []), "--quiet"],
+        ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
         {
           spawnArgs,
         }

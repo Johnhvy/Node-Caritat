@@ -71,7 +71,7 @@ export async function getEnv(
     username,
     emailAddress,
     abstain: parsedArgs.abstain,
-    signCommits: parsedArgs["gpg-sign"] === true,
+    gpgSign: parsedArgs["gpg-sign"],
     doNotCleanTempFiles: parsedArgs["do-not-clean"],
   };
 }

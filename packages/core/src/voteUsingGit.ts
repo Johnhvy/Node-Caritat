@@ -6,7 +6,8 @@ import { once } from "events";
 import { webcrypto as crypto } from "crypto";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
- 
+import { getGPGSignGitFlag } from "./utils/gpgSign.js";
+
 import encryptData from "@aduh95/caritat-crypto/encrypt";
 import {
   BallotFileFormat,
@@ -20,10 +21,8 @@ import {
   summarizeCondorcetBallotForVoter,
 } from "./summary/condorcetSummary.js";
 
-
-
 export async function voteAndCommit({
-  GIT_BIN,
+  GIT_BIN = "git",
   EDITOR,
   cwd,
   subPath,
@@ -31,7 +30,7 @@ export async function voteAndCommit({
   username,
   emailAddress,
   abstain,
-  signCommits,
+  gpgSign,
 }) {
   const spawnArgs = { cwd };
   const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
@@ -126,7 +125,7 @@ export async function voteAndCommit({
     GIT_BIN,
     [
       "commit",
-      ...(signCommits ? ["-S"] : []),
+      ...getGPGSignGitFlag(gpgSign),
       `--author`,
       author,
       "-m",
@@ -139,16 +138,16 @@ export async function voteAndCommit({
 }
 
 export default async function voteUsingGit({
-  GIT_BIN,
+  GIT_BIN = "git",
   EDITOR,
-  repoUrl,
+  repoURL,
   branch,
   subPath,
   handle,
   username,
   emailAddress,
   abstain,
-  signCommits,
+  gpgSign,
   doNotCleanTempFiles,
 }) {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
@@ -157,7 +156,7 @@ export default async function voteUsingGit({
   console.log("Cloning remote repository...");
   await runChildProcessAsync(
     GIT_BIN,
-    ["clone", "--branch", branch, "--no-tags", "--depth=1", repoUrl, "."],
+    ["clone", "--branch", branch, "--no-tags", "--depth=1", repoURL, "."],
     { spawnArgs }
   );
 
@@ -170,19 +169,19 @@ export default async function voteUsingGit({
     username,
     emailAddress,
     abstain,
-    signCommits,
+    gpgSign,
   });
 
   console.log("Pushing to the remote repository...");
   try {
-    await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+    await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
       spawnArgs,
     });
   } catch {
     console.log(
       "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
     );
-    await runChildProcessAsync(GIT_BIN, ["fetch", repoUrl, branch], {
+    await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
       spawnArgs,
     });
     await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
@@ -190,14 +189,14 @@ export default async function voteUsingGit({
     });
     await runChildProcessAsync(
       GIT_BIN,
-      ["rebase", "FETCH_HEAD", ...(signCommits ? ["-S"] : []), "--quiet"],
+      ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
       {
         spawnArgs,
       }
     );
 
     console.log("Pushing to the remote repository...");
-    await runChildProcessAsync(GIT_BIN, ["push", repoUrl, `HEAD:${branch}`], {
+    await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
       spawnArgs,
     });
   }
