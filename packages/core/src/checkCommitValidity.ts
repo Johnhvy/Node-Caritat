@@ -27,7 +27,7 @@ export default async function reasonToDiscardCommit({
     [
       "--no-pager",
       "show",
-      `${commitRef}`,
+      commitRef,
       "--format=///%H %G? %aN <%aE>",
       "--name-only",
     ],
