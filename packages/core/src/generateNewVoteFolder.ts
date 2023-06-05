@@ -182,14 +182,18 @@ export default async function generateNewVoteFolder(options: Options) {
                 { stdio: ["pipe", "pipe", "inherit"] }
               );
               gpg.on("error", reject);
-              gpg.stdin.end(new Uint8Array(raw));
               gpg.stdout
                 // @ts-ignore
                 .toArray()
-                .then(
-                  (chunks) => resolve(chunks.join("").replaceAll("\r\n", "\n")),
-                  reject
-                );
+                .then((chunks) => {
+                  console.log({ chunks });
+                  resolve(
+                    Buffer.concat(chunks)
+                      .toString("ascii")
+                      .replaceAll("\r\n", "\n")
+                  );
+                }, reject);
+              gpg.stdin.end(new Uint8Array(raw));
             })
         )
       )
