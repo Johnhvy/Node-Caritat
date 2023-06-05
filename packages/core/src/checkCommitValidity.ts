@@ -6,9 +6,8 @@ import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
 import Vote, { VoteCommit } from "./vote.js";
 
 interface checkCommitArgs {
-  GIT_BIN: string;
+  GIT_BIN?: string;
   cwd: string;
-  branch: string;
   subPath: string;
   commitSha: string;
 }
