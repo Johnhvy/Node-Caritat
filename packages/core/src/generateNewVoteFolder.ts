@@ -186,7 +186,6 @@ export default async function generateNewVoteFolder(options: Options) {
                 // @ts-ignore
                 .toArray()
                 .then((chunks) => {
-                  console.log({ chunks });
                   resolve(
                     Buffer.concat(chunks)
                       .toString("ascii")
