@@ -131,7 +131,7 @@ export default class Vote {
     if (this.#alreadyCommittedVoters.has(commit.author))
       return "A more recent vote commit from this author has already been counted.";
     if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
-      return "The commit author is not in the list of allowed voters.";
+      return "The commit author (" + commit.author + ") is not in the list of allowed voters.";
 
     // TODO: check commits signatures?
 
