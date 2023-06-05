@@ -19,6 +19,7 @@
     "./countBallotsFromGit": "./dist/countBallotsFromGit.js",
     "./voteUsingGit": "./dist/voteUsingGit.js",
     "./parser": "./dist/parser.js",
+    "./checkCommitValidity": "./dist/checkCommitValidity.js",
     "./package.json": "./package.json"
   },
   "type": "module"
