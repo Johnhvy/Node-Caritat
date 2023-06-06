@@ -59,12 +59,12 @@ export default async function countParticipation({
     invalidCommits = { __proto__: null };
     const gitRevParse = streamChildProcessStdout(GIT_BIN, [
       "rev-parse",
-      firstCommitRef,
+      lastCommitRef,
       reportInvalidCommitsAfter,
     ]);
-    const firstCommitSHA = (await gitRevParse.next()).value as string;
+    const lastCommitSHA = (await gitRevParse.next()).value as string;
     reportInvalidCommitsAfter = (await gitRevParse.next()).value as string;
-    shouldReport = firstCommitSHA === reportInvalidCommitsAfter;
+    shouldReport = lastCommitSHA !== reportInvalidCommitsAfter;
   }
   const gitShow = streamChildProcessStdout(
     GIT_BIN,
@@ -81,6 +81,9 @@ export default async function countParticipation({
   for await (const line of gitShow) {
     if (line.startsWith("///")) {
       if (currentCommit) {
+        if (currentCommit.sha === reportInvalidCommitsAfter) {
+          shouldReport = false;
+        }
         const reason =
           vote.reasonToDiscardCommit(currentCommit) ||
           (await getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd));
@@ -89,9 +92,6 @@ export default async function countParticipation({
           vote.addFakeBallot(currentCommit.author);
         } else if (shouldReport) {
           invalidCommits[currentCommit.sha] = reason;
-        }
-        if (currentCommit.sha === reportInvalidCommitsAfter) {
-          shouldReport = true;
         }
       }
       currentCommit = {
