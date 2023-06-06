@@ -61,9 +61,31 @@ export function loadYmlFile<T>(filePath: fs.PathOrFileDescriptor): T {
   return loadYmlString<T>(document, null, documentBuffer);
 }
 
+/*** Fisher-Yates shuffle */
+function shuffle<T>(array: Array<T>): Array<T> {
+  let currentIndex = array.length,
+    randomIndex: number;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
 export function templateBallot(
   vote_data: VoteFileFormat,
-  user: UserCredentials = undefined
+  user: UserCredentials = undefined,
+  shuffleCandidates: boolean = true
 ): string {
   const subject: string = vote_data.subject
     ? yaml.dump({ subject: vote_data.subject }) + "\n"
@@ -77,7 +99,9 @@ export function templateBallot(
   const footer = vote_data.footerInstructions
     ? "\n# " + vote_data.footerInstructions.trim().replaceAll("\n", "\n# ")
     : "";
-  const candidates: string[] = vote_data.candidates;
+  const candidates: string[] = shuffleCandidates
+    ? shuffle(vote_data.candidates)
+    : vote_data.candidates;
 
   const template: BallotFileFormat = {
     preferences: [],
