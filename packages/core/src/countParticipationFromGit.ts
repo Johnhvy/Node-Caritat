@@ -95,7 +95,7 @@ export default async function countParticipation({
         }
       }
       currentCommit = {
-        sha: line.substring(3, 40),
+        sha: line.substr(3, 40),
         signatureStatus: line.charAt(44),
         author: line.slice(46),
         files: [],
