@@ -3,6 +3,7 @@ import path from "path";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
 
 import Vote, { VoteCommit } from "./vote.js";
+import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 
 interface checkCommitArgs {
   GIT_BIN?: string;
@@ -10,6 +11,32 @@ interface checkCommitArgs {
   subPath: string;
   firstCommitRef: string;
   lastCommitRef?: string;
+  reportInvalidCommitsAfter?: string;
+}
+
+async function getReasonToDiscardVoteFile(
+  commit: VoteCommit,
+  GIT_BIN: string,
+  cwd: string
+) {
+  let data;
+  try {
+    data = JSON.parse(
+      await runChildProcessAsync(
+        GIT_BIN,
+        ["show", `${commit.sha}:${commit.files[0]}`],
+        { captureStdout: true, spawnArgs: { cwd } }
+      )
+    );
+  } catch (e) {
+    return "invalid vote file: " + e.message;
+  }
+  if (!data?.encryptedSecret || typeof data.encryptedSecret !== "string") {
+    return "Missing or invalid encryptedSecret key";
+  }
+  if (!data?.data || typeof data.data !== "string") {
+    return "Missing or invalid data key";
+  }
 }
 
 export default async function countParticipation({
@@ -18,6 +45,7 @@ export default async function countParticipation({
   subPath,
   firstCommitRef,
   lastCommitRef = "HEAD",
+  reportInvalidCommitsAfter,
 }: checkCommitArgs) {
   const spawnArgs = { cwd };
 
@@ -36,14 +64,25 @@ export default async function countParticipation({
   );
   let currentCommit: VoteCommit;
   let validVoters = [];
+  const invalidCommits = reportInvalidCommitsAfter && { __proto__: null };
+  let shouldReport = false;
   for await (const line of gitShow) {
     if (line.startsWith("///")) {
-      if (currentCommit && vote.reasonToDiscardCommit(currentCommit) == null) {
-        validVoters.push(currentCommit.author);
-        vote.addFakeBallot(currentCommit.author);
+      if (currentCommit) {
+        const reason =
+          vote.reasonToDiscardCommit(currentCommit) ||
+          getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd);
+        if (reason == null) {
+          validVoters.push(currentCommit.author);
+          vote.addFakeBallot(currentCommit.author);
+        } else if (shouldReport) {
+          invalidCommits[currentCommit.sha] = reason;
+        } else if (currentCommit.sha === reportInvalidCommitsAfter) {
+          shouldReport = true;
+        }
       }
       currentCommit = {
-        sha: line.substr(3, 40),
+        sha: line.substring(3, 40),
         signatureStatus: line.charAt(44),
         author: line.slice(46),
         files: [],
@@ -52,9 +91,20 @@ export default async function countParticipation({
       currentCommit?.files.push(line);
     }
   }
-  if (currentCommit && vote.reasonToDiscardCommit(currentCommit) == null) {
-    validVoters.push(currentCommit.author);
-    vote.addFakeBallot(currentCommit.author);
+  if (currentCommit) {
+    const reason =
+      vote.reasonToDiscardCommit(currentCommit) ||
+      getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd);
+    if (reason == null) {
+      validVoters.push(currentCommit.author);
+      vote.addFakeBallot(currentCommit.author);
+    } else if (shouldReport) {
+      invalidCommits[currentCommit.sha] = reason;
+    }
   }
-  return { validVoters, participation: vote.count().participation };
+  return {
+    validVoters,
+    invalidCommits,
+    participation: vote.count().participation,
+  };
 }
