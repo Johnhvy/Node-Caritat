@@ -51,6 +51,21 @@ export default async function countParticipation({
 
   const vote = new Vote();
   vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
+
+  let currentCommit: VoteCommit, invalidCommits: Record<string, string>;
+  let shouldReport = false;
+  if (reportInvalidCommitsAfter) {
+    // We can only compare SHAs, so we need to parse the refs to compare them.
+    invalidCommits = { __proto__: null };
+    const gitRevParse = streamChildProcessStdout(GIT_BIN, [
+      "rev-parse",
+      firstCommitRef,
+      reportInvalidCommitsAfter,
+    ]);
+    const firstCommitSHA = (await gitRevParse.next()).value as string;
+    reportInvalidCommitsAfter = (await gitRevParse.next()).value as string;
+    shouldReport = firstCommitSHA === reportInvalidCommitsAfter;
+  }
   const gitShow = streamChildProcessStdout(
     GIT_BIN,
     [
@@ -62,22 +77,20 @@ export default async function countParticipation({
     ],
     spawnArgs
   );
-  let currentCommit: VoteCommit;
-  let validVoters = [];
-  const invalidCommits = reportInvalidCommitsAfter && { __proto__: null };
-  let shouldReport = false;
+  const validVoters = [];
   for await (const line of gitShow) {
     if (line.startsWith("///")) {
       if (currentCommit) {
         const reason =
           vote.reasonToDiscardCommit(currentCommit) ||
-          getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd);
+          (await getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd));
         if (reason == null) {
           validVoters.push(currentCommit.author);
           vote.addFakeBallot(currentCommit.author);
         } else if (shouldReport) {
           invalidCommits[currentCommit.sha] = reason;
-        } else if (currentCommit.sha === reportInvalidCommitsAfter) {
+        }
+        if (currentCommit.sha === reportInvalidCommitsAfter) {
           shouldReport = true;
         }
       }
@@ -94,7 +107,7 @@ export default async function countParticipation({
   if (currentCommit) {
     const reason =
       vote.reasonToDiscardCommit(currentCommit) ||
-      getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd);
+      (await getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd));
     if (reason == null) {
       validVoters.push(currentCommit.author);
       vote.addFakeBallot(currentCommit.author);
