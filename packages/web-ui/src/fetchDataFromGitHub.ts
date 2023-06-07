@@ -1,8 +1,11 @@
 const githubPRUrlPattern = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)\/?$/;
 const rawGitHubUserContentURL = new URL("https://raw.githubusercontent.com/");
 
-async function _fetchRawVoteURL(url) {
-  const prUrl = new URL(url);
+async function _fetchRawVoteURL(
+  url: string | URL,
+  fetchOptions: Parameters<typeof fetch>[1]
+) {
+  const prUrl = new URL(url as string);
   if (prUrl.origin !== "https://github.com") {
     throw new Error(
       "Only GitHub PR URLs are supported on the web UI. Use the CLI instead."
@@ -16,12 +19,15 @@ async function _fetchRawVoteURL(url) {
   }
   const [, owner, repo, number] = prUrlMatch;
   const prFiles = await fetch(
-    `https://api.github.com/repos/${owner}/${repo}/pulls/${number}/files`
+    `https://api.github.com/repos/${owner}/${repo}/pulls/${number}/files`,
+    fetchOptions
   ).then((response) =>
     response.ok
       ? response.json()
       : Promise.reject(
-          new Error(`Fetch error: ${response.status} ${response.statusText}`)
+          new Error(`Fetch error: ${response.status} ${response.statusText}`, {
+            cause: response,
+          })
         )
   );
 
@@ -38,12 +44,15 @@ async function _fetchRawVoteURL(url) {
   );
 }
 let requestCache = new Map();
-async function fetchRawVoteURL(url: string) {
+async function fetchRawVoteURL(
+  url: string,
+  fetchOptions: Parameters<typeof fetch>[1]
+) {
   const cachedRequest = requestCache.get(url);
   if (cachedRequest != null) return cachedRequest;
 
   try {
-    const rawVoteURL = _fetchRawVoteURL(url);
+    const rawVoteURL = _fetchRawVoteURL(url, fetchOptions);
     requestCache.set(url, rawVoteURL);
     return rawVoteURL;
   } catch (err) {
@@ -52,15 +61,18 @@ async function fetchRawVoteURL(url: string) {
   }
 }
 
-async function act(url) {
+async function act(
+  url: string | URL,
+  fetchOptions?: Parameters<typeof fetch>[1]
+) {
   try {
-    const voteUrl = await fetchRawVoteURL(url);
+    const voteUrl = await fetchRawVoteURL(url as string, fetchOptions);
 
     const ballotURL = new URL(`./ballot.yml`, voteUrl);
     const publicKeyURL = new URL(`./public.pem`, voteUrl);
 
     return [
-      fetch(ballotURL as any as string).then((response) =>
+      fetch(ballotURL as any as string, fetchOptions).then((response) =>
         response.ok
           ? response.text()
           : Promise.reject(
@@ -69,7 +81,7 @@ async function act(url) {
               )
             )
       ),
-      fetch(publicKeyURL as any as string).then((response) =>
+      fetch(publicKeyURL as any as string, fetchOptions).then((response) =>
         response.ok
           ? response.arrayBuffer()
           : Promise.reject(
@@ -78,20 +90,33 @@ async function act(url) {
               )
             )
       ),
-    ];
+    ] as [Promise<string>, Promise<ArrayBuffer>];
   } catch (err) {
     err = Promise.reject(err);
-    return [err, err];
+    return [err, err] as [never, never];
   }
 }
 
-let previousURL: string;
+let previousURL: string | null;
 export default function fetchFromGitHub(
-  url: string,
-  callback: (errOfResult: [Promise<string>, Promise<string>]) => void
+  { url, username, token }: { url: string; username?: string; token?: string },
+  callback: (
+    errOfResult: [Promise<string>, Promise<ArrayBuffer>]
+  ) => void | Promise<void>
 ) {
-  if (previousURL === url) return;
-  previousURL = url;
+  const options =
+    username && token
+      ? {
+          headers: {
+            Authorization: `Basic ${btoa(`${username}:${token}`)}`,
+          },
+        }
+      : undefined;
+  if (previousURL === url + options?.headers.Authorization) return;
+  previousURL = url + options?.headers.Authorization;
 
-  act(url).then(callback, callback);
+  act(url, options).then(callback, (err) => {
+    previousURL = null;
+    return callback(err);
+  });
 }

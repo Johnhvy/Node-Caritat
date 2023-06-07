@@ -1,14 +1,11 @@
 <script lang="ts">
   import { beforeUpdate } from "svelte";
 
-  // @ts-ignore
   import encryptData from "@aduh95/caritat-crypto/encrypt";
-  // @ts-ignore
   import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
-  // @ts-ignore
   import fetchFromGitHub from "./fetchDataFromGitHub.ts";
 
-  export let url, registerEncrypedBallot;
+  export let url, username, token, registerEncrypedBallot;
 
   let fetchedBallot, fetchedPublicKey;
 
@@ -21,7 +18,7 @@
     registerEncrypedBallot(
       (async () => {
         const { encryptedSecret, saltedCiphertext } = await encryptData(
-          textEncoder.encode(textarea.value),
+          textEncoder.encode(textarea.value) as Uint8Array,
           await fetchedPublicKey
         );
         return JSON.stringify({
@@ -34,7 +31,7 @@
 
   fetchedBallot = fetchedPublicKey = Promise.reject("no data");
   beforeUpdate(() => {
-    fetchFromGitHub(url, (errOfResult) => {
+    fetchFromGitHub({ url, username, token }, (errOfResult) => {
       [fetchedBallot, fetchedPublicKey] = errOfResult;
     });
   });
@@ -43,7 +40,7 @@
 <summary>Fill in ballot</summary>
 
 {#await fetchedBallot}
-  <p>...loading</p>
+  <p>...loading as {username}</p>
 {:then ballotPlainText}
   <form on:submit={onSubmit}>
     <textarea name="ballot">{ballotPlainText}</textarea>
