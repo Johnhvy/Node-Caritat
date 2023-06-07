@@ -131,9 +131,14 @@ export default class Vote {
     if (this.#alreadyCommittedVoters.has(commit.author))
       return "A more recent vote commit from this author has already been counted.";
     if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
-      return "The commit author (" + commit.author + ") is not in the list of allowed voters.";
+      return `The commit author (${commit.author}) is not in the list of allowed voters.`;
 
-    // TODO: check commits signatures?
+    if (
+      this.voteFileData.requireSignedBallots &&
+      commit.signatureStatus !== "G"
+    ) {
+      return `Valid signature are required for this vote, expected status G, got ${commit.signatureStatus}`;
+    }
 
     this.#alreadyCommittedVoters.add(commit.author);
     return null;

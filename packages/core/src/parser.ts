@@ -14,6 +14,9 @@ export interface VoteFileFormat {
   headerInstructions?: string;
   footerInstructions?: string;
   checksum?: string;
+
+  canShuffleCandidates?: boolean;
+  requireSignedBallots?: boolean;
 }
 function instanceOfVoteFile(object: any): object is VoteFileFormat {
   return "candidates" in object;
@@ -84,8 +87,7 @@ function shuffle<T>(array: Array<T>): Array<T> {
 
 export function templateBallot(
   vote_data: VoteFileFormat,
-  user: UserCredentials = undefined,
-  shuffleCandidates: boolean = true
+  user: UserCredentials = undefined
 ): string {
   const subject: string = vote_data.subject
     ? yaml.dump({ subject: vote_data.subject }) + "\n"
@@ -99,9 +101,10 @@ export function templateBallot(
   const footer = vote_data.footerInstructions
     ? "\n# " + vote_data.footerInstructions.trim().replaceAll("\n", "\n# ")
     : "";
-  const candidates: string[] = shuffleCandidates
-    ? shuffle(vote_data.candidates)
-    : vote_data.candidates;
+  const candidates: string[] =
+    vote_data.canShuffleCandidates !== false
+      ? shuffle(vote_data.candidates)
+      : vote_data.candidates;
 
   const template: BallotFileFormat = {
     preferences: [],
