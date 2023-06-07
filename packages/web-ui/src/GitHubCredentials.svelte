@@ -16,7 +16,18 @@
 </p>
 
 <form on:submit={onSubmit}>
-  <input name="username" value={username} />
-  <input name="token" value={token} type="password" />
+  <label
+    >Username:
+    <input name="username" value={username} /></label
+  >
+  <label
+    >Token:
+    <input
+      name="token"
+      value={token}
+      type="password"
+      placeholder="gho_…"
+    /></label
+  >
   <button type="submit">Save</button>
 </form>

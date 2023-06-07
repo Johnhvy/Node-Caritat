@@ -1,7 +1,6 @@
 const githubPRUrlPattern = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)\/?$/;
-const rawGitHubUserContentURL = new URL("https://raw.githubusercontent.com/");
 
-async function _fetchRawVoteURL(
+async function fetchRawVoteURL(
   url: string | URL,
   fetchOptions: Parameters<typeof fetch>[1]
 ) {
@@ -33,46 +32,36 @@ async function _fetchRawVoteURL(
 
   const voteUrl = prFiles.find((file) =>
     file.filename.endsWith("/vote.yml")
-  )?.raw_url;
+  )?.contents_url;
   if (!voteUrl) {
     throw new Error("Failed to find a vote.yml file in this PR");
   }
 
-  return new URL(
-    new URL(voteUrl.replaceAll("%2F", "/")).pathname.replace("/raw/", "/"),
-    rawGitHubUserContentURL
-  );
-}
-let requestCache = new Map();
-async function fetchRawVoteURL(
-  url: string,
-  fetchOptions: Parameters<typeof fetch>[1]
-) {
-  const cachedRequest = requestCache.get(url);
-  if (cachedRequest != null) return cachedRequest;
-
-  try {
-    const rawVoteURL = _fetchRawVoteURL(url, fetchOptions);
-    requestCache.set(url, rawVoteURL);
-    return rawVoteURL;
-  } catch (err) {
-    requestCache.set(url, Promise.reject(err));
-    throw err;
-  }
+  return voteUrl;
 }
 
 async function act(
   url: string | URL,
   fetchOptions?: Parameters<typeof fetch>[1]
 ) {
+  const contentsFetchOptions = {
+    ...fetchOptions,
+    headers: {
+      ...fetchOptions?.headers,
+      Accept: "application/vnd.github.raw",
+    },
+  };
   try {
     const voteUrl = await fetchRawVoteURL(url as string, fetchOptions);
 
-    const ballotURL = new URL(`./ballot.yml`, voteUrl);
-    const publicKeyURL = new URL(`./public.pem`, voteUrl);
+    const ballotURL = voteUrl.replace(/vote\.yml(\?ref=\w+)$/, "ballot.yml$1");
+    const publicKeyURL = voteUrl.replace(
+      /vote\.yml(\?ref=\w+)$/,
+      "public.pem$1"
+    );
 
     return [
-      fetch(ballotURL as any as string, fetchOptions).then((response) =>
+      fetch(ballotURL, contentsFetchOptions).then((response) =>
         response.ok
           ? response.text()
           : Promise.reject(
@@ -81,7 +70,7 @@ async function act(
               )
             )
       ),
-      fetch(publicKeyURL as any as string, fetchOptions).then((response) =>
+      fetch(publicKeyURL, contentsFetchOptions).then((response) =>
         response.ok
           ? response.arrayBuffer()
           : Promise.reject(
@@ -112,8 +101,9 @@ export default function fetchFromGitHub(
           },
         }
       : undefined;
-  if (previousURL === url + options?.headers.Authorization) return;
-  previousURL = url + options?.headers.Authorization;
+  const serializedURL = url + options?.headers.Authorization;
+  if (previousURL === serializedURL) return;
+  previousURL = serializedURL;
 
   act(url, options).then(callback, (err) => {
     previousURL = null;

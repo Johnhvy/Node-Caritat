@@ -54,4 +54,11 @@
   <p>
     An error occured: {error?.message ?? error}
   </p>
+
+  {#if !token || !username}
+    <p>
+      Maybe consider providing an access token, authenticated API calls are more
+      likely to succeed.
+    </p>
+  {/if}
 {/await}
