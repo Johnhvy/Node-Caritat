@@ -1,5 +1,6 @@
 const githubPRUrlPattern = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)\/?$/;
 
+const branchInfoCache = new Map();
 async function fetchRawVoteURL(
   url: string | URL,
   fetchOptions: Parameters<typeof fetch>[1]
@@ -30,14 +31,41 @@ async function fetchRawVoteURL(
         )
   );
 
-  const voteUrl = prFiles.find((file) =>
+  const voteFileInfo = prFiles.find((file) =>
     file.filename.endsWith("/vote.yml")
-  )?.contents_url;
-  if (!voteUrl) {
+  );
+  if (!voteFileInfo) {
     throw new Error("Failed to find a vote.yml file in this PR");
   }
 
-  return voteUrl;
+  const {
+    head: {
+      repo: { html_url },
+      ref,
+    },
+  } = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`,
+    fetchOptions
+  ).then((response) =>
+    response.ok
+      ? response.json()
+      : Promise.reject(
+          new Error(`Fetch error: ${response.status} ${response.statusText}`, {
+            cause: response,
+          })
+        )
+  );
+
+  branchInfoCache.set(
+    url,
+    `${html_url}/new/${ref}/${voteFileInfo.filename.replace(/vote\.yml$/, "")}`
+  );
+
+  return voteFileInfo.contents_url;
+}
+
+export function fetchNewVoteFileURL(url: string | URL) {
+  return branchInfoCache.get(url);
 }
 
 async function act(

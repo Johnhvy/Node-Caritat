@@ -1,7 +1,9 @@
 <script lang="ts">
   import { beforeUpdate } from "svelte";
+  import { fetchNewVoteFileURL } from "./fetchDataFromGitHub";
 
   export let encryptDataPromise: Promise<string | never>;
+  export let url: string;
 
   let copyPromise: Promise<void>;
   let showError: boolean;
@@ -29,11 +31,17 @@
       Copied to the clipboard!
     {:catch error}
       {#if showError}
-        An error occured: {error?.message ?? error}
+        An error occurred: {error?.message ?? error}
       {/if}
     {/await}
   </div>
   <button type="button" on:click={copyToClipboard}>Copy to clipboard</button>
+  <p>
+    Cast a vote by pasting this on a <a
+      href={fetchNewVoteFileURL(url)}
+      target="_blank">new file on the vote branch</a
+    >.
+  </p>
 {:catch error}
-  An error occured: {error?.message ?? error}
+  An error occurred: {error?.message ?? error}
 {/await}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CopyEncrytptedBallotForm from "./CopyEncrytptedBallotForm.svelte";
+  import CopyEncryptedBallotForm from "./CopyEncryptedBallotForm.svelte";
   import FillBallotForm from "./FillBallotForm.svelte";
   import GitHubCredentials from "./GitHubCredentials.svelte";
   import FindPrForm from "./FindPRForm.svelte";
@@ -51,5 +51,5 @@
   <FillBallotForm {url} {username} {token} {registerEncrypedBallot} />
 </details>
 <details open={step === 2}>
-  <CopyEncrytptedBallotForm {encryptDataPromise} />
+  <CopyEncryptedBallotForm {encryptDataPromise} {url} />
 </details>
