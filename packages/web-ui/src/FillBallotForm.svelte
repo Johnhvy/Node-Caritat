@@ -40,7 +40,7 @@
 <summary>Fill in ballot</summary>
 
 {#await fetchedBallot}
-  <p>...loading as {username}</p>
+  <p>...loading as {username || "anonymous"}</p>
 {:then ballotPlainText}
   <form on:submit={onSubmit}>
     <textarea name="ballot">{ballotPlainText}</textarea>
