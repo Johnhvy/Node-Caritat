@@ -5,7 +5,7 @@
   import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
   import fetchFromGitHub from "./fetchDataFromGitHub.ts";
 
-  export let url, username, token, registerEncrypedBallot;
+  export let url, username, token, registerEncryptedBallot;
 
   let fetchedBallot, fetchedPublicKey;
 
@@ -15,7 +15,7 @@
   function onSubmit(this: HTMLFormElement, event: SubmitEvent) {
     event.preventDefault();
     const textarea = this.elements.namedItem("ballot") as HTMLInputElement;
-    registerEncrypedBallot(
+    registerEncryptedBallot(
       (async () => {
         const { encryptedSecret, saltedCiphertext } = await encryptData(
           textEncoder.encode(textarea.value) as Uint8Array,
@@ -52,7 +52,7 @@
   </form>
 {:catch error}
   <p>
-    An error occured: {error?.message ?? error}
+    An error occurred: {error?.message ?? error}
   </p>
 
   {#if !token || !username}

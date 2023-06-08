@@ -23,7 +23,7 @@
     step = url ? Math.max(step, 1) : 0;
   });
 
-  function registerEncrypedBallot(promise) {
+  function registerEncryptedBallot(promise) {
     encryptDataPromise = promise;
     promise.then(
       () => {
@@ -48,7 +48,7 @@
   <FindPrForm {url} />
 </details>
 <details open={step === 1}>
-  <FillBallotForm {url} {username} {token} {registerEncrypedBallot} />
+  <FillBallotForm {url} {username} {token} {registerEncryptedBallot} />
 </details>
 <details open={step === 2}>
   <CopyEncryptedBallotForm {encryptDataPromise} {url} />
