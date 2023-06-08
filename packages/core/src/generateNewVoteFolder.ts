@@ -19,6 +19,7 @@ interface Options {
   subject: string;
   headerInstructions?: string;
   candidates: string[];
+  canShuffleCandidates?: boolean;
   footerInstructions?: string;
 
   /** Defaults to "Condorcet" */
@@ -149,7 +150,7 @@ export default async function generateNewVoteFolder(options: Options) {
     return lines.join("\n");
   }
 
-  const ballot = {
+  const voteConfig: VoteFileFormat = {
     subject: options.subject,
     headerInstructions: options.headerInstructions,
     candidates: options.candidates,
@@ -197,8 +198,9 @@ export default async function generateNewVoteFolder(options: Options) {
         )
       )
     ).filter(String),
+    canShuffleCandidates: options.canShuffleCandidates,
   };
-  let yamlString = yaml.dump(ballot);
+  let yamlString = yaml.dump(voteConfig);
   await voteFile.writeFile(yamlString);
   await voteFile.close();
 
@@ -222,7 +224,7 @@ export default async function generateNewVoteFolder(options: Options) {
     }
   }
 
-  await fs.writeFile(publicKeyPath, ballot.publicKey);
+  await fs.writeFile(publicKeyPath, voteConfig.publicKey);
   await fs.writeFile(ballotPath, ballotContent);
 
   if (gitOptions) {

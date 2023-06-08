@@ -86,30 +86,30 @@ function shuffle<T>(array: Array<T>): Array<T> {
 }
 
 export function templateBallot(
-  vote_data: VoteFileFormat,
+  voteConfig: VoteFileFormat,
   user: UserCredentials = undefined
 ): string {
-  const subject: string = vote_data.subject
-    ? yaml.dump({ subject: vote_data.subject }) + "\n"
+  const subject: string = voteConfig.subject
+    ? yaml.dump({ subject: voteConfig.subject }) + "\n"
     : "";
 
-  const header = vote_data.headerInstructions
+  const header = voteConfig.headerInstructions
     ? "# " +
-      vote_data.headerInstructions.trim().replaceAll("\n", "\n# ") +
+      voteConfig.headerInstructions.trim().replaceAll("\n", "\n# ") +
       "\n\n"
     : "";
-  const footer = vote_data.footerInstructions
-    ? "\n# " + vote_data.footerInstructions.trim().replaceAll("\n", "\n# ")
+  const footer = voteConfig.footerInstructions
+    ? "\n# " + voteConfig.footerInstructions.trim().replaceAll("\n", "\n# ")
     : "";
   const candidates: string[] =
-    vote_data.canShuffleCandidates !== false
-      ? shuffle(vote_data.candidates)
-      : vote_data.candidates;
+    voteConfig.canShuffleCandidates !== false
+      ? shuffle(voteConfig.candidates)
+      : voteConfig.candidates;
 
   const template: BallotFileFormat = {
     preferences: [],
     ...(user && { author: `${user.username} <${user.emailAddress}>` }),
-    poolChecksum: vote_data.checksum,
+    poolChecksum: voteConfig.checksum,
   };
   template.preferences.push(
     ...candidates.map((title) => ({ title, score: 0 }))
