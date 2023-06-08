@@ -105,6 +105,9 @@ export default async function countParticipation({
     }
   }
   if (currentCommit) {
+    if (currentCommit.sha === reportInvalidCommitsAfter) {
+      shouldReport = false;
+    }
     const reason =
       vote.reasonToDiscardCommit(currentCommit) ||
       (await getReasonToDiscardVoteFile(currentCommit, GIT_BIN, cwd));
