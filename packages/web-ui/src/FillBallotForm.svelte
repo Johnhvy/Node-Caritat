@@ -53,10 +53,9 @@
   fetchedBallot = fetchedPublicKey = Promise.reject("no data");
   beforeUpdate(() => {
     fetchFromGitHub({ url, username, token }, (errOfResult) => {
-      [fetchedBallot, fetchedPublicKey] = errOfResult;
-      // TODO: make this dependant on the thing in vote.yml
-      const shoudlshuffle = true;
-      if(shoudlshuffle){
+      let shouldShuffleCandidates: boolean
+      [fetchedBallot, fetchedPublicKey, shouldShuffleCandidates] = errOfResult;
+      if(shouldShuffleCandidates){
         fetchedBallot = fetchedBallot.then((ballotData)=>{
           const exp = /\n(?!\s)/
           const titleString = "  - title: "

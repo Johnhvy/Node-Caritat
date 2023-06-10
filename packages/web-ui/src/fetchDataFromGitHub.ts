@@ -87,7 +87,7 @@ async function act(
       /vote\.yml(\?ref=\w+)$/,
       "public.pem$1"
     );
-
+    const shouldShuffleCandidates = await fetch(voteUrl,contentsFetchOptions).then((response)=>response.ok?response.text().then(txt=>txt.split("canShuffleCandidates: ")[1].startsWith("true")):false)
     return [
       fetch(ballotURL, contentsFetchOptions).then((response) =>
         response.ok
@@ -107,10 +107,11 @@ async function act(
               )
             )
       ),
-    ] as [Promise<string>, Promise<ArrayBuffer>];
+      shouldShuffleCandidates
+    ] as [Promise<string>, Promise<ArrayBuffer>, boolean];
   } catch (err) {
     err = Promise.reject(err);
-    return [err, err] as [never, never];
+    return [err, err, false] as [never, never, boolean];
   }
 }
 
@@ -118,7 +119,7 @@ let previousURL: string | null;
 export default function fetchFromGitHub(
   { url, username, token }: { url: string; username?: string; token?: string },
   callback: (
-    errOfResult: [Promise<string>, Promise<ArrayBuffer>]
+    errOfResult: [Promise<string>, Promise<ArrayBuffer>, boolean]
   ) => void | Promise<void>
 ) {
   const options =
