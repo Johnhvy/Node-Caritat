@@ -7,7 +7,7 @@
 
   export let url, username, token, registerEncryptedBallot;
 
-  let fetchedBallot, fetchedPublicKey;
+  let fetchedBallot: Promise<string>, fetchedPublicKey;
 
   const textEncoder =
     typeof TextEncoder === "undefined" ? { encode() {} } : new TextEncoder();
@@ -29,12 +29,47 @@
     );
   }
 
+  /*** Fisher-Yates shuffle */
+  function shuffle<T>(array: Array<T>): Array<T> {
+    let currentIndex = array.length,
+      randomIndex: number;
+
+    // While there remain elements to shuffle.
+    while (currentIndex != 0) {
+      // Pick a remaining element.
+      randomIndex = Math.floor(Math.random() * currentIndex);
+      currentIndex--;
+
+      // And swap it with the current element.
+      [array[currentIndex], array[randomIndex]] = [
+        array[randomIndex],
+        array[currentIndex],
+      ];
+    }
+
+    return array;
+  }
+
   fetchedBallot = fetchedPublicKey = Promise.reject("no data");
   beforeUpdate(() => {
     fetchFromGitHub({ url, username, token }, (errOfResult) => {
       [fetchedBallot, fetchedPublicKey] = errOfResult;
+      // TODO: make this dependant on the thing in vote.yml
+      const shoudlshuffle = true;
+      if(shoudlshuffle){
+        fetchedBallot = fetchedBallot.then((ballotData)=>{
+          const exp = /\n(?!\s)/
+          const titleString = "  - title: "
+          const sectionString = "\npreferences:\n"
+          const parts0 = ballotData.split(sectionString,2)
+          const parts1 = parts0[1].split(exp,2)
+          const candidates = titleString + shuffle((parts1[0]+"\n").split(titleString).slice(1)).join(titleString)
+          return parts0[0]+sectionString+candidates+parts1[1]
+        });
+      }
     });
   });
+
 </script>
 
 <summary>Fill in ballot</summary>
