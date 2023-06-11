@@ -53,22 +53,43 @@
   fetchedBallot = fetchedPublicKey = Promise.reject("no data");
   beforeUpdate(() => {
     fetchFromGitHub({ url, username, token }, (errOfResult) => {
-      let shouldShuffleCandidates: boolean
+      let shouldShuffleCandidates: boolean;
       [fetchedBallot, fetchedPublicKey, shouldShuffleCandidates] = errOfResult;
-      if(shouldShuffleCandidates){
-        fetchedBallot = fetchedBallot.then((ballotData)=>{
-          const exp = /\n(?!\s)/
-          const titleString = "  - title: "
-          const sectionString = "\npreferences:\n"
-          const parts0 = ballotData.split(sectionString,2)
-          const parts1 = parts0[1].split(exp,2)
-          const candidates = titleString + shuffle((parts1[0]+"\n").split(titleString).slice(1)).join(titleString)
-          return parts0[0]+sectionString+candidates+parts1[1]
+      if (shouldShuffleCandidates) {
+        fetchedBallot = fetchedBallot.then((ballotData) => {
+          let lineStart = 0;
+          let lineEnd = ballotData.indexOf("\n");
+
+          let headerEnd;
+
+          const candidates = [];
+          let currentCandidate;
+          let isInsidePreferences = false;
+          while (lineEnd !== -1) {
+            if (isInsidePreferences) {
+              if (
+                ballotData[lineStart] !== " " ||
+                ballotData[lineStart + 1] !== " "
+              )
+                break;
+              if (ballotData[lineStart + 2] === "-") {
+                if (currentCandidate) candidates.push(currentCandidate);
+                currentCandidate = ballotData.slice(lineStart, lineEnd);
+              }
+            } else if (ballotData.slice(lineStart, lineEnd) === "preferences") {
+              isInsidePreferences = true;
+              headerEnd = lineEnd;
+            }
+          }
+          return (
+            ballotData.slice(0, headerEnd) +
+            shuffle(candidates).join("\n") +
+            ballotData.slice(lineStart)
+          );
         });
       }
     });
   });
-
 </script>
 
 <summary>Fill in ballot</summary>
