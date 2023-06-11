@@ -29,65 +29,10 @@
     );
   }
 
-  /*** Fisher-Yates shuffle */
-  function shuffle<T>(array: Array<T>): Array<T> {
-    let currentIndex = array.length,
-      randomIndex: number;
-
-    // While there remain elements to shuffle.
-    while (currentIndex != 0) {
-      // Pick a remaining element.
-      randomIndex = Math.floor(Math.random() * currentIndex);
-      currentIndex--;
-
-      // And swap it with the current element.
-      [array[currentIndex], array[randomIndex]] = [
-        array[randomIndex],
-        array[currentIndex],
-      ];
-    }
-
-    return array;
-  }
-
   fetchedBallot = fetchedPublicKey = Promise.reject("no data");
   beforeUpdate(() => {
     fetchFromGitHub({ url, username, token }, (errOfResult) => {
-      let shouldShuffleCandidates: boolean;
-      [fetchedBallot, fetchedPublicKey, shouldShuffleCandidates] = errOfResult;
-      if (shouldShuffleCandidates) {
-        fetchedBallot = fetchedBallot.then((ballotData) => {
-          let lineStart = 0;
-          let lineEnd = ballotData.indexOf("\n");
-
-          let headerEnd;
-
-          const candidates = [];
-          let currentCandidate;
-          let isInsidePreferences = false;
-          while (lineEnd !== -1) {
-            if (isInsidePreferences) {
-              if (
-                ballotData[lineStart] !== " " ||
-                ballotData[lineStart + 1] !== " "
-              )
-                break;
-              if (ballotData[lineStart + 2] === "-") {
-                if (currentCandidate) candidates.push(currentCandidate);
-                currentCandidate = ballotData.slice(lineStart, lineEnd);
-              }
-            } else if (ballotData.slice(lineStart, lineEnd) === "preferences") {
-              isInsidePreferences = true;
-              headerEnd = lineEnd;
-            }
-          }
-          return (
-            ballotData.slice(0, headerEnd) +
-            shuffle(candidates).join("\n") +
-            ballotData.slice(lineStart)
-          );
-        });
-      }
+      [fetchedBallot, fetchedPublicKey] = errOfResult;
     });
   });
 </script>

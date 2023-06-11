@@ -122,6 +122,27 @@ export function fetchNewVoteFileURL(url: string | URL) {
   return branchInfoCache.get(url);
 }
 
+/*** Fisher-Yates shuffle */
+function shuffle<T>(array: Array<T>): Array<T> {
+  let currentIndex = array.length,
+    randomIndex: number;
+
+  // While there remain elements to shuffle.
+  while (currentIndex != 0) {
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex],
+      array[currentIndex],
+    ];
+  }
+
+  return array;
+}
+
 async function act(
   url: string | URL,
   fetchOptions?: Parameters<typeof fetch>[1]
@@ -142,20 +163,67 @@ async function act(
     // This won't catch all the cases (if the PR modifies an existing file
     // rather than creating a new one, or if the YAML is formatted differently),
     // but it saves us from doing another request so deemed worth it.
-    const shouldShuffleCandidates = voteFile.patch.includes(
-      "\ncanShuffleCandidates: true\n"
+    const shouldShuffleCandidates = /^\+canShuffleCandidates:\s*true$/m.test(
+      voteFile.patch
     );
 
     return [
-      fetch(ballotFile.contents_url, contentsFetchOptions).then((response) =>
-        response.ok
-          ? response.text()
-          : Promise.reject(
-              new Error(
-                `Fetch error: ${response.status} ${response.statusText}`
+      fetch(ballotFile.contents_url, contentsFetchOptions)
+        .then((response) =>
+          response.ok
+            ? response.text()
+            : Promise.reject(
+                new Error(
+                  `Fetch error: ${response.status} ${response.statusText}`
+                )
               )
-            )
-      ),
+        )
+        .then(
+          shouldShuffleCandidates
+            ? (ballotData) => {
+                debugger;
+                let lineStart = 0;
+                let lineEnd = ballotData.indexOf("\n");
+
+                let headerEnd: number;
+
+                const candidates = [];
+                let currentCandidate: string;
+                let isInsidePreferences = false;
+                while (lineEnd !== -1) {
+                  if (isInsidePreferences) {
+                    if (
+                      ballotData[lineStart] !== " " ||
+                      ballotData[lineStart + 1] !== " "
+                    )
+                      break;
+                    if (ballotData[lineStart + 2] === "-") {
+                      if (currentCandidate) candidates.push(currentCandidate);
+                      currentCandidate = "";
+                    }
+                    currentCandidate += ballotData.slice(
+                      lineStart - 1,
+                      lineEnd
+                    );
+                  } else if (
+                    ballotData.slice(lineStart, lineEnd) === "preferences:"
+                  ) {
+                    isInsidePreferences = true;
+                    headerEnd = lineEnd;
+                  }
+                  lineStart = lineEnd + 1;
+                  lineEnd = ballotData.indexOf("\n", lineStart);
+                }
+                if (currentCandidate) candidates.push(currentCandidate);
+                return (
+                  ballotData.slice(0, headerEnd) +
+                  shuffle(candidates).join("") +
+                  "\n" +
+                  ballotData.slice(lineStart)
+                );
+              }
+            : undefined
+        ),
       fetch(publicKeyFile.contents_url, contentsFetchOptions).then((response) =>
         response.ok
           ? response.arrayBuffer()
@@ -165,11 +233,10 @@ async function act(
               )
             )
       ),
-      shouldShuffleCandidates,
-    ] as [Promise<string>, Promise<ArrayBuffer>, boolean];
+    ] as [Promise<string>, Promise<ArrayBuffer>];
   } catch (err) {
     err = Promise.reject(err);
-    return [err, err, false] as [never, never, boolean];
+    return [err, err] as [never, never];
   }
 }
 
