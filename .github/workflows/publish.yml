@@ -1,0 +1,55 @@
+name: Publish releases
+
+on:
+  push:
+    branches: [main]
+
+env:
+  YARN_ENABLE_GLOBAL_CACHE: false
+
+jobs:
+  release-please:
+    runs-on: ubuntu-latest
+    outputs:
+      release_created:  ${{ steps.release.outputs.release_created }}
+      release_tag:  ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: google-github-actions/release-please-action@v3
+        id: release
+        with:
+          release-type: node
+          extra-files: |
+            packages/cli/package.json
+            packages/core/package.json
+            packages/crypto/package.json
+
+  npm-publish:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-node@v3
+        with:
+          node-version: lts/*
+
+      - name: Get the Yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(corepack yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+        shell: bash
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{steps.yarn-cache-dir-path.outputs.dir}}
+          key: ${{runner.os}}-yarn-${{hashFiles('**/yarn.lock')}}
+          restore-keys: |
+            ${{runner.os}}-yarn-
+
+      - name: Publish to the npm registry
+        run: |
+          corepack yarn install --immutable
+          corepack yarn build
+          corepack yarn workspaces foreach --no-private npm publish --access public
+        env:
+          YARN_NPM_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
