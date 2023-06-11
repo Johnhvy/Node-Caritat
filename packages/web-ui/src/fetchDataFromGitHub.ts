@@ -181,7 +181,6 @@ async function act(
         .then(
           shouldShuffleCandidates
             ? (ballotData) => {
-                debugger;
                 let lineStart = 0;
                 let lineEnd = ballotData.indexOf("\n");
 
