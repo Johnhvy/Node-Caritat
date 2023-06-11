@@ -68,12 +68,16 @@ const query = `query PR($prid: Int!, $owner: String!, $repo: String!) {
             }
           }
         }
-        headRefName
+        headRef {
+          name
+          repository {
+            ${parsedArgs.protocol === "http" ? "" : "sshUrl"}
+            ${parsedArgs.protocol === "ssh" ? "" : "url"}
+          }
+        }
         closed
         merged
       }
-      ${parsedArgs.protocol === "http" ? "" : "sshUrl"}
-      ${parsedArgs.protocol === "ssh" ? "" : "url"}
     }
     viewer {
       ${parsedArgs.login ? "" : "login"}
@@ -106,7 +110,11 @@ const { pullRequest } = data.repository;
 
 const sha = pullRequest.commits.nodes[0].commit.oid;
 
-const { headRefName: branch, merged, closed } = pullRequest;
+const {
+  headRef: { name: branch, repository },
+  merged,
+  closed,
+} = pullRequest;
 
 if (merged || closed) {
   console.warn("The pull request seems to be closed.");
@@ -146,8 +154,8 @@ function getHTTPRepoURL(repoURL: string, login: string) {
 }
 const repoURL =
   protocol === "ssh"
-    ? data.repository.sshUrl
-    : getHTTPRepoURL(data.repository.url, handle);
+    ? repository.sshUrl
+    : getHTTPRepoURL(repository.url, handle);
 
 console.log("All relevant information has been retrieved:", {
   repoURL,
