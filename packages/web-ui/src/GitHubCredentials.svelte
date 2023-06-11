@@ -31,3 +31,5 @@
   >
   <button type="submit">Save</button>
 </form>
+
+<p>The token should have at least the <code>repo</code> permissions.</p>
