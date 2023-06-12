@@ -1,7 +1,8 @@
 {
   "name": "caritat",
   "private": true,
-  "packageManager": "yarn@3.2.2+sha224.634d0331703700cabfa9d9389835bd8f7426b0207ed6b74d8d34c81e",
+  "packageManager": "yarn@4.0.0-rc.45+sha224.54f0a052d2349fb4ea87e32dfc16e12c5a6fae38c6bf3aa249501c80",
+  "version": "0.5.1",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -9,8 +10,7 @@
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
-    "@types/minimist": "^1.2.2",
-    "@types/node": "^18.0.0",
+    "@types/node": "^20.0.0",
     "typescript": "^5.0.0"
   },
   "imports": {
