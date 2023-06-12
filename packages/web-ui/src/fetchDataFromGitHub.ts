@@ -1,4 +1,5 @@
 const githubPRUrlPattern = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)\/?$/;
+const startCandidateList = /\npreferences:[^\n\S]*(#[^\n]*)?\n/;
 
 const branchInfoCache = new Map();
 async function fetchVoteFilesInfo(
@@ -181,37 +182,38 @@ async function act(
         .then(
           shouldShuffleCandidates
             ? (ballotData) => {
-                let lineStart = 0;
-                let lineEnd = ballotData.indexOf("\n");
-
-                let headerEnd: number;
+                const match = startCandidateList.exec(ballotData);
+                if (match == null) {
+                  console.warn(
+                    "Cannot find the list of candidates to shuffle, ignoring..."
+                  );
+                  return ballotData;
+                }
+                const headerEnd = match.index + match[0].length - 1;
 
                 const candidates = [];
                 let currentCandidate: string;
-                let isInsidePreferences = false;
-                while (lineEnd !== -1) {
-                  if (isInsidePreferences) {
-                    if (
-                      ballotData[lineStart] !== " " ||
-                      ballotData[lineStart + 1] !== " "
-                    )
-                      break;
-                    if (ballotData[lineStart + 2] === "-") {
-                      if (currentCandidate) candidates.push(currentCandidate);
-                      currentCandidate = "";
-                    }
-                    currentCandidate += ballotData.slice(
-                      lineStart - 1,
-                      lineEnd
-                    );
-                  } else if (
-                    ballotData.slice(lineStart, lineEnd) === "preferences:"
-                  ) {
-                    isInsidePreferences = true;
-                    headerEnd = lineEnd;
-                  }
+                let lineStart;
+                let lineEnd = headerEnd;
+                while (true) {
                   lineStart = lineEnd + 1;
                   lineEnd = ballotData.indexOf("\n", lineStart);
+                  if (lineEnd === -1) {
+                    if (lineStart !== ballotData.length) {
+                      currentCandidate += ballotData.slice(lineStart - 1);
+                    }
+                    break;
+                  }
+                  if (
+                    ballotData[lineStart] !== " " ||
+                    ballotData[lineStart + 1] !== " "
+                  )
+                    break;
+                  if (ballotData[lineStart + 2] === "-") {
+                    if (currentCandidate) candidates.push(currentCandidate);
+                    currentCandidate = "";
+                  }
+                  currentCandidate += ballotData.slice(lineStart - 1, lineEnd);
                 }
                 if (currentCandidate) candidates.push(currentCandidate);
                 return (
