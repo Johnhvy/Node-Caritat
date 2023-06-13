@@ -1,7 +1,7 @@
 {
   "name": "@aduh95/caritat-cli",
   "x-release-please-start-version": null,
-  "version": "0.6.1",
+  "version": "0.6.2",
   "x-release-please-end": null,
   "files": [
     "dist/"

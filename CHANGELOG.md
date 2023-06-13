@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/aduh95/caritat/compare/v0.6.1...v0.6.2) (2023-06-13)
+
+
+### Bug Fixes
+
+* empty commit to test the release automation ([831c44f](https://github.com/aduh95/caritat/commit/831c44fc364acf087fa51b5e25c835baded4db52))
+
 ## [0.6.1](https://github.com/aduh95/caritat/compare/v0.6.0...v0.6.1) (2023-06-13)
 
 
