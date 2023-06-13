@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/aduh95/caritat/compare/v0.6.0...v0.6.1) (2023-06-13)
+
+
+### Bug Fixes
+
+* **cli:** add README to the npm package ([d6e7d26](https://github.com/aduh95/caritat/commit/d6e7d2689ec13feaf326a6d3477fcbd304386f3e))
+
 ## [0.6.0](https://github.com/aduh95/caritat/compare/v0.5.1...v0.6.0) (2023-06-13)
 
 
