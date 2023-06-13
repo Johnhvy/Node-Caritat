@@ -35,4 +35,6 @@ jobs:
 
       - run: corepack yarn install --immutable
 
+      - run: corepack yarn tsc --noEmit
+
       - run: corepack yarn test

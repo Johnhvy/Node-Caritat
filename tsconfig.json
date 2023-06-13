@@ -3,6 +3,6 @@
     "allowSyntheticDefaultImports": true
   },
   "files": [],
-  "references": [{ "path": "./packages/cli" }, { "path": "./packages/nodejs" }],
+  "references": [{ "path": "./packages/cli" }],
   "exclude": ["**/*.test.ts"]
 }
