@@ -11,8 +11,8 @@ jobs:
   release-please:
     runs-on: ubuntu-latest
     outputs:
-      release_created:  ${{ steps.release.outputs.release_created }}
-      release_tag:  ${{ steps.release.outputs.tag_name }}
+      release_created: ${{ steps.release.outputs.release_created }}
+      release_tag: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: google-github-actions/release-please-action@v3
         id: release
@@ -45,6 +45,11 @@ jobs:
           key: ${{runner.os}}-yarn-${{hashFiles('**/yarn.lock')}}
           restore-keys: |
             ${{runner.os}}-yarn-
+
+      - name: Copy README to sub-directories
+        run: |
+          cp README.md packages/cli/.
+          cp README.md packages/core/.
 
       - name: Publish to the npm registry
         run: |

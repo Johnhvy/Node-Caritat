@@ -8,6 +8,7 @@
 
 node_modules/
 dist/
+packages/cli/README.md
 packages/core/README.md
 
 test/*.js
