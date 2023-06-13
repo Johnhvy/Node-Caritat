@@ -17,7 +17,7 @@
     "#ts-loader": "./packages/ts-loader/loader.js"
   },
   "scripts": {
-    "test": "node --loader '#ts-loader' test/index.ts",
+    "test": "node --experimental-global-webcrypto --loader '#ts-loader' test/index.ts",
     "build": "tsc --build",
     "deploy:cli": "rm -rf packages/cli/dist && tsc --build --force && yarn workspace @aduh95/caritat-cli npm publish --access public",
     "deploy:core": "rm -rf packages/core/dist && tsc --build --force && cp README.md packages/core/. && yarn workspace @aduh95/caritat npm publish --access public",

@@ -35,5 +35,4 @@ jobs:
 
       - run: corepack yarn install --immutable
 
-      - name: Check for type errors
-        run: corepack yarn test
+      - run: corepack yarn test
