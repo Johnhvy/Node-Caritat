@@ -30,14 +30,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@aduh95/caritat-nodejs@workspace:packages/nodejs":
-  version: 0.0.0-use.local
-  resolution: "@aduh95/caritat-nodejs@workspace:packages/nodejs"
-  dependencies:
-    "@aduh95/caritat": "workspace:*"
-  languageName: unknown
-  linkType: soft
-
 "@aduh95/caritat-ts-loader@workspace:packages/ts-loader":
   version: 0.0.0-use.local
   resolution: "@aduh95/caritat-ts-loader@workspace:packages/ts-loader"
