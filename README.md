@@ -5,7 +5,7 @@ French philosopher and mathematician, notably known for championing an election
 method that now named after him.
 
 The goal of this project is to allow organisations of people working remotely to
-cast votes is a secure and transparent way, using a git repository collect and
+cast votes is a secure and transparent way, using a git repository to collect and
 authenticate votes.
 
 ## Usage
@@ -21,13 +21,13 @@ If the vote is setup on a GitHub pull request and you have
 account:
 
 ```sh
-npx --package=@aduh95/caritat voteOnGitHub <pr-url>
+npx --package=@aduh95/caritat-cli voteOnGitHub <pr-url>
 ```
 
 Otherwise, you can specify the details manually:
 
 ```sh
-npx --package=@aduh95/caritat voteUsingGit \
+npx --package=@aduh95/caritat-cli voteUsingGit \
   --repo=<repo-url> --branch=<branch-name> \
   --path=<subfolder-where-the-vote-data-is-stored> \
   --handle=<your-github-handle>
@@ -62,7 +62,7 @@ and create the JSON file containing your encrypted ballot using GitHub web UI.
 #### Node.js script
 
 ```sh
-npx --package=@aduh95/caritat generateNewVoteFolder \
+npx --package=@aduh95/caritat-cli generateNewVoteFolder \
  --repo "<repo-url>" --branch "<new-vote-branch-name>" \
  --directory "<relative-path-to-new-vote-folder>" \
  --subject "Vote subject" \
@@ -86,11 +86,19 @@ can then commit those files and push this to a new branch (optionally open the
 vote pull request). If you are participating to that vote yourself, you should
 cast your vote right away using one of the methods described above.
 
+### Using the API
+
+You can build your own CLI to interface with Caritat so it's more fitted to your
+use-case and is more user-friendly.
+
+Since we are using TypeScript, please rely on the type definition for
+documentation on how to use the API.
+
 ## FAQ
 
 ### Who do I need to trust?
 
-- As a voter, you need to trust the instigator for:
+- As a voter, you need to trust the vote instigator for:
   - using a reliable hardware and software to generate the private key and
     encrypt it, and to not store it anywhere.
   - not leaking the private key before the vote closes if they have kept the
@@ -103,8 +111,9 @@ cast your vote right away using one of the methods described above.
     reconstructed the private key, which they should not do).
   - not basing their vote in function of what other has voted (if they have
     reconstructed the private key, which they should not do).
-- As a voter or the instigator, you need to trust the git commits are genuine.
-  Enforcing the use of PGP signatures on vote commits can help with that.
+- As a voter or the instigator, you need to trust the git commits are genuine,
+  and therefor you need to trust that the server hosting the vote repository is
+  not compromised.
 
 ### Can a participant tamper with the votes?
 
@@ -132,11 +141,11 @@ authority (the vote instigator).
 
 Encrypting the ballot is necessary to ensure people voting early do not
 interfere or influence folks voting after them. At the end of the vote, the
-instigator of the vote can share the private key, so anyone can decrypt the
-ballots and verify the result themself. Or the voters can decide that the
-private key won't be shared in order to keep the votes anonymous (the instigator
-of the vote needs to be able the votes to do the counting, they have to be
-trusted).
+the private key can be made public, so anyone can decrypt the ballots and verify
+the result themself. Or it can decided that the private key won't be shared in
+order to keep the votes anonymous, and a large enough panel of secret holders
+(depending on the vote settings) need to share their key parts, decrypt the
+ballots, and share the vote result without disclosing the content of the ballots.
 
 ### How are the votes authenticated?
 
@@ -144,14 +153,14 @@ Voters can sign their commit using PGP. When doing the counting, the system uses
 the git commit metadata to attribute a ballot to a voter. If a voter casts
 several ballots, the system only counts the most recent one.
 
-### What happens if the vote instigator lose access to the decrypting key?
+### What happens if the secret holders lose their key parts?
 
 The vote ballots cannot be deciphered, the process needs to start again (unless
-you have a quantum computer at home).
+you have a quantum computer at home to break the RSA encryption).
 
 ### Could this tool used for any elections?
 
 The license makes no restrictions on how this tool should be used, but keep in
 mind that, as any electronic voting system, it can only be trusted as long as
-the unanonymized vote ballots are made public as soon as the vote closed, which
+the unanonymized vote ballots are made public as soon as the vote closes, which
 may or may not be OK depending on the type of election you are using this for.
