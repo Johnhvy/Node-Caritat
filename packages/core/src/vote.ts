@@ -85,11 +85,11 @@ export default class Vote {
   }
 
   public loadFromFile(voteFilePath: PathOrFileDescriptor): void {
-    let voteData: VoteFileFormat = loadYmlFile<VoteFileFormat>(voteFilePath);
+    const voteData: VoteFileFormat = loadYmlFile<VoteFileFormat>(voteFilePath);
     this.voteFromVoteData(voteData);
   }
   public loadFromString(voteFileContents: string): void {
-    let voteData: VoteFileFormat =
+    const voteData: VoteFileFormat =
       loadYmlString<VoteFileFormat>(voteFileContents);
     this.voteFromVoteData(voteData);
   }
@@ -111,7 +111,7 @@ export default class Vote {
 
   public addCandidate(
     candidate: VoteCandidate,
-    checkUniqueness: boolean = false
+    checkUniqueness = false
   ): void {
     if (
       checkUniqueness &&
@@ -146,7 +146,7 @@ export default class Vote {
 
   public addAuthorizedVoter(
     actor: Actor,
-    checkUniqueness: boolean = false
+    checkUniqueness = false
   ): void {
     if (
       checkUniqueness &&
@@ -159,10 +159,10 @@ export default class Vote {
 
   public addBallotFile(ballotData: BallotFileFormat, author?: string): Ballot {
     if (checkBallot(ballotData, this.voteFileData, author)) {
-      let preferences: Map<VoteCandidate, Rank> = new Map(
+      const preferences: Map<VoteCandidate, Rank> = new Map(
         ballotData.preferences.map((element) => [element.title, element.score])
       );
-      let ballot: Ballot = {
+      const ballot: Ballot = {
         voter: { id: author ?? ballotData.author },
         preferences,
       };
@@ -186,7 +186,7 @@ export default class Vote {
   }
 
   public addBallot(ballot: Ballot): void {
-    let existingBallotIndex = this.#votes.findIndex(
+    const existingBallotIndex = this.#votes.findIndex(
       (existingBallot: Ballot) => existingBallot.voter.id === ballot.voter.id
     );
     if (existingBallotIndex !== -1) {
@@ -203,7 +203,6 @@ export default class Vote {
     const VoteResultImpl = getVoteResultImplementation(
       options?.method ?? this.#targetMethod
     );
-    // @ts-ignore
     return new VoteResultImpl(
       this.#authorizedVoters,
       this.#candidates,

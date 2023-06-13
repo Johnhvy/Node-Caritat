@@ -1,6 +1,7 @@
 import { once } from "node:events";
 import { stdin, stdout } from "node:process";
 
+import type { VoteMethod } from "@aduh95/caritat/vote.js";
 import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
 import { getEnv, cliArgs } from "../utils/voteGitEnv.js";
@@ -113,7 +114,7 @@ await generateNewVoteFolder({
     console.log(ballotContent);
     stdout.write("\nIs it ready to commit? [Y/n] ");
     stdin.resume();
-    let chars = await once(stdin, "data");
+    const chars = await once(stdin, "data");
     stdin.pause();
     if (
       chars[0][0] === 0x6e || // n
@@ -136,7 +137,7 @@ await generateNewVoteFolder({
   subject: parsedArgs.subject,
   footerInstructions: parsedArgs["footer-instructions"],
   headerInstructions: parsedArgs["header-instructions"],
-  method: parsedArgs.method as any,
+  method: parsedArgs.method as VoteMethod,
   gitOptions: parsedArgs["disable-git"]
     ? undefined
     : {
@@ -144,7 +145,7 @@ await generateNewVoteFolder({
         branch: parsedArgs.branch,
         baseBranch: parsedArgs.base,
         commitMessage: parsedArgs["git-commit-message"],
-        gpgSign: parsedArgs["gpg-sign"] as any,
+        gpgSign: parsedArgs["gpg-sign"],
         forceClone: parsedArgs["force-clone"],
         doNotCleanTempFiles: parsedArgs["do-not-clean"],
         commitAuthor: await getCommitAuthor(),

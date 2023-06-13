@@ -19,17 +19,17 @@ export default class CondorcetResult extends VoteResult {
 
     candidates.forEach((candidate, index) => {
       for (let i = index + 1; i < candidates.length; i++) {
-        let opponent: VoteCandidate = candidates[i];
+        const opponent: VoteCandidate = candidates[i];
         let firstWins = 0;
         let secondWins = 0;
         votes.forEach((ballot: Ballot) => {
-          let firstScore = ballot.preferences.get(candidate) ?? 0;
-          let secondScore = ballot.preferences.get(opponent) ?? 0;
+          const firstScore = ballot.preferences.get(candidate) ?? 0;
+          const secondScore = ballot.preferences.get(opponent) ?? 0;
           if (firstScore > secondScore) firstWins++;
           else if (firstScore < secondScore) secondWins++;
         });
         if (firstWins != secondWins) {
-          let duelWinner: VoteCandidate =
+          const duelWinner: VoteCandidate =
             firstWins > secondWins ? candidate : opponent;
 
           this.#result.set(duelWinner, this.#result.get(duelWinner) + 1);

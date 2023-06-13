@@ -7,10 +7,7 @@ export class BallotPool {
     this.authorizedVoters = authorizedVoters;
   }
 
-  public addBallot({
-    url,
-    author,
-  }: { url: URL; author?: string } | any): boolean {
+  public addBallot({ url, author }: { url: URL; author?: string }): boolean {
     if (
       author != null &&
       (author in this.ballots ||
@@ -18,7 +15,7 @@ export class BallotPool {
           !this.authorizedVoters.includes(author)))
     )
       return false;
-    const index: number = 0;
+    const index = 0;
     this.ballots[author] = { url, index };
     return true;
   }

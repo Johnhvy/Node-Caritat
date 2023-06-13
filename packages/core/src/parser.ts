@@ -18,7 +18,7 @@ export interface VoteFileFormat {
   canShuffleCandidates?: boolean;
   requireSignedBallots?: boolean;
 }
-function instanceOfVoteFile(object: any): object is VoteFileFormat {
+function instanceOfVoteFile(object: object): object is VoteFileFormat {
   return "candidates" in object;
 }
 

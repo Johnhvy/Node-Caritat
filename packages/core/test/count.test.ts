@@ -7,9 +7,9 @@ import type { VoteFileFormat } from "../src/parser";
 
 const fixturesURL = new URL("../../../test/fixtures/", import.meta.url);
 
-const ballotDirURL = new URL("./ballots/", fixturesURL);
+// const ballotDirURL = new URL("./ballots/", fixturesURL);
 
-let voteFileParsed = loadYmlFile<VoteFileFormat>(
+const voteFileParsed = loadYmlFile<VoteFileFormat>(
   new URL("vote.yml", fixturesURL)
 );
 // it("should create ballot pool", () => {
@@ -25,7 +25,6 @@ interface VoteResult {
   potentialWinners: PotentialWinner[];
 }
 class Vote {
-  constructor(voteFile, ballots: BallotPool) {}
   public count(): VoteResult {
     return { winner: "foo" } as VoteResult;
   }

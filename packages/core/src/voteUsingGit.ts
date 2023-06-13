@@ -69,13 +69,13 @@ export async function voteAndCommit({
           textDecoder.decode(rawBallot)
         );
 
-        let preferences = new Map(
+        const preferences = new Map(
           ballotData.preferences.map((element) => [
             element.title,
             element.score,
           ])
         );
-        let ballot = getSummarizedBallot({
+        const ballot = getSummarizedBallot({
           voter: { id: ballotData.author },
           preferences,
         });
@@ -89,7 +89,7 @@ export async function voteAndCommit({
         }
         stdout.write("\nDo you want to cast this vote? [Y/n] ");
         stdin.resume();
-        let chars = await once(stdin, "data");
+        const chars = await once(stdin, "data");
         stdin.pause();
         editFile =
           chars[0][0] === 0x6e || // n
@@ -106,9 +106,7 @@ export async function voteAndCommit({
   const jsonFilePath = path.join(
     cwd,
     subPath,
-    `${
-      handle || username.replace(/\W/g, "") || (crypto as any).randomUUID()
-    }.json`
+    `${handle || username.replace(/\W/g, "") || crypto.randomUUID()}.json`
   );
   await fs.writeFile(
     jsonFilePath,

@@ -51,7 +51,9 @@ for await (const fsEntry of await opendir(ROOT_DIR)) {
         : [];
       // To make self-reference work:
       packagesDirLocalDeps[fsEntry.name].push(name);
-    } catch {}
+    } catch {
+      // ignore errors
+    }
   }
 }
 

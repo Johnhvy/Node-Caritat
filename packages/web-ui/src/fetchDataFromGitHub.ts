@@ -195,7 +195,7 @@ async function act(
                 let currentCandidate: string;
                 let lineStart;
                 let lineEnd = headerEnd;
-                while (true) {
+                for (;;) {
                   lineStart = lineEnd + 1;
                   lineEnd = ballotData.indexOf("\n", lineStart);
                   if (lineEnd === -1) {
@@ -236,8 +236,8 @@ async function act(
       ),
     ] as [Promise<string>, Promise<ArrayBuffer>];
   } catch (err) {
-    err = Promise.reject(err);
-    return [err, err] as [never, never];
+    const error = Promise.reject(err);
+    return [error, error] as [never, never];
   }
 }
 

@@ -67,8 +67,8 @@ function redactKeyPart(
   shareHolders: number,
   maxDepth: number,
   keyLength: number = buffer.length,
-  offset: number = 0,
-  depth: number = 1
+  offset = 0,
+  depth = 1
 ): void {
   if (depth > maxDepth) return;
   const subKeyLength = keyLength / shareHolders;
@@ -144,7 +144,7 @@ crypto.getRandomValues(secret);
 // secret.fill(0xff);
 const buffer: Uint8Array = new Uint8Array(secret);
 
-let usedParts: Uint8Array[] = [];
+const usedParts: Uint8Array[] = [];
 
 for (let i = 0; i < shareHolders; i++) {
   redactKeyPart(buffer, i, shareHolders, maxDepth);

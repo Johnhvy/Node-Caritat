@@ -27,7 +27,7 @@ const summary = new CondorcetSummary({
 
 it("should contain winners", () => {
   const summaryWinners = summary
-    .match(/\*\*Winning candidate.*\*\*\: (.*)/)[1]
+    .match(/\*\*Winning candidate.*\*\*: (.*)/)?.[1]
     .split(", ")
     .map((winner) => winner.trim());
   assert.deepStrictEqual(summaryWinners, [""]);

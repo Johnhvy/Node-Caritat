@@ -4,6 +4,7 @@ import { createInterface } from "readline";
 
 export default async function* streamChildProcessStdout(
   cmd: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any[] | readonly string[],
   spawnArgs?: SpawnOptions
 ) {

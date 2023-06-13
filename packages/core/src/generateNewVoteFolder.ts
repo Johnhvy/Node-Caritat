@@ -184,9 +184,9 @@ export default async function generateNewVoteFolder(options: Options) {
               );
               gpg.on("error", reject);
               gpg.stdout
-                // @ts-ignore
+                // @ts-expect-error toArray is real
                 .toArray()
-                .then((chunks) => {
+                .then((chunks: Buffer[]) => {
                   resolve(
                     Buffer.concat(chunks)
                       .toString("ascii")

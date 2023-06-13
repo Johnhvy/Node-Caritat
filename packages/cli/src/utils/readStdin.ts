@@ -14,6 +14,7 @@ export default function readStdIn<B extends boolean>(
 
   return new Promise((resolve, reject) => {
     stdin.on("end", () =>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       resolve(isText ? inputChunks.join() : (Buffer.concat(inputChunks) as any))
     );
     stdin.on("error", () => reject(new Error("error during read")));

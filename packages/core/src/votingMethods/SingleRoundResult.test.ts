@@ -2,20 +2,20 @@ import it from "node:test";
 import { strict as assert } from "node:assert";
 
 import SingleRound from "./SingleRoundResult.js";
-import type { Ballot } from "../vote.js";
+import type { Actor, Ballot } from "../vote.js";
 
 function singleRound(a: string[], b: Ballot[]) {
-  return new SingleRound(null as any, a, "subject", b, {}).result;
+  return new SingleRound(null as Actor[], a, "subject", b, {}).result;
 }
 
 it("should return an empty map for an empty vote", () => {
-  let result = singleRound([], []);
+  const result = singleRound([], []);
 
   assert.strictEqual(result.size, 0);
 });
 
 it("should return a map for a vote", () => {
-  let result = singleRound(
+  const result = singleRound(
     ["a"],
     [
       {
@@ -47,7 +47,7 @@ it("should return a map for a vote", () => {
 });
 
 it("should return a map for two votes", () => {
-  let result = singleRound(
+  const result = singleRound(
     ["a"],
     [
       {

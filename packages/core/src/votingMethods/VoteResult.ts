@@ -26,7 +26,7 @@ export default abstract class VoteResult {
   }
 
   *findWinners(): Generator<VoteCandidate, void, unknown> {
-    let maxScore = Math.max(...this.result.values());
+    const maxScore = Math.max(...this.result.values());
     for (const [candidate, score] of this.result) {
       if (score === maxScore) yield candidate;
     }

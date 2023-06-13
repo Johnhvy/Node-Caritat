@@ -2,7 +2,6 @@ import { Ballot, VoteCandidate } from "../vote";
 import cleanMarkdown from "../utils/cleanMarkdown.js";
 import ElectionSummary from "./electionSummary.js";
 
-// @ts-ignore
 const formatter = new Intl.ListFormat("en", {
   style: "long",
   type: "conjunction",
@@ -84,8 +83,8 @@ export function getSummarizedBallot(ballot: Ballot): BallotSummarize {
 
   if (minNote === maxNote) return { abstain: true };
 
-  let minCandidates = [];
-  let maxCandidates = [];
+  const minCandidates = [];
+  const maxCandidates = [];
   for (const [candidate, score] of ballot.preferences) {
     if (score !== minNote && score !== maxNote) {
       const orderedPreferences = new Map() as Map<number, VoteCandidate[]>;

@@ -3,6 +3,7 @@
 import fs from "fs/promises";
 import { existsSync } from "fs";
 import path from "path";
+import type { SpawnOptions } from "child_process";
 
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
@@ -44,7 +45,7 @@ async function readFileAtRevision(
   GIT_BIN: string,
   revision: string,
   filePath: string,
-  spawnArgs: any
+  spawnArgs: SpawnOptions
 ) {
   return await runChildProcessAsync(
     GIT_BIN,

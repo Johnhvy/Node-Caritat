@@ -2,19 +2,20 @@ import it from "node:test";
 import { strict as assert } from "node:assert";
 
 import CondorcetVote from "./CondorcetResult.js";
+import type { Actor } from "src/vote.js";
 
 function condorcet(a, b) {
-  return new CondorcetVote(null as any, a, "subject", b, {}).result;
+  return new CondorcetVote(null as Actor[], a, "subject", b, {}).result;
 }
 
 it("should return an empty map for an empty vote", () => {
-  let result = condorcet([], []);
+  const result = condorcet([], []);
 
   assert.strictEqual(result.size, 0);
 });
 
 it("should return a map for a vote", () => {
-  let result = condorcet(
+  const result = condorcet(
     ["a"],
     [
       {
@@ -46,7 +47,7 @@ it("should return a map for a vote", () => {
 });
 
 it("should return a map for two votes", () => {
-  let result = condorcet(
+  const result = condorcet(
     ["a"],
     [
       {

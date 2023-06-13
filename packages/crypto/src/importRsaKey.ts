@@ -32,7 +32,7 @@ function isArmoredMessage(pem: BufferSource) {
 }
 
 function importKey(
-  format: KeyFormat,
+  format: Exclude<KeyFormat, "jwk">,
   pem: BufferSource | string,
   usage: KeyUsage[]
 ) {
@@ -52,13 +52,7 @@ function importKey(
     binaryDer = pem;
   }
 
-  return subtle.importKey(
-    format as any,
-    binaryDer,
-    ASYMMETRIC_ALGO,
-    true,
-    usage
-  );
+  return subtle.importKey(format, binaryDer, ASYMMETRIC_ALGO, true, usage);
 }
 
 export default function importRsaKey(
