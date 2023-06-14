@@ -98,54 +98,91 @@ documentation on how to use the API.
 
 ### Who do I need to trust?
 
-- As a voter, you need to trust the vote instigator for:
-  - using a reliable hardware and software to generate the private key and
+- As a Voter, you need to trust the Vote Instigator for:
+  - using a reliable hardware and software to generate the Vote Private Key and
     encrypt it, and to not store it anywhere.
-  - not leaking the private key before the vote closes if they have kept the
-    private key (which they should not do).
+  - not leaking the Vote Private Key before the vote closes if they have kept it.
   - not basing their vote in function of what other has voted (having the
     instigator always vote first helps alleviate this issue).
-- As a voter, you need to trust the panel of secret holders for:
-  - not reconstitue the private key before the vote closes.
-  - not leaking the private key before the vote closes (if they have
-    reconstructed the private key, which they should not do).
+- As a Voter, you need to trust the panel of Secret Holders for:
+  - not reconstitue the Vote Private Key before the vote closes.
+  - not leaking the Vote Private Key before the vote closes (if they have
+    reconstructed it, which they should not do).
   - not basing their vote in function of what other has voted (if they have
-    reconstructed the private key, which they should not do).
-- As a voter or the instigator, you need to trust the git commits are genuine,
+    reconstructed the Vote Private Key, which they should not do).
+- As a Voter or the Vote Instigator, you need to trust the git commits are genuine,
   and therefor you need to trust that the server hosting the vote repository is
   not compromised.
 
 ### Can a participant tamper with the votes?
 
-When using git, a participant could force push the branch and remove or modify
+When using git, one could force push (or otherwise alter the git tree if they
+have direct access to the server) the branch and remove or modify
 ballots from other participants. Adding protection on the branch on which the
 vote is happening can help prevent this.
 
 ### When voting using this tool, are my choices public?
 
 Ballots are encrypted using a public key generated for the vote, only someone in
-possession for the private key is theoretically able to decipher the ballot.
-Typically, no one should be in possession of the full private key (although
+possession for the Vote Private Key is theoretically able to decipher the ballot.
+Typically, no one should be in possession of the Vote Prive Key (although
 there is no way of ensuring that, see "Who do I need to trust?" section) until
 the vote closes. Unless the vote needs to stay private, a recommended practice
-is to publish the vote private key, effectively making everyone's choices
+is to publish the Vote Private Key, effectively making everyone's choices
 public.
 
 Making the non-encrypted ballot available publicly is a great way to ensure the
 election was not rigged. Everyone can check that the ballot counted as their has
 not been altered and that the result adds up. It's still possible to not make
 them public (to keep the vote anonymous), but that requires to trust a single
-authority (the vote instigator).
+authority (the Vote Instigator).
+
+### How is a vote initialized?
+
+When setting up the vote, the Vote Instigator creates the following keys:
+
+- the Vote Private Key (RSA 2048 bits)
+- the Vote Public Key (derived from the Vote Private Key)
+- the Vote Secret (a random binary string)
+- the Vote Secret Key Parts (derived from the Vote Secret, as many key parts as
+  there are Secret Holders)
+
+Then a `vote.yml` file is created:
+
+- the Vote Public Key,
+- the Vote Private Key encrypted using the Vote Secret,
+- the Vote Secret Key Parts encrypted using PGP (each key part is encrypted
+  using Secret Holder public key),
+- a list of candidates (only those candidates are allowed in a ballot),
+- a list of allowed Voters,
+- a vote subject, header and footer instructions to give more context to the
+  voter directly in the ballot,
+- the method to count the ballots (only Condorcet is supported at the time of
+  writing),
+- miscellaneous vote options, such as `canShuffleCandidates`.
+
+The Vote Instigator pushes to a newly created vote branch (when using git) the
+`vote.yml`, as well as a file containing the public key and a ballot example.
+The two other files can be used to vote without parsing the YAML file.
 
 ### Why are the ballots encrypted?
 
 Encrypting the ballot is necessary to ensure people voting early do not
 interfere or influence folks voting after them. At the end of the vote, the
-the private key can be made public, so anyone can decrypt the ballots and verify
-the result themself. Or it can decided that the private key won't be shared in
-order to keep the votes anonymous, and a large enough panel of secret holders
+the Vote Private Key can be made public, so anyone can decrypt the ballots and verify
+the result themself. Or it can decided that the Vote Private Key won't be shared in
+order to keep the votes anonymous, and a large enough panel of Secret Holders
 (depending on the vote settings) need to share their key parts, decrypt the
 ballots, and share the vote result without disclosing the content of the ballots.
+
+### What's inside an encrypted ballot?
+
+An encrypted ballot is a JSON object which contains at least two keys:
+
+- `encryptedSecret`: the Ballot Secret encrypted using the Vote Public Key.
+- `data`: the YAML ballot, encrypted using the Ballot Secret.
+
+There could be other keys in that JSON object, they will be ignored.
 
 ### How are the votes authenticated?
 
@@ -153,7 +190,7 @@ Voters can sign their commit using PGP. When doing the counting, the system uses
 the git commit metadata to attribute a ballot to a voter. If a voter casts
 several ballots, the system only counts the most recent one.
 
-### What happens if the secret holders lose their key parts?
+### What happens if the Secret Holders lose their key parts?
 
 The vote ballots cannot be deciphered, the process needs to start again (unless
 you have a quantum computer at home to break the RSA encryption).
