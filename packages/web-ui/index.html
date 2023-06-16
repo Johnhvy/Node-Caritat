@@ -6,9 +6,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Caritat</title>
     <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+      }
+
+      #app {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 5px;
+      }
+
+      h1 {
+        text-align: center;
+        font-size: 36px;
+        margin-top: 0;
+        margin-bottom: 20px;
+        color: #222;
+      }
+
+      summary {
+        font-weight: bold;
+        cursor: pointer;
+      }
+
+      details > * {
+        margin: 10px 0;
+      }
+
+      label {
+        line-height: 2.5rem;
+      }
+      input {
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        height: 2.5rem;
+      }
+
+      button,
+      input[type="submit"] {
+        padding: 10px;
+        background-color: #4caf50;
+        color: #fff;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+      }
+
       textarea {
         width: 100%;
         min-height: 30rem;
+        padding: 10px;
+        margin-top: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+      }
+
+      hr {
+        margin: 20px 0;
+        border: none;
+        border-top: 1px solid #ccc;
+      }
+
+      noscript {
+        color: red;
+        font-weight: bold;
+        text-align: center;
       }
     </style>
   </head>

@@ -25,13 +25,26 @@
   form div {
     display: flex;
     gap: 1ch;
+    flex-direction: column;
   }
+
   label {
     display: inherit;
     gap: inherit;
     flex-grow: 2;
+    line-height: 2.5rem;
   }
   input[type="url"] {
     flex-grow: 2;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    height: 2.5rem;
+  }
+
+  @media screen and (min-width: 800px) {
+    form div {
+      flex-direction: row;
+    }
+
   }
 </style>
