@@ -21,13 +21,13 @@ If the vote is setup on a GitHub pull request and you have
 account:
 
 ```sh
-npx --package=@aduh95/caritat-cli voteOnGitHub <pr-url>
+npx --package=@node-core/caritat-cli voteOnGitHub <pr-url>
 ```
 
 Otherwise, you can specify the details manually:
 
 ```sh
-npx --package=@aduh95/caritat-cli voteUsingGit \
+npx --package=@node-core/caritat-cli voteUsingGit \
   --repo=<repo-url> --branch=<branch-name> \
   --path=<subfolder-where-the-vote-data-is-stored> \
   --handle=<your-github-handle>
@@ -62,7 +62,7 @@ and create the JSON file containing your encrypted ballot using GitHub web UI.
 #### Node.js script
 
 ```sh
-npx --package=@aduh95/caritat-cli generateNewVoteFolder \
+npx --package=@node-core/caritat-cli generateNewVoteFolder \
  --repo "<repo-url>" --branch "<new-vote-branch-name>" \
  --directory "<relative-path-to-new-vote-folder>" \
  --subject "Vote subject" \

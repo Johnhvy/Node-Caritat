@@ -8,7 +8,7 @@ import { webcrypto as crypto } from "crypto";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import { getGPGSignGitFlag } from "./utils/gpgSign.js";
 
-import encryptData from "@aduh95/caritat-crypto/encrypt";
+import encryptData from "@node-core/caritat-crypto/encrypt";
 import {
   BallotFileFormat,
   loadYmlFile,

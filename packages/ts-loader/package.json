@@ -1,5 +1,5 @@
 {
-  "name": "@aduh95/caritat-ts-loader",
+  "name": "@node-core/caritat-ts-loader",
   "private": true,
   "version": "0.0.0",
   "type": "module",

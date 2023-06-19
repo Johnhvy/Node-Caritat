@@ -10,7 +10,7 @@
     "rootDir": "./src",
     "baseUrl": ".",
     "paths": {
-      "@aduh95/caritat-crypto/*": ["../crypto/src/*"]
+      "@node-core/caritat-crypto/*": ["../crypto/src/*"]
     }
   },
   "include": ["./src/**/*.ts"],

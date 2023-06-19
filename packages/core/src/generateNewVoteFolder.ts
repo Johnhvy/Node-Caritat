@@ -8,7 +8,7 @@ import { env } from "node:process";
 
 import * as yaml from "js-yaml";
 
-import { generateAndSplitKeyPair } from "@aduh95/caritat-crypto/generateSplitKeyPair";
+import { generateAndSplitKeyPair } from "@node-core/caritat-crypto/generateSplitKeyPair";
 import { loadYmlString, templateBallot, VoteFileFormat } from "./parser.js";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import type { VoteMethod } from "./vote.js";

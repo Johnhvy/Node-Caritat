@@ -1,7 +1,7 @@
 <script lang="ts">
   import { beforeUpdate } from "svelte";
 
-  import encryptData from "@aduh95/caritat-crypto/encrypt";
+  import encryptData from "@node-core/caritat-crypto/encrypt";
   import uint8ArrayToBase64 from "./uint8ArrayToBase64.ts";
   import fetchFromGitHub from "./fetchDataFromGitHub.ts";
 

@@ -1,5 +1,5 @@
 {
-  "name": "@aduh95/caritat",
+  "name": "@node-core/caritat",
   "x-release-please-start-version": null,
   "version": "0.6.2",
   "x-release-please-end": null,
@@ -9,10 +9,10 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stduhpf/caritat.git"
+    "url": "https://github.com/nodejs/caritat.git"
   },
   "dependencies": {
-    "@aduh95/caritat-crypto": "workspace:*",
+    "@node-core/caritat-crypto": "workspace:*",
     "js-yaml": "^4.1.0"
   },
   "types": "./dist/index.d.ts",

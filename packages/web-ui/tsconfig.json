@@ -4,7 +4,7 @@
     "noEmit": true,
     "lib": ["ESNext", "dom"],
     "paths": {
-      "@aduh95/caritat-crypto/*": ["../crypto/src/*"]
+      "@node-core/caritat-crypto/*": ["../crypto/src/*"]
     }
   },
   "references": [{ "path": "../crypto" }]

@@ -1,3 +1,3 @@
-# @aduh95/caritat-crypto
+# @node-core/caritat-crypto
 
-Crypto utils for @aduh95/caritat.
+Crypto utils for @node-core/caritat.

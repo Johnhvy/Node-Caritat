@@ -3,7 +3,7 @@
 import * as fs from "fs";
 
 import parseArgs from "../utils/parseArgs.js";
-import encryptData from "@aduh95/caritat-crypto/encrypt";
+import encryptData from "@node-core/caritat-crypto/encrypt";
 
 const parsedArgs = await parseArgs().options({
   file: {

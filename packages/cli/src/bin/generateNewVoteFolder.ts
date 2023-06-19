@@ -1,8 +1,8 @@
 import { once } from "node:events";
 import { stdin, stdout } from "node:process";
 
-import type { VoteMethod } from "@aduh95/caritat/vote.js";
-import generateNewVoteFolder from "@aduh95/caritat/generateNewVoteFolder";
+import type { VoteMethod } from "@node-core/caritat/vote.js";
+import generateNewVoteFolder from "@node-core/caritat/generateNewVoteFolder";
 import parseArgs from "../utils/parseArgs.js";
 import { getEnv, cliArgs } from "../utils/voteGitEnv.js";
 

@@ -8,8 +8,8 @@ import type { SpawnOptions } from "child_process";
 import runChildProcessAsync from "./utils/runChildProcessAsync.js";
 import streamChildProcessStdout from "./utils/streamChildProcessStdout.js";
 
-import decryptData from "@aduh95/caritat-crypto/decrypt";
-import reconstructSplitKey from "@aduh95/caritat-crypto/reconstructSplitKey";
+import decryptData from "@node-core/caritat-crypto/decrypt";
+import reconstructSplitKey from "@node-core/caritat-crypto/reconstructSplitKey";
 import type { VoteCommit } from "./vote.js";
 import Vote from "./vote.js";
 import { DiscardedCommit } from "./summary/electionSummary.js";

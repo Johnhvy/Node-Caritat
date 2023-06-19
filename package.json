@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/stduhpf/caritat.git"
+    "url": "https://github.com/nodejs/caritat.git"
   },
   "devDependencies": {
     "@types/eslint": "^8",
@@ -26,9 +26,9 @@
     "test:unit": "node --experimental-global-webcrypto --loader '#ts-loader' test/index.ts",
     "test": "yarn test:lint && yarn test:types && yarn test:unit",
     "build": "tsc --build",
-    "deploy:cli": "rm -rf packages/cli/dist && tsc --build --force && cp README.md packages/cli/. && yarn workspace @aduh95/caritat-cli npm publish --access public",
-    "deploy:core": "rm -rf packages/core/dist && tsc --build --force && cp README.md packages/core/. && yarn workspace @aduh95/caritat npm publish --access public",
-    "deploy:crypto": "rm -rf packages/crypto/dist && tsc --build --force && yarn workspace @aduh95/caritat-crypto npm publish --access public",
+    "deploy:cli": "rm -rf packages/cli/dist && tsc --build --force && cp README.md packages/cli/. && yarn workspace @node-core/caritat-cli npm publish --access public",
+    "deploy:core": "rm -rf packages/core/dist && tsc --build --force && cp README.md packages/core/. && yarn workspace @node-core/caritat npm publish --access public",
+    "deploy:crypto": "rm -rf packages/crypto/dist && tsc --build --force && yarn workspace @node-core/caritat-crypto npm publish --access public",
     "deploy:web": "yarn workspace web-ui deploy",
     "web:dev": "yarn workspace web-ui dev",
     "web:deploy": "yarn workspace web-ui deploy"

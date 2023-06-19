@@ -5,48 +5,6 @@ __metadata:
   version: 7
   cacheKey: 9
 
-"@aduh95/caritat-cli@workspace:packages/cli":
-  version: 0.0.0-use.local
-  resolution: "@aduh95/caritat-cli@workspace:packages/cli"
-  dependencies:
-    "@aduh95/caritat": "workspace:*"
-    "@types/yargs": "npm:^17.0.22"
-    yargs: "npm:^17.3.1"
-  bin:
-    countBallotsFromGit: dist/bin/countBallotsFromGit.js
-    countBallotsFromGitHub: dist/bin/countBallotsFromGitHub.js
-    decryptBallot: dist/bin/decryptBallot.js
-    encryptBallot: dist/bin/encryptBallot.js
-    extractEncryptedPrivateKey: dist/bin/extractEncryptedPrivateKey.js
-    generateNewVoteFolder: dist/bin/generateNewVoteFolder.js
-    voteOnGitHub: dist/bin/voteOnGitHub.js
-    voteUsingGit: dist/bin/voteUsingGit.js
-  languageName: unknown
-  linkType: soft
-
-"@aduh95/caritat-crypto@workspace:*, @aduh95/caritat-crypto@workspace:packages/crypto":
-  version: 0.0.0-use.local
-  resolution: "@aduh95/caritat-crypto@workspace:packages/crypto"
-  languageName: unknown
-  linkType: soft
-
-"@aduh95/caritat-ts-loader@workspace:packages/ts-loader":
-  version: 0.0.0-use.local
-  resolution: "@aduh95/caritat-ts-loader@workspace:packages/ts-loader"
-  dependencies:
-    sucrase: "npm:^3.0.0"
-  languageName: unknown
-  linkType: soft
-
-"@aduh95/caritat@workspace:*, @aduh95/caritat@workspace:packages/core":
-  version: 0.0.0-use.local
-  resolution: "@aduh95/caritat@workspace:packages/core"
-  dependencies:
-    "@aduh95/caritat-crypto": "workspace:*"
-    js-yaml: "npm:^4.1.0"
-  languageName: unknown
-  linkType: soft
-
 "@esbuild/android-arm64@npm:0.17.19":
   version: 0.17.19
   resolution: "@esbuild/android-arm64@npm:0.17.19"
@@ -323,6 +281,48 @@ __metadata:
   checksum: 56cd5d76d2717f31ccab224094d2cd92918aa612a070f63738160e857045bde2bd9b247aba6147f3ed15b9dd056b4231c6b5f6d6cc7e624f1ad37bda1d49365c
   languageName: node
   linkType: hard
+
+"@node-core/caritat-cli@workspace:packages/cli":
+  version: 0.0.0-use.local
+  resolution: "@node-core/caritat-cli@workspace:packages/cli"
+  dependencies:
+    "@node-core/caritat": "workspace:*"
+    "@types/yargs": "npm:^17.0.22"
+    yargs: "npm:^17.3.1"
+  bin:
+    countBallotsFromGit: dist/bin/countBallotsFromGit.js
+    countBallotsFromGitHub: dist/bin/countBallotsFromGitHub.js
+    decryptBallot: dist/bin/decryptBallot.js
+    encryptBallot: dist/bin/encryptBallot.js
+    extractEncryptedPrivateKey: dist/bin/extractEncryptedPrivateKey.js
+    generateNewVoteFolder: dist/bin/generateNewVoteFolder.js
+    voteOnGitHub: dist/bin/voteOnGitHub.js
+    voteUsingGit: dist/bin/voteUsingGit.js
+  languageName: unknown
+  linkType: soft
+
+"@node-core/caritat-crypto@workspace:*, @node-core/caritat-crypto@workspace:packages/crypto":
+  version: 0.0.0-use.local
+  resolution: "@node-core/caritat-crypto@workspace:packages/crypto"
+  languageName: unknown
+  linkType: soft
+
+"@node-core/caritat-ts-loader@workspace:packages/ts-loader":
+  version: 0.0.0-use.local
+  resolution: "@node-core/caritat-ts-loader@workspace:packages/ts-loader"
+  dependencies:
+    sucrase: "npm:^3.0.0"
+  languageName: unknown
+  linkType: soft
+
+"@node-core/caritat@workspace:*, @node-core/caritat@workspace:packages/core":
+  version: 0.0.0-use.local
+  resolution: "@node-core/caritat@workspace:packages/core"
+  dependencies:
+    "@node-core/caritat-crypto": "workspace:*"
+    js-yaml: "npm:^4.1.0"
+  languageName: unknown
+  linkType: soft
 
 "@nodelib/fs.scandir@npm:2.1.5":
   version: 2.1.5

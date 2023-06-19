@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-// Usage: curl -L <url-to-vote.yml> | npx --package=@aduh95/caritat extractEncryptedPrivateKey | gpg -d |\
-//          npx --package=@aduh95/caritat countBallotsFromGit -r <repo> -b <branch> -p <subpath> |\
+// Usage: curl -L <url-to-vote.yml> | npx --package=@node-core/caritat extractEncryptedPrivateKey | gpg -d |\
+//          npx --package=@node-core/caritat countBallotsFromGit -r <repo> -b <branch> -p <subpath> |\
 //          gh pr comment <url-to-pr> --body-file -
 
 import { stdout, argv } from "process";
@@ -9,7 +9,7 @@ import fs from "fs/promises";
 
 import { load } from "js-yaml";
 import readStdIn from "../utils/readStdin.js";
-import type { VoteFileFormat } from "@aduh95/caritat/parser.js";
+import type { VoteFileFormat } from "@node-core/caritat/parser.js";
 
 const [, , yamlFile] = argv;
 
