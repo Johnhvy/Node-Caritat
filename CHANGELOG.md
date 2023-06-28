@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.1](https://github.com/nodejs/caritat/compare/v1.0.0...v1.0.1) (2023-06-28)
+
+
+### Bug Fixes
+
+* **core:** fix typescript errors ([e263608](https://github.com/nodejs/caritat/commit/e2636089270e8d822b2aea4e5da3e03bf0d3bc2a))
+
 ## [1.0.0](https://github.com/nodejs/caritat/compare/v0.6.2...v1.0.0) (2023-06-28)
 
 
