@@ -34,7 +34,7 @@ export interface Ballot {
 
 export function getVoteResultImplementation(
   method: VoteMethod
-): typeof VoteResult {
+) {
   switch (method) {
     case "Condorcet":
       return CondorcetResult;
@@ -43,7 +43,7 @@ export function getVoteResultImplementation(
     default:
       break;
   }
-  return null;
+  return null as never;
 }
 export interface VoteCommit {
   sha: string;
