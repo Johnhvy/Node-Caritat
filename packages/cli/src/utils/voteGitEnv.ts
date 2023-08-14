@@ -32,7 +32,7 @@ export const cliArgs = {
   ["gpg-sign"]: {
     alias: "S",
     describe: "GPG-sign commits.",
-    string: true as const,
+    // string: true as const,
     boolean: true as const,
   },
 };
