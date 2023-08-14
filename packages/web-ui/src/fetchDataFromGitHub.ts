@@ -1,6 +1,15 @@
 const githubPRUrlPattern = /^\/([^/]+)\/([^/]+)\/pull\/(\d+)\/?$/;
 const startCandidateList = /\npreferences:[^\n\S]*(#[^\n]*)?\n/;
 
+const fetch2JSON = (response: Awaited<ReturnType<typeof fetch>>) =>
+  response.ok
+    ? response.json()
+    : Promise.reject(
+        new Error(`Fetch error: ${response.status} ${response.statusText}`, {
+          cause: response,
+        })
+      );
+
 const branchInfoCache = new Map();
 async function fetchVoteFilesInfo(
   url: string | URL,
@@ -20,12 +29,15 @@ async function fetchVoteFilesInfo(
   }
   const [, owner, repo, number] = prUrlMatch;
 
-  const data = await fetch(`https://api.github.com/graphql`, {
-    ...fetchOptions,
-    method: "POST",
-    body: JSON.stringify({
-      variables: { prid: Number(number), owner, repo },
-      query: `query PR($prid: Int!, $owner: String!, $repo: String!) {
+  let data;
+  // @ts-expect-error `headers` is provided by us as an object
+  if (fetchOptions?.headers?.Authorization) {
+    const graphQLData = await fetch(`https://api.github.com/graphql`, {
+      ...fetchOptions,
+      method: "POST",
+      body: JSON.stringify({
+        variables: { prid: Number(number), owner, repo },
+        query: `query PR($prid: Int!, $owner: String!, $repo: String!) {
         repository(owner: $owner, name: $repo) {
           pullRequest(number: $prid) {
             commits(first: 1) {
@@ -44,24 +56,41 @@ async function fetchVoteFilesInfo(
           }
         }
       }\n`,
-    }),
-  }).then((response) =>
-    response.ok
-      ? response.json()
-      : Promise.reject(
-          new Error(`Fetch error: ${response.status} ${response.statusText}`, {
-            cause: response,
-          })
-        )
-  );
+      }),
+    }).then(fetch2JSON);
 
-  if (data.error) {
-    throw new Error("Unable to get required information for the vote PR", {
-      cause: data.error,
-    });
+    if (graphQLData.error) {
+      throw new Error("Unable to get required information for the vote PR", {
+        cause: graphQLData.error,
+      });
+    }
+
+    data = graphQLData.data.repository.pullRequest;
+  } else {
+    // GraphQL requires authenticated calls, we have to fallback to the REST API:
+    const restData = await Promise.all([
+      fetch(
+        `https://api.github.com/repos/${owner}/${repo}/pulls/${number}`,
+        fetchOptions
+      ).then(fetch2JSON),
+      fetch(
+        `https://api.github.com/repos/${owner}/${repo}/pulls/${number}/commits`,
+        fetchOptions
+      ).then(fetch2JSON),
+    ]);
+
+    data = {
+      closed: restData[0].state === "closed",
+      merged: restData[0].state === "merged",
+      headRef: {
+        name: restData[0].head.ref,
+        repository: { url: restData[0].head.repo.html_url },
+      },
+      commits: { nodes: [{ commit: { oid: restData[1][0].sha } }] },
+    };
   }
 
-  const { closed, merged, commits, headRef } = data.data.repository.pullRequest;
+  const { closed, merged, commits, headRef } = data;
 
   if (closed) {
     throw new Error("The PR is marked as closed");
