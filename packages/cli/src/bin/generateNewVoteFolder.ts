@@ -74,6 +74,12 @@ const parsedArgs = await parseArgs().options({
       "A candidate that voter can vote for. You can specify any number of candidates",
     string: true,
     array: true,
+    alias: "c",
+  },
+  doNotShuffleCandidates: {
+    describe:
+      "Add a flag to not shuffle the candidates when generating ballots",
+    boolean: true,
   },
   "allowed-voter": {
     describe: "Name and email of authorized voter, same format as git",
@@ -126,6 +132,7 @@ await generateNewVoteFolder({
   },
   allowedVoters: parsedArgs["allowed-voter"],
   candidates: parsedArgs.candidate,
+  canShuffleCandidates: !parsedArgs.doNotShuffleCandidates,
   gpgOptions: {
     binaryPath: parsedArgs["gpg-binary"],
     keyServerURL: parsedArgs["gpg-key-server-url"],
