@@ -6,7 +6,7 @@ import * as yaml from "js-yaml";
 import type { VoteFileFormat } from "@node-core/caritat/parser";
 import runChildProcessAsync from "../utils/runChildProcessAsync.js";
 
-if (argv.length > 2 && argv[3] !== "--post-comment") {
+if (argv.length > 3 && argv[3] !== "--post-comment") {
   console.warn("Unknown flag:", argv[3]);
   argv[2] = "-h"; // print help message
 }

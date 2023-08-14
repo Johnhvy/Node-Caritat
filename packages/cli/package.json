@@ -22,6 +22,7 @@
     "countBallotsFromGit": "dist/bin/countBallotsFromGit.js",
     "countBallotsFromGitHub": "dist/bin/countBallotsFromGitHub.js",
     "decryptBallot": "dist/bin/decryptBallot.js",
+    "decryptKeyPart": "dist/bin/decryptKeyPart.js",
     "encryptBallot": "dist/bin/encryptBallot.js",
     "extractEncryptedPrivateKey": "dist/bin/extractEncryptedPrivateKey.js",
     "generateNewVoteFolder": "dist/bin/generateNewVoteFolder.js",
