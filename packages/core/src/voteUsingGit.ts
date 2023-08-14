@@ -87,10 +87,15 @@ export async function voteAndCommit({
           default:
             break;
         }
-        stdout.write("\nDo you want to cast this vote? [Y/n] ");
+        stdout.write("\nDo you want to cast this vote? [Y/n/a] ");
         stdin.resume();
         const chars = await once(stdin, "data");
         stdin.pause();
+        if (
+          chars[0][0] === 0x62 || // a
+          chars[0][0] === 0x41 // A
+        )
+          throw new Error("Aborted by the user");
         editFile =
           chars[0][0] === 0x6e || // n
           chars[0][0] === 0x4e; // N
@@ -151,57 +156,59 @@ export default async function voteUsingGit({
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
   const spawnArgs = { cwd };
 
-  console.log("Cloning remote repository...");
-  await runChildProcessAsync(
-    GIT_BIN,
-    ["clone", "--branch", branch, "--no-tags", "--depth=1", repoURL, "."],
-    { spawnArgs }
-  );
-
-  await voteAndCommit({
-    GIT_BIN,
-    EDITOR,
-    cwd,
-    subPath,
-    handle,
-    username,
-    emailAddress,
-    abstain,
-    gpgSign,
-  });
-
-  console.log("Pushing to the remote repository...");
   try {
-    await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-      spawnArgs,
-    });
-  } catch {
-    console.log(
-      "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
-    );
-    await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
-      spawnArgs,
-    });
-    await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
-      spawnArgs,
-    });
+    console.log("Cloning remote repository...");
     await runChildProcessAsync(
       GIT_BIN,
-      ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
-      {
-        spawnArgs,
-      }
+      ["clone", "--branch", branch, "--no-tags", "--depth=1", repoURL, "."],
+      { spawnArgs }
     );
 
-    console.log("Pushing to the remote repository...");
-    await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-      spawnArgs,
+    await voteAndCommit({
+      GIT_BIN,
+      EDITOR,
+      cwd,
+      subPath,
+      handle,
+      username,
+      emailAddress,
+      abstain,
+      gpgSign,
     });
-  }
 
-  if (doNotCleanTempFiles) {
-    console.info("The temp folder was not removed from the file system", cwd);
-  } else {
-    await fs.rm(cwd, { recursive: true, force: true });
+    console.log("Pushing to the remote repository...");
+    try {
+      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+        spawnArgs,
+      });
+    } catch {
+      console.log(
+        "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
+      );
+      await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
+        spawnArgs,
+      });
+      await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
+        spawnArgs,
+      });
+      await runChildProcessAsync(
+        GIT_BIN,
+        ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
+        {
+          spawnArgs,
+        }
+      );
+
+      console.log("Pushing to the remote repository...");
+      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+        spawnArgs,
+      });
+    }
+  } finally {
+    if (doNotCleanTempFiles) {
+      console.info("The temp folder was not removed from the file system", cwd);
+    } else {
+      await fs.rm(cwd, { recursive: true, force: true });
+    }
   }
 }
