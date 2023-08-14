@@ -109,26 +109,25 @@ async function fetchVoteFilesInfo(
   const { files } = await fetch(
     `https://api.github.com/repos/${owner}/${repo}/commits/${initVoteCommit}`,
     fetchOptions
-  ).then((response) =>
-    response.ok
-      ? response.json()
-      : Promise.reject(
-          new Error(`Fetch error: ${response.status} ${response.statusText}`, {
-            cause: response,
-          })
-        )
-  );
+  ).then(fetch2JSON);
 
   if (files?.length !== 3) {
     throw new Error("That PR does not look like a vote PR");
   }
 
-  const voteFile = files.find((file) => file.filename.endsWith("/vote.yml"));
-  const ballotFile = files.find((file) =>
-    file.filename.endsWith("/ballot.yml")
+  const voteFile = files.find(
+    (file) =>
+      file.filename === "vote.yml" || file.filename.endsWith("/vote.yml")
   );
-  const publicKeyFile = files.find((file) =>
-    file.filename.endsWith("/public.pem")
+  const ballotFile = files.find(
+    (file) =>
+      file.filename ===
+      voteFile.filename.slice(0, -"vote.yml".length) + "ballot.yml"
+  );
+  const publicKeyFile = files.find(
+    (file) =>
+      file.filename ===
+      voteFile.filename.slice(0, -"vote.yml".length) + "public.pem"
   );
 
   if (!voteFile || !ballotFile || !publicKeyFile) {
