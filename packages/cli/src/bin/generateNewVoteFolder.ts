@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 import { once } from "node:events";
 import { stdin, stdout } from "node:process";
 
