@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/nodejs/caritat/compare/v1.1.0...v1.1.1) (2023-08-14)
+
+
+### Bug Fixes
+
+* **cli:** add hashbangs to all executables ([98750a9](https://github.com/nodejs/caritat/commit/98750a90ffef8330be5f143a2fa98fb6ed49ba11))
+
 ## [1.1.0](https://github.com/nodejs/caritat/compare/v1.0.1...v1.1.0) (2023-08-14)
 
 
