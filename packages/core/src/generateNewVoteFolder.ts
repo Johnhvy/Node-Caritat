@@ -28,7 +28,7 @@ interface Options {
   shareholders: string[];
   shareholdersThreshold: number;
   /** It should match the git commit author. */
-  allowedVoters: string[];
+  allowedVoters?: string[];
 
   /**
    * If gitOptions is supplied, it's the subpath relative to the root og the git

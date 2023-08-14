@@ -5,7 +5,7 @@ import type { Actor, Ballot, VoteCandidate } from "../vote.js";
 export type CandidateScores = Map<VoteCandidate, number>;
 
 export default abstract class VoteResult {
-  #authorizedVoters: Actor[];
+  #authorizedVoters?: Actor[];
   #votes: Ballot[];
   #options: Partial<ElectionSummaryOptions>;
   #subject: string;
@@ -13,7 +13,7 @@ export default abstract class VoteResult {
   abstract readonly result: CandidateScores;
 
   constructor(
-    authorizedVoters: Actor[],
+    authorizedVoters: Actor[] | undefined,
     candidates: VoteCandidate[],
     subject: string,
     votes: Ballot[],

@@ -36,7 +36,7 @@ export async function voteAndCommit({
   const vote = loadYmlFile<VoteFileFormat>(path.join(cwd, subPath, "vote.yml"));
 
   const author = `${username} <${emailAddress}>`;
-  if (!vote.allowedVoters?.includes(author)) {
+  if (vote.allowedVoters && !vote.allowedVoters.includes(author)) {
     console.warn("It looks like you are not on the list of allowed voters.");
     console.warn({ author, allowedVoters: vote.allowedVoters });
   }

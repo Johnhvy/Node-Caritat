@@ -32,9 +32,7 @@ export interface Ballot {
   preferences: Map<VoteCandidate, Rank>;
 }
 
-export function getVoteResultImplementation(
-  method: VoteMethod
-) {
+export function getVoteResultImplementation(method: VoteMethod) {
   switch (method) {
     case "Condorcet":
       return CondorcetResult;
@@ -54,7 +52,7 @@ export interface VoteCommit {
 
 export default class Vote {
   #candidates: VoteCandidate[];
-  #authorizedVoters: Actor[];
+  #authorizedVoters?: Actor[];
   #votes: Ballot[];
   public subject: string;
   private result: CandidateScores;
@@ -78,7 +76,7 @@ export default class Vote {
     subject?: string;
   }) {
     this.#candidates = options?.candidates ?? [];
-    this.#authorizedVoters = options?.authorizedVoters ?? [];
+    this.#authorizedVoters = options?.authorizedVoters;
     this.#votes = options?.votes ?? [];
     this.#targetMethod = options?.targetMethod;
     this.subject = options?.subject ?? "";
@@ -97,7 +95,7 @@ export default class Vote {
     this.voteFileData = voteData;
     this.#candidates = voteData.candidates;
     this.#targetMethod = voteData.method as VoteMethod;
-    this.#authorizedVoters = voteData.allowedVoters.map((id) => ({ id }));
+    this.#authorizedVoters = voteData.allowedVoters?.map((id) => ({ id }));
     this.subject = voteData.subject ?? "Unknown vote";
   }
 
@@ -109,10 +107,7 @@ export default class Vote {
     throw new Error("Cannot change the existing target voting method");
   }
 
-  public addCandidate(
-    candidate: VoteCandidate,
-    checkUniqueness = false
-  ): void {
+  public addCandidate(candidate: VoteCandidate, checkUniqueness = false): void {
     if (
       checkUniqueness &&
       this.#candidates.some(
@@ -130,7 +125,10 @@ export default class Vote {
       return "This commit touches more than one file.";
     if (this.#alreadyCommittedVoters.has(commit.author))
       return "A more recent vote commit from this author has already been counted.";
-    if (!this.#authorizedVoters.some((voter) => voter.id === commit.author))
+    if (
+      this.#authorizedVoters &&
+      !this.#authorizedVoters.some((voter) => voter.id === commit.author)
+    )
       return `The commit author (${commit.author}) is not in the list of allowed voters.`;
 
     if (
@@ -142,19 +140,6 @@ export default class Vote {
 
     this.#alreadyCommittedVoters.add(commit.author);
     return null;
-  }
-
-  public addAuthorizedVoter(
-    actor: Actor,
-    checkUniqueness = false
-  ): void {
-    if (
-      checkUniqueness &&
-      this.#authorizedVoters.some((voter: Actor) => voter.id === actor.id)
-    ) {
-      throw new Error("Cannot have duplicate voter id");
-    }
-    this.#authorizedVoters.push(actor);
   }
 
   public addBallotFile(ballotData: BallotFileFormat, author?: string): Ballot {

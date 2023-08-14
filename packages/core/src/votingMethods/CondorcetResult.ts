@@ -7,7 +7,7 @@ export default class CondorcetResult extends VoteResult {
   #result: CandidateScores;
 
   constructor(
-    authorizedVoters: Actor[],
+    authorizedVoters: Actor[] | undefined,
     candidates: VoteCandidate[],
     subject: string,
     votes: Ballot[],
