@@ -1,4 +1,4 @@
-import type ElectionSummary from "../summary/electionSummary";
+import type { ElectionSummaryOptions } from "../summary/electionSummary";
 import type { Actor, Ballot, VoteCandidate } from "../vote";
 import VoteResult from "./VoteResult.js";
 import type { CandidateScores } from "./VotingMethodImplementation";
@@ -11,7 +11,7 @@ export default class SingleRoundResult extends VoteResult {
     candidates: VoteCandidate[],
     subject: string,
     votes: Ballot[],
-    options: Partial<ElectionSummary>
+    options: Partial<ElectionSummaryOptions>
   ) {
     super(authorizedVoters, candidates, subject, votes, options);
 

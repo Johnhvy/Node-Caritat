@@ -60,7 +60,7 @@ interface countFromGitArgs {
   repoURL: string;
   branch: string;
   subPath: string;
-  privateKey: ArrayBuffer;
+  privateKey?: ArrayBuffer;
   keyParts: string[];
   firstCommitRef: string;
   lastCommitRef?: string;
@@ -84,7 +84,11 @@ export default async function countFromGit({
   commitJsonSummary,
   gpgSign,
   doNotCleanTempFiles,
-}: countFromGitArgs): Promise<{ result: VoteResult; privateKey: ArrayBuffer }> {
+}: countFromGitArgs): Promise<{
+  result: VoteResult;
+  privateKey: ArrayBuffer;
+  readonly privateKeyAsArmoredString: string;
+}> {
   const spawnArgs = { cwd };
 
   let hasCreatedTempFiles = false;
@@ -289,5 +293,16 @@ export default async function countFromGit({
     await fs.rm(cwd, { recursive: true, force: true });
   }
 
-  return { result, privateKey };
+  return {
+    result,
+    privateKey,
+    get privateKeyAsArmoredString() {
+      const base64Key = Buffer.from(privateKey).toString("base64");
+      let key = "-----BEGIN PRIVATE KEY-----\n";
+      for (let i = 0; i < base64Key.length; i += 64) {
+        key += base64Key.slice(i, i + 60) + "\n";
+      }
+      return key + "-----END PRIVATE KEY-----";
+    },
+  };
 }
