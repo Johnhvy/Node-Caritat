@@ -211,7 +211,7 @@ async function getKeyPartsFromComments() {
   return results;
 }
 
-const { result: summary, privateKey: _privateKey } = await countFromGit({
+const { result: summary, privateKeyAsArmoredString } = await countFromGit({
   ...(await getEnv(parsedArgs)),
   repoURL,
   branch,
@@ -233,7 +233,7 @@ if (parsedArgs["post-comment"]) {
     "comment",
     parsedArgs["pr-url"],
     "-b",
-    summary.generateSummary(_privateKey.toString()),
+    summary.generateSummary(privateKeyAsArmoredString),
   ]);
 } else {
   console.log(

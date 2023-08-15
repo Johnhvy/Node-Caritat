@@ -27,7 +27,7 @@ const privateKey =
     ? await readStdIn(false)
     : parsedArgs.key && (await fs.readFile(parsedArgs.key as string));
 
-const { result, privateKey: _privateKey } = await countFromGit({
+const { result, privateKeyAsArmoredString } = await countFromGit({
   ...(await getEnv(parsedArgs)),
   repoURL,
   branch,
@@ -45,6 +45,6 @@ switch (parsedArgs.summarize) {
     break;
 
   case "md":
-    console.log(result.generateSummary(_privateKey.toString()));
+    console.log(result.generateSummary(privateKeyAsArmoredString));
     break;
 }
