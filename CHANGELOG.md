@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/nodejs/caritat/compare/v1.1.1...v1.2.0) (2023-09-03)
+
+
+### Features
+
+* **core:** expose private key as an armored string ([aa7a6ec](https://github.com/nodejs/caritat/commit/aa7a6ec9d3dea44576d66a6221eafa5e351c83db))
+
+
+### Bug Fixes
+
+* **cli:** output the private key as armored string in vote summary ([648b10a](https://github.com/nodejs/caritat/commit/648b10a46ef72d6b5680d8cb3648f8b448305bd1))
+
 ## [1.1.1](https://github.com/nodejs/caritat/compare/v1.1.0...v1.1.1) (2023-08-14)
 
 

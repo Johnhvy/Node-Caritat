@@ -1,7 +1,7 @@
 {
   "name": "@node-core/caritat",
   "x-release-please-start-version": null,
-  "version": "1.1.1",
+  "version": "1.2.0",
   "x-release-please-end": null,
   "files": [
     "dist/"
