@@ -95,9 +95,11 @@ export default async function generateNewVoteFolder(options: Options) {
       const stats = await fs.stat(directory);
       if (!stats.isDirectory())
         throw new Error(`${directory} exists and is not a directory`);
+      return Function.prototype;
     } catch (err) {
       if (err?.code === "ENOENT") {
         await fs.mkdir(directory, { recursive: true });
+        return () => fs.rm(directory, { recursive: true });
       } else throw err;
     }
   }
@@ -108,7 +110,7 @@ export default async function generateNewVoteFolder(options: Options) {
     if (gitOptions.forceClone) {
       await cloneInTempFolder(GIT_BIN);
     } else if (!path.isAbsolute(options.path)) {
-      await createFolder(directory); // We need to create the folder so the next command doesn't fail.
+      const rmDirIfCreatedByUs = await createFolder(directory); // We need to create the folder so the next command doesn't fail.
       try {
         const spawnArgs = { cwd: directory };
         await runChildProcessAsync(GIT_BIN, ["status", "--short"], {
@@ -117,10 +119,7 @@ export default async function generateNewVoteFolder(options: Options) {
           captureStderr: true,
         });
       } catch {
-        await Promise.all([
-          fs.rm(directory, { recursive: true }),
-          cloneInTempFolder(GIT_BIN),
-        ]);
+        await Promise.all([rmDirIfCreatedByUs(), cloneInTempFolder(GIT_BIN)]);
       }
     } else {
       cwd = directory;
