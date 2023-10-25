@@ -54,7 +54,7 @@ sh/voteUsingGit.ps1 <your-github-handle> <repo-url> <branch-name> <subfolder-whe
 
 Only works for vote that are hosted on a GitHub pull request.
 
-Visit <https://stduhpf.github.io/caritat/>, paste the URL of the pull request,
+Visit <https://nodejs.github.io/caritat/>, paste the URL of the pull request,
 and create the JSON file containing your encrypted ballot using GitHub web UI.
 
 ### Setup a vote using Caritat
