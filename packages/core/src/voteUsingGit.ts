@@ -92,7 +92,7 @@ export async function voteAndCommit({
         const chars = await once(stdin, "data");
         stdin.pause();
         if (
-          chars[0][0] === 0x62 || // a
+          chars[0][0] === 0x61 || // a
           chars[0][0] === 0x41 // A
         )
           throw new Error("Aborted by the user");
