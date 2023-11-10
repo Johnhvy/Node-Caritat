@@ -87,7 +87,8 @@ function shuffle<T>(array: Array<T>): Array<T> {
 
 export function templateBallot(
   voteConfig: VoteFileFormat,
-  user: UserCredentials = undefined
+  user: UserCredentials = undefined,
+  scores: Map<string, number> = undefined
 ): string {
   const subject: string = voteConfig.subject
     ? yaml.dump({ subject: voteConfig.subject }) + "\n"
@@ -101,19 +102,19 @@ export function templateBallot(
   const footer = voteConfig.footerInstructions
     ? "\n# " + voteConfig.footerInstructions.trim().replaceAll("\n", "\n# ")
     : "";
-  const candidates: string[] =
-    voteConfig.canShuffleCandidates !== false
-      ? shuffle(voteConfig.candidates)
-      : voteConfig.candidates;
+  const preferences: { title: string; score: number }[] =
+    scores == null
+      ? (voteConfig.canShuffleCandidates !== false
+          ? shuffle(voteConfig.candidates)
+          : voteConfig.candidates
+        ).map((title) => ({ title, score: 0 }))
+      : Array.from(scores.entries(), ([title, score]) => ({ title, score }));
 
   const template: BallotFileFormat = {
-    preferences: [],
+    preferences,
     ...(user && { author: `${user.username} <${user.emailAddress}>` }),
     poolChecksum: voteConfig.checksum,
   };
-  template.preferences.push(
-    ...candidates.map((title) => ({ title, score: 0 }))
-  );
   return subject + header + yaml.dump(template) + footer + "\n";
 }
 
