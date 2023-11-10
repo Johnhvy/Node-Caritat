@@ -273,7 +273,7 @@ let previousURL: string | null;
 export default function fetchFromGitHub(
   { url, username, token }: { url: string; username?: string; token?: string },
   callback: (
-    errOfResult: [Promise<string>, Promise<ArrayBuffer>, boolean]
+    errOfResult: [Promise<string>, Promise<ArrayBuffer>]
   ) => void | Promise<void>
 ) {
   const options =
