@@ -23,6 +23,7 @@
     "./parser": "./dist/parser.js",
     "./checkCommitValidity": "./dist/checkCommitValidity.js",
     "./countParticipationFromGit": "./dist/countParticipationFromGit.js",
+    "./summary/condorcet": "./dist/summary/condorcetSummary.js",
     "./package.json": "./package.json"
   },
   "type": "module"
