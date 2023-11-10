@@ -74,7 +74,7 @@ async function fetchVoteFilesInfo(
         fetchOptions
       ).then(fetch2JSON),
       fetch(
-        `https://api.github.com/repos/${owner}/${repo}/pulls/${number}/commits`,
+        `https://api.github.com/repos/${owner}/${repo}/pulls/${number}/commits?per_page=1`,
         fetchOptions
       ).then(fetch2JSON),
     ]);
