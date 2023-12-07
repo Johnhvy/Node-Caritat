@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/nodejs/caritat/compare/v1.2.1...v1.3.0) (2023-11-10)
+
+
+### Features
+
+* **core:** expose vote summary methods ([ffa5d55](https://github.com/nodejs/caritat/commit/ffa5d556376b464743359ca3d35be1c6d0e7dc3e))
+* **core:** generate ballots with non-zero preferences ([6dca5fb](https://github.com/nodejs/caritat/commit/6dca5fb6a50228d2ca8b6b52b58f423ece5f5534))
+
+
+### Bug Fixes
+
+* **core:** fix abort request detection ([769fbba](https://github.com/nodejs/caritat/commit/769fbbadf01e481a1977aebe1be6da084b58edf8))
+* **web-ui:** do not fetch data about irrelevant commits ([3e80952](https://github.com/nodejs/caritat/commit/3e80952a0cffa16ee9374238ec60692bb5b0d640))
+
 ## [1.2.1](https://github.com/nodejs/caritat/compare/v1.2.0...v1.2.1) (2023-10-25)
 
 
