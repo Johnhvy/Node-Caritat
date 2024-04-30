@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/nodejs/caritat/compare/v1.3.0...v1.3.1) (2024-04-30)
+
+
+### Bug Fixes
+
+* **chore:** run `$EDITOR` within a shell ([#23](https://github.com/nodejs/caritat/issues/23)) ([df3fade](https://github.com/nodejs/caritat/commit/df3fade69edafb7c34ec5f3709c8769a89401c62))
+
 ## [1.3.0](https://github.com/nodejs/caritat/compare/v1.2.1...v1.3.0) (2023-11-10)
 
 
