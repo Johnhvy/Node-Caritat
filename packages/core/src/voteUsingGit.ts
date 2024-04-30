@@ -60,7 +60,7 @@ export async function voteAndCommit({
       console.log("Ballot is ready for edit.");
       await runChildProcessAsync(EDITOR, [
         path.join(cwd, subPath, `${handle || username}.yml`),
-      ]);
+      ], { spawnArgs: { shell: true } });
       rawBallot = await fs.readFile(
         path.join(cwd, subPath, `${handle || username}.yml`)
       );
