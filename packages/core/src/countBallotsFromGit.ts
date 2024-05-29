@@ -239,10 +239,23 @@ export default async function countFromGit({
     } finally {
       await fd.close();
     }
-    await runChildProcessAsync(GIT_BIN, ["add", filepath], { spawnArgs });
 
     // Remove all vote related files.
-    await runChildProcessAsync(GIT_BIN, ["rm", "-rf", subPath], { spawnArgs });
+    await runChildProcessAsync(
+      GIT_BIN,
+      [
+        "restore",
+        "--source",
+        `${firstCommitRef}^`,
+        "--staged",
+        "--worktree",
+        "--",
+        ".",
+      ],
+      { spawnArgs }
+    );
+
+    await runChildProcessAsync(GIT_BIN, ["add", filepath], { spawnArgs });
 
     await runChildProcessAsync(
       GIT_BIN,
