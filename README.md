@@ -201,3 +201,51 @@ The license makes no restrictions on how this tool should be used, but keep in
 mind that, as any electronic voting system, it can only be trusted as long as
 the unanonymized vote ballots are made public as soon as the vote closes, which
 may or may not be OK depending on the type of election you are using this for.
+
+## How does the tool pick the winner?
+
+The default vote counting system is the Condorcet method (preferential ranked votes). This repository is probably not the best place to
+learn about vote theory, but all you need to know it's the best option to pick an option that
+majority of voters will agree with.
+
+Let's for the sake of simplification take a situation where you are the only voter, and there are
+three candidates (A, B, and C). You set score 100000 to candidate A, score -100000 to candidate B,
+and 0 to candidate C. Here's how Caritat will count the votes:
+
+1. Caritat puts up A against B, see that you set a higher score to A, and count your vote for A.
+   Because in this example, you're the only one voter, there's no other ballot to count.
+   _A gets 1 vote, B gets 0 votes, A wins the duel against B._
+2. Caritat puts up B against C, see that you set a higher score to C, and count your vote for C.
+   _C gets 1 vote, B gets 0 votes, C wins the duel against B._
+3. Caritat puts up A against C, see that you set a higher score to A, and count your vote for A.
+   _A gets 1 vote, C gets 0 votes, A wins the duel against C._
+
+Caritat will show the following table of result:
+
+| Candidate | Number of won duels |
+| --------- | ------------------- |
+| A         | 2                   |
+| B         | 0                   |
+| C         | 1                   |
+
+The winner is _A_, as it is the candidate that wins the most duels (also called the Condorcet winner).
+
+It's worth noting that the exact numbers on the ballot (like 100000, 0, and -100000) 
+don't change the result of the vote. What really matters is how these numbers stack up 
+against the other candidates' numbers in your ballot: if they are bigger, smaller, or the
+same. The numbers used in the other ballots have no effect on how your ballot is counted.
+
+In practice, there will be probably more than one voter, and potentially more than three candidates,
+but the same principles apply: each pair of candidates is evaluated, the candidate that wins the
+most duels is the winner.
+
+Sometimes, the vote result can include more than one winner:
+
+- It's possible to get an exact equality between two options (e.g. 3 voters prefer A against B, 9
+  voters are indifferent, 3 prefer B against A), in which case the duel is won by neither option.
+  Having an equality is not really a big deal, unless there are no other candidate that wins against
+  both options. In that case, Caritat will show more than one winner. At this point, re-running the
+  vote should yield the same result, unless the list of voter changes.
+- Another situation would be a Condorcet triangle (e.g. A wins against B, B wins against C, and C
+  wins against A). As in love, those triangles are unlikely to get resolved in a way that keeps
+  everyone happy.
