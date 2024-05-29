@@ -1,5 +1,5 @@
 import { readFile, opendir } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
+import { URL, fileURLToPath } from "node:url";
 
 import { transform } from "sucrase";
 
