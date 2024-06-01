@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.0](https://github.com/nodejs/caritat/compare/v1.3.1...v1.4.0) (2024-06-01)
+
+
+### Features
+
+* **core:** add an option to skip pushing init vote commit ([#31](https://github.com/nodejs/caritat/issues/31)) ([7da1c6a](https://github.com/nodejs/caritat/commit/7da1c6a29fba9daf43ab08a5d5af1b5d105fb7aa))
+
+
+### Bug Fixes
+
+* **core:** use `git restore` to remove vote files ([#25](https://github.com/nodejs/caritat/issues/25)) ([562f49b](https://github.com/nodejs/caritat/commit/562f49bbc4e9612a065eef1f7525839ed5c1ce4a))
+
 ## [1.3.1](https://github.com/nodejs/caritat/compare/v1.3.0...v1.3.1) (2024-04-30)
 
 
