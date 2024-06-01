@@ -59,6 +59,7 @@ interface Options {
     commitMessage?: string;
     commitAuthor?: string;
     gpgSign?: boolean | string;
+    pushToRemote?: boolean
   };
 }
 
@@ -235,6 +236,7 @@ export default async function generateNewVoteFolder(options: Options) {
       gpgSign,
       commitAuthor,
       commitMessage,
+      pushToRemote = true,
       doNotCleanTempFiles,
     } = gitOptions;
     const spawnArgs = { cwd: directory };
@@ -263,7 +265,7 @@ export default async function generateNewVoteFolder(options: Options) {
       { spawnArgs }
     );
 
-    if (repo) {
+    if (repo && pushToRemote) {
       await runChildProcessAsync(GIT_BIN, ["push", repo, `HEAD:${branch}`], {
         spawnArgs,
       });
