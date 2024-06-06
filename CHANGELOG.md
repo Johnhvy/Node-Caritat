@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.1](https://github.com/nodejs/caritat/compare/v1.4.0...v1.4.1) (2024-06-06)
+
+
+### Bug Fixes
+
+* **deps:** bump npm dependencies ([#34](https://github.com/nodejs/caritat/issues/34)) ([b548f76](https://github.com/nodejs/caritat/commit/b548f7692bad85b15ba3f747578dc410abfdc808))
+
 ## [1.4.0](https://github.com/nodejs/caritat/compare/v1.3.1...v1.4.0) (2024-06-01)
 
 
