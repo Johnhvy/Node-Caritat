@@ -1,8 +1,12 @@
 {
-    "release-type": "node",
-    "extra-files": [
-        "packages/cli/package.json",
-        "packages/core/package.json",
-        "packages/crypto/package.json"
-    ]
+    "packages": {
+        ".": {
+            "release-type": "node",
+            "extra-files": [
+                "packages/cli/package.json",
+                "packages/core/package.json",
+                "packages/crypto/package.json"
+            ]
+        }
+    }
 }
