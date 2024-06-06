@@ -2,6 +2,7 @@
     "packages": {
         ".": {
             "release-type": "node",
+            "include-component-in-tag": false,
             "extra-files": [
                 "packages/cli/package.json",
                 "packages/core/package.json",
