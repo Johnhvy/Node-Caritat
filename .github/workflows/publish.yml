@@ -14,23 +14,20 @@ jobs:
       release_created: ${{ steps.release.outputs.release_created }}
       release_tag: ${{ steps.release.outputs.tag_name }}
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - uses: googleapis/release-please-action@f3969c04a4ec81d7a9aa4010d84ae6a7602f86a7  # v4.1.1
         id: release
         with:
           release-type: node
-          extra-files: |
-            packages/cli/package.json
-            packages/core/package.json
-            packages/crypto/package.json
+          manifest-file: .release-please-manifest.json
 
   npm-publish:
     needs: release-please
     if: ${{ needs.release-please.outputs.release_created }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@0ad4b8fadaa221de15dcec353f45205ec38ea70b  # v4.1.4
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
         with:
           node-version: lts/*
 
@@ -39,7 +36,7 @@ jobs:
         run: echo "dir=$(corepack yarn config get cacheFolder)" >> $GITHUB_OUTPUT
         shell: bash
 
-      - uses: actions/cache@v3
+      - uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9  # v4.0.2
         with:
           path: ${{steps.yarn-cache-dir-path.outputs.dir}}
           key: ${{runner.os}}-yarn-${{hashFiles('**/yarn.lock')}}
@@ -55,6 +52,6 @@ jobs:
         run: |
           corepack yarn install --immutable
           corepack yarn build
-          corepack yarn workspaces foreach --no-private npm publish --access public
+          corepack yarn workspaces foreach --all --no-private npm publish --access public
         env:
           YARN_NPM_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}

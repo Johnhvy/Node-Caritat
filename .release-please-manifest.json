@@ -1,0 +1,7 @@
+{
+    "extra-files": [
+        "packages/cli/package.json",
+        "packages/core/package.json",
+        "packages/crypto/package.json"
+    ]
+}
