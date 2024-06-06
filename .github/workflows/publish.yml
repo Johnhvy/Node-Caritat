@@ -4,6 +4,10 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   YARN_ENABLE_GLOBAL_CACHE: false
 
