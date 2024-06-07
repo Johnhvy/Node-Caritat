@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/nodejs/caritat/compare/v1.4.1...v1.5.0) (2024-06-07)
+
+
+### Features
+
+* **core:** add `pushToRemote` option to more places ([#39](https://github.com/nodejs/caritat/issues/39)) ([a73d9a8](https://github.com/nodejs/caritat/commit/a73d9a836378ba530ea48f7db15ea657ec0b683c))
+
 ## [1.4.1](https://github.com/nodejs/caritat/compare/v1.4.0...v1.4.1) (2024-06-06)
 
 
