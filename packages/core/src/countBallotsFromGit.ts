@@ -66,6 +66,7 @@ interface countFromGitArgs {
   lastCommitRef?: string;
   mailmap: string;
   commitJsonSummary: { refs: string[] } | null;
+  pushToRemote?: boolean
   gpgSign?: boolean | string;
   doNotCleanTempFiles: boolean;
 }
@@ -82,6 +83,7 @@ export default async function countFromGit({
   lastCommitRef = "HEAD",
   mailmap,
   commitJsonSummary,
+  pushToRemote = true,
   gpgSign,
   doNotCleanTempFiles,
 }: countFromGitArgs): Promise<{
@@ -270,33 +272,35 @@ export default async function countFromGit({
       }
     );
 
-    console.log("Pushing to the remote repository...");
-    try {
-      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-        spawnArgs,
-      });
-    } catch {
-      console.log(
-        "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
-      );
-      await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
-        spawnArgs,
-      });
-      await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
-        spawnArgs,
-      });
-      await runChildProcessAsync(
-        GIT_BIN,
-        ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
-        {
-          spawnArgs,
-        }
-      );
-
+    if (pushToRemote) {
       console.log("Pushing to the remote repository...");
-      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-        spawnArgs,
-      });
+      try {
+        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+          spawnArgs,
+        });
+      } catch {
+        console.log(
+          "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
+        );
+        await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
+          spawnArgs,
+        });
+        await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
+          spawnArgs,
+        });
+        await runChildProcessAsync(
+          GIT_BIN,
+          ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
+          {
+            spawnArgs,
+          }
+        );
+
+        console.log("Pushing to the remote repository...");
+        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+          spawnArgs,
+        });
+      }
     }
   }
 

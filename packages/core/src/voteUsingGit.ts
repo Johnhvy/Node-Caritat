@@ -151,6 +151,7 @@ export default async function voteUsingGit({
   emailAddress,
   abstain,
   gpgSign,
+  pushToRemote = true,
   doNotCleanTempFiles,
 }) {
   const cwd = await fs.mkdtemp(path.join(os.tmpdir(), "caritat-"));
@@ -176,33 +177,35 @@ export default async function voteUsingGit({
       gpgSign,
     });
 
-    console.log("Pushing to the remote repository...");
-    try {
-      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-        spawnArgs,
-      });
-    } catch {
-      console.log(
-        "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
-      );
-      await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
-        spawnArgs,
-      });
-      await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
-        spawnArgs,
-      });
-      await runChildProcessAsync(
-        GIT_BIN,
-        ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
-        {
-          spawnArgs,
-        }
-      );
-
+    if (pushToRemote) {
       console.log("Pushing to the remote repository...");
-      await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-        spawnArgs,
-      });
+      try {
+        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+          spawnArgs,
+        });
+      } catch {
+        console.log(
+          "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
+        );
+        await runChildProcessAsync(GIT_BIN, ["fetch", repoURL, branch], {
+          spawnArgs,
+        });
+        await runChildProcessAsync(GIT_BIN, ["reset", "--hard"], {
+          spawnArgs,
+        });
+        await runChildProcessAsync(
+          GIT_BIN,
+          ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
+          {
+            spawnArgs,
+          }
+        );
+        
+        console.log("Pushing to the remote repository...");
+        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
+          spawnArgs,
+        });
+      }
     }
   } finally {
     if (doNotCleanTempFiles) {
