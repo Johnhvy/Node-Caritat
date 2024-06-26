@@ -4,7 +4,12 @@ export default (
   cmd: string,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   args: any[] | readonly string[],
-  { captureStdout = false, captureStderr = false, spawnArgs = {} } = {}
+  {
+    captureStdout = false,
+    captureStderr = false,
+    trimOutput = true,
+    spawnArgs = {},
+  } = {}
 ) =>
   new Promise((resolve, reject) => {
     const opt = {
@@ -35,6 +40,6 @@ export default (
       if (code !== 0) {
         return reject(new Error(`${cmd} ${args} failed: ${code}`));
       }
-      return resolve(stdout?.trim());
+      return resolve(trimOutput ? stdout?.trim() : stdout);
     });
   }) as Promise<string>;

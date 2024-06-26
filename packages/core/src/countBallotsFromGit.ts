@@ -66,7 +66,7 @@ interface countFromGitArgs {
   lastCommitRef?: string;
   mailmap: string;
   commitJsonSummary: { refs: string[] } | null;
-  pushToRemote?: boolean
+  pushToRemote?: boolean;
   gpgSign?: boolean | string;
   doNotCleanTempFiles: boolean;
 }
@@ -112,6 +112,7 @@ export default async function countFromGit({
     hasCreatedTempFiles = true;
   }
 
+  const voteFile = path.join(subPath, "vote.yml");
   const hasVoteFilesBeenTampered = await runChildProcessAsync(
     GIT_BIN,
     [
@@ -120,7 +121,7 @@ export default async function countFromGit({
       "--format=%%",
       `${firstCommitRef}..${lastCommitRef}`,
       "--",
-      path.join(subPath, "vote.yml"),
+      voteFile,
       path.join(subPath, "ballot.yml"),
       path.join(subPath, "public.yml"),
     ],
@@ -135,7 +136,13 @@ export default async function countFromGit({
   }
 
   const vote = new Vote();
-  vote.loadFromFile(path.join(cwd, subPath, "vote.yml"));
+  vote.loadFromString(
+    await runChildProcessAsync(
+      GIT_BIN,
+      ["show", `${firstCommitRef}:${voteFile}`],
+      { captureStdout: true, trimOutput: false, spawnArgs }
+    )
+  );
 
   if (!privateKey) {
     privateKey = await reconstructSplitKey(
@@ -160,7 +167,7 @@ export default async function countFromGit({
     [
       "--no-pager",
       "log",
-      `${firstCommitRef}..HEAD`,
+      `${firstCommitRef}..${lastCommitRef}`,
       "--format=///%H %G? %aN <%aE>",
       "--name-only",
     ],
@@ -229,6 +236,24 @@ export default async function countFromGit({
   const result = vote.count({ discardedCommits });
 
   if (commitJsonSummary != null) {
+    if (lastCommitRef !== "HEAD") {
+      const refs = Promise.all([
+        runChildProcessAsync(GIT_BIN, ["rev-parse", "HEAD"], {
+          spawnArgs,
+          captureStdout: true,
+        }),
+        runChildProcessAsync(GIT_BIN, ["rev-parse", lastCommitRef], {
+          spawnArgs,
+          captureStdout: true,
+        }),
+      ]);
+      if (refs[0] !== refs[1]) {
+        throw new Error(
+          "Cannot commit JSON summary if not on top of the vote branch"
+        );
+      }
+    }
+
     const { fd, filepath } = await openSummaryFile(cwd);
     try {
       await fd.writeFile(
@@ -275,9 +300,13 @@ export default async function countFromGit({
     if (pushToRemote) {
       console.log("Pushing to the remote repository...");
       try {
-        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-          spawnArgs,
-        });
+        await runChildProcessAsync(
+          GIT_BIN,
+          ["push", repoURL, `HEAD:${branch}`],
+          {
+            spawnArgs,
+          }
+        );
       } catch {
         console.log(
           "Pushing failed, maybe because the local branch is outdated. Attempting a rebase..."
@@ -291,15 +320,15 @@ export default async function countFromGit({
         await runChildProcessAsync(
           GIT_BIN,
           ["rebase", "FETCH_HEAD", ...getGPGSignGitFlag(gpgSign), "--quiet"],
-          {
-            spawnArgs,
-          }
+          { spawnArgs }
         );
 
         console.log("Pushing to the remote repository...");
-        await runChildProcessAsync(GIT_BIN, ["push", repoURL, `HEAD:${branch}`], {
-          spawnArgs,
-        });
+        await runChildProcessAsync(
+          GIT_BIN,
+          ["push", repoURL, `HEAD:${branch}`],
+          { spawnArgs }
+        );
       }
     }
   }
