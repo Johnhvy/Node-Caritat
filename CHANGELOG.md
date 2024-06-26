@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.6.0](https://github.com/nodejs/caritat/compare/v1.5.0...v1.6.0) (2024-06-26)
+
+
+### Features
+
+* **core:** add `missingVoices` property to vote result ([#43](https://github.com/nodejs/caritat/issues/43)) ([dac0a32](https://github.com/nodejs/caritat/commit/dac0a324f29f6c069d4fcfed172f83ea12233087))
+
+
+### Bug Fixes
+
+* **core:** do not assume cwd is on top of the vote branch ([#46](https://github.com/nodejs/caritat/issues/46)) ([ed00bfd](https://github.com/nodejs/caritat/commit/ed00bfddc3776cf235fed80669c429e8a3aebfe9))
+* **core:** do not crash the vote count in case of invalid ballot ([#45](https://github.com/nodejs/caritat/issues/45)) ([4fcce30](https://github.com/nodejs/caritat/commit/4fcce30cd050e4ba2f27e86f21ed7dda2ae56f78))
+
 ## [1.5.0](https://github.com/nodejs/caritat/compare/v1.4.1...v1.5.0) (2024-06-07)
 
 
