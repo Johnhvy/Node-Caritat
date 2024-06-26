@@ -1,7 +1,7 @@
 {
   "name": "caritat",
   "private": true,
-  "packageManager": "yarn@4.2.2+sha224.1e50daf19e5e249a025569752c60b88005fddf57d10fcde5fc68b88f",
+  "packageManager": "yarn@4.3.1+sha224.934d21773e22af4b69a7032a2d3b4cb38c1f7c019624777cc9916b23",
   "version": "1.5.0",
   "license": "MIT",
   "repository": {
