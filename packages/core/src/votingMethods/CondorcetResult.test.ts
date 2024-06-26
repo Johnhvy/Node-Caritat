@@ -1,4 +1,4 @@
-import it from "node:test";
+import { describe, it } from "node:test";
 import { strict as assert } from "node:assert";
 
 import CondorcetVote from "./CondorcetResult.js";
@@ -202,4 +202,57 @@ it("should return the correct result", () => {
       ["c", 0],
     ]
   );
+});
+
+describe("should report missing ballots in missingVoices property", () => {
+  const authorizedVoters = [{ id: "a" }, { id: "b" }, { id: "c" }];
+  it("should report all if not votes where passed", () => {
+    const { missingVoices } = new CondorcetVote(
+      authorizedVoters,
+      ["candidate"],
+      "subject",
+      [],
+      {},
+    );
+    assert.deepStrictEqual(missingVoices, authorizedVoters.map(({ id }) => id));
+  });
+
+  it("should report only the missing ones", () => {
+    {
+      const { missingVoices } = new CondorcetVote(
+        authorizedVoters,
+        ["candidate"],
+        "subject",
+        [
+          {
+            voter: authorizedVoters[0],
+            preferences: new Map(),
+          },
+        ],
+        {},
+      );
+      assert.deepStrictEqual(missingVoices, [
+        authorizedVoters[1].id,
+        authorizedVoters[2].id,
+      ]);
+    }
+    {
+      const { missingVoices } = new CondorcetVote(
+        authorizedVoters,
+        ["candidate"],
+        "subject",
+        [
+          {
+            voter: authorizedVoters[1],
+            preferences: new Map(),
+          },
+        ],
+        {},
+      );
+      assert.deepStrictEqual(missingVoices, [
+        authorizedVoters[0].id,
+        authorizedVoters[2].id,
+      ]);
+    }
+  });
 });

@@ -38,6 +38,14 @@ export default abstract class VoteResult {
     return this.#votes.length / expectedVotes;
   }
 
+  get missingVoices(): Actor["id"][] {
+    return this.#authorizedVoters
+      .filter(
+        (voter) => !this.#votes.some((ballot) => ballot.voter.id === voter.id),
+      )
+      .map((potentialVoter) => potentialVoter.id);
+  }
+
   public generateSummary(
     privateKey: string,
     options?: Partial<ElectionSummaryOptions>
