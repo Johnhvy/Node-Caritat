@@ -143,7 +143,7 @@ export default class Vote {
   }
 
   public addBallotFile(ballotData: BallotFileFormat, author?: string): Ballot {
-    if (checkBallot(ballotData, this.voteFileData, author)) {
+    if (ballotData && checkBallot(ballotData, this.voteFileData, author)) {
       const preferences: Map<VoteCandidate, Rank> = new Map(
         ballotData.preferences.map((element) => [element.title, element.score])
       );
@@ -154,7 +154,7 @@ export default class Vote {
       this.addBallot(ballot);
       return ballot;
     } else {
-      console.warn("Invalid Ballot");
+      console.warn("Invalid Ballot", author);
     }
     return null;
   }
