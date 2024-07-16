@@ -1,5 +1,55 @@
 # Changelog
 
+## [2.0.0](https://github.com/Johnhvy/Node-Caritat/compare/v1.6.0...v2.0.0) (2024-07-16)
+
+
+### ⚠ BREAKING CHANGES
+
+* switch to `@node-core` scope ([#11](https://github.com/Johnhvy/Node-Caritat/issues/11))
+
+### Features
+
+* **cli:** add `doNotShuffleCandidates` flag to `generateNewVoteFolder` ([451866a](https://github.com/Johnhvy/Node-Caritat/commit/451866ad266371279e029ae80b3f2ad7245a0eb2))
+* **cli:** expose `decryptKeyPart` ([a91ff28](https://github.com/Johnhvy/Node-Caritat/commit/a91ff2845fd00913dcaa8b1c0c8e4fa1e68b7782))
+* **core:** add `missingVoices` property to vote result ([#43](https://github.com/Johnhvy/Node-Caritat/issues/43)) ([e4b73b5](https://github.com/Johnhvy/Node-Caritat/commit/e4b73b5c2864bf75d37e4a5a68e7d6ff936ef440))
+* **core:** add `pushToRemote` option to more places ([#39](https://github.com/Johnhvy/Node-Caritat/issues/39)) ([cbc8a59](https://github.com/Johnhvy/Node-Caritat/commit/cbc8a596c6e3b2fa6aa924458d1ae383d03c9060))
+* **core:** add an abort option when casting a vote ([425ec49](https://github.com/Johnhvy/Node-Caritat/commit/425ec493f76cae60ff208af5fe65fd4e3f4840d4))
+* **core:** add an option to skip pushing init vote commit ([#31](https://github.com/Johnhvy/Node-Caritat/issues/31)) ([0760e59](https://github.com/Johnhvy/Node-Caritat/commit/0760e59f15b59141b89d8b2fd8e3fb38a44c4e60))
+* **core:** expose private key as an armored string ([f34886e](https://github.com/Johnhvy/Node-Caritat/commit/f34886ea5f03105ca62cd8cd54cbe426336480f4))
+* **core:** expose vote summary methods ([120d650](https://github.com/Johnhvy/Node-Caritat/commit/120d650ac3b3afa7fe376cc59c1a05f4e6a07719))
+* **core:** generate ballots with non-zero preferences ([b76eed3](https://github.com/Johnhvy/Node-Caritat/commit/b76eed3ba75d5d2c05572acf33d8d01552515f1e))
+* empty commit to test the release automation ([730351e](https://github.com/Johnhvy/Node-Caritat/commit/730351e9f5dc59f300558a1053e58a647406ef26))
+* **web-ui:** update CSS ([cff6c41](https://github.com/Johnhvy/Node-Caritat/commit/cff6c41dfcfc4add9efa1d5646c3afe3d5040487))
+
+
+### Bug Fixes
+
+* add `permissions` for GHA workflows ([bb80eca](https://github.com/Johnhvy/Node-Caritat/commit/bb80eca2a9b467361b3d53d9ec5a5dd5cb1b221b))
+* **chore:** run `$EDITOR` within a shell ([#23](https://github.com/Johnhvy/Node-Caritat/issues/23)) ([adcbb67](https://github.com/Johnhvy/Node-Caritat/commit/adcbb67903e0d523f70ed0ff995ee5d85cf804e6))
+* **cli:** add back support for boolean `--gpg-sign` ([0013834](https://github.com/Johnhvy/Node-Caritat/commit/0013834e2cda5b94d52f222086f6804376846085))
+* **cli:** add hashbangs to all executables ([8624faf](https://github.com/Johnhvy/Node-Caritat/commit/8624faf2f6c83cc2c54b4baea73de912a6aa8cad))
+* **cli:** add README to the npm package ([e181a15](https://github.com/Johnhvy/Node-Caritat/commit/e181a1524735ccdfeba0505ffe90b63edb0d47b0))
+* **cli:** output the private key as armored string in vote summary ([628e77e](https://github.com/Johnhvy/Node-Caritat/commit/628e77e20937af39a16b8be7435b50551f3bb7c0))
+* **core:** do not assume cwd is on top of the vote branch ([#46](https://github.com/Johnhvy/Node-Caritat/issues/46)) ([1399904](https://github.com/Johnhvy/Node-Caritat/commit/13999042b3fa452616c07942ac2355805cd237f5))
+* **core:** do not crash the vote count in case of invalid ballot ([#45](https://github.com/Johnhvy/Node-Caritat/issues/45)) ([5985ba0](https://github.com/Johnhvy/Node-Caritat/commit/5985ba0885e27396d7f3af0323e0d3415cd14d85))
+* **core:** do not remove folders that were not created by us ([c86b35f](https://github.com/Johnhvy/Node-Caritat/commit/c86b35f4a2a8cdecbd6a2ee44254b0a7a16cf403))
+* **core:** fix abort request detection ([4b3feaa](https://github.com/Johnhvy/Node-Caritat/commit/4b3feaa2d0cfcbb98ca1fdeb5dc6e15e232ab27b))
+* **core:** fix typescript errors ([d543a67](https://github.com/Johnhvy/Node-Caritat/commit/d543a679388ba96145e52a3ec84c0e1e4ca3b101))
+* **core:** treat elections with no list of allowed voters as public votes ([ca50b70](https://github.com/Johnhvy/Node-Caritat/commit/ca50b70a7019f098c49eb46b28885ae4fc645eae))
+* **core:** use `git restore` to remove vote files ([#25](https://github.com/Johnhvy/Node-Caritat/issues/25)) ([ad5df98](https://github.com/Johnhvy/Node-Caritat/commit/ad5df98ad586a898b9d2bf92f2d67daa12e36172))
+* **deploy:** empty commit to trigger a release ([90e26b0](https://github.com/Johnhvy/Node-Caritat/commit/90e26b0d77f4953d10d59bbc8c6f4b6b870be447))
+* **deploy:** use `"packages"` field in Release Please config ([d908f95](https://github.com/Johnhvy/Node-Caritat/commit/d908f9549dbd8847e925f9b493efd4a0cd148ed7))
+* **deps:** bump npm dependencies ([#34](https://github.com/Johnhvy/Node-Caritat/issues/34)) ([4a290e5](https://github.com/Johnhvy/Node-Caritat/commit/4a290e523acfc365b5d917f5ef4b6596aa9dc23e))
+* empty commit to test the release automation ([e4a8299](https://github.com/Johnhvy/Node-Caritat/commit/e4a82993567760e3dde0dd8198deb6c7c6c6959a))
+* **web-ui:** do not fetch data about irrelevant commits ([369e613](https://github.com/Johnhvy/Node-Caritat/commit/369e613dc0a34456cd700de9a0032f640e6e1a02))
+* **web-ui:** restore support for unauthenticated votes on public repos ([6eb0c50](https://github.com/Johnhvy/Node-Caritat/commit/6eb0c503e423f345b742020c80c625929bd2b02c))
+* **web-ui:** support vote happening on the root folder ([39cdd30](https://github.com/Johnhvy/Node-Caritat/commit/39cdd30960e2dc2a9657060d04151e9873d4cd3b))
+
+
+### Miscellaneous Chores
+
+* switch to `[@node-core](https://github.com/node-core)` scope ([#11](https://github.com/Johnhvy/Node-Caritat/issues/11)) ([54a0d9a](https://github.com/Johnhvy/Node-Caritat/commit/54a0d9acc08a36b5a6a787fba263e7cc6c44f412))
+
 ## [1.6.0](https://github.com/nodejs/caritat/compare/v1.5.0...v1.6.0) (2024-06-26)
 
 
